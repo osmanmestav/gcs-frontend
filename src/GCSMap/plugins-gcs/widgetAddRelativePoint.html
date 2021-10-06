@@ -1,0 +1,69 @@
+<style>
+#addRelativeWaypoint {
+	display:none;
+	position: absolute;
+	left: 5px;
+	top: 70px;
+	padding: 4px;
+	z-index:100;
+}
+
+#addRelativeWaypoint div {
+	padding: 5px;
+}
+
+#addRelativeWaypoint input {
+	padding: 5px;
+}
+</style>
+<div id="addRelativeWaypoint" class="cesium-box" tabindex="-1">
+	<h3>Add relative waypoint</h3>
+		<form>
+		<div>
+		   <label for="addRelWP_after">Base</label>
+		   <input disabled type="number" class="form-control" id="addRelWP_after">
+		 </div>
+		 <div>
+		   <label for="addRelWP_direction">Direction</label>
+		   <input type="number" class="form-control" id="addRelWP_direction" placeholder="Enter direction in degrees">
+		 </div>
+		 <div>
+		   <label for="addRelWP_distance">Distance</label>
+		   <input type="number" class="form-control" id="addRelWP_distance" placeholder="Enter distance in meters">
+		 </div>
+		</form>
+	<div>
+		<button class="cesium-button" onclick="addRelativeWaypointHandler()">Add Point</button>
+		<button class="cesium-button" onclick="$('#addRelativeWaypoint').hide();">Close</button>
+   </div>
+</div>
+		
+<script>
+
+if (contextMenus.waypoint)
+	contextMenus.waypoint.addItem("Add relative waypoint...",(e)=> {
+		$("#addRelWP_after").val(e.targetIndex+1);
+		$('#addRelativeWaypoint').show();
+	});
+
+function addRelativeWaypointHandler()
+{
+	var index = $("#addRelWP_after").val()*1;
+	var direction = $("#addRelWP_direction").val()*1;
+	var distance = $("#addRelWP_distance").val()*1;
+	if (isNaN(index)||isNaN(direction)||isNaN(distance)) return;
+	var h = waypoints[index-1];
+	if (!h) return;
+	h = h.data.coordinates;
+	var A = GeoHelper.getDestination(h.latitude,h.longitude,direction,distance);
+	
+	if (!A||isNaN(A.latitude)||isNaN(A.longitude)) return;
+	var cartographic = Cesium.Cartographic.fromDegrees(A.longitude, A.latitude);
+	var promise = Cesium.sampleTerrain(viewer.terrainProvider, window.terrainLevelUsed, [cartographic]);
+	Cesium.when(promise, function(updatedPositions) {
+		A.altitude = updatedPositions[0].height||0;
+		csharp.addWaypoint(-1,"Waypoint",A.latitude.toFixed(7),A.longitude.toFixed(7),A.altitude.toFixed(1),"0");
+	});
+}
+
+</script>

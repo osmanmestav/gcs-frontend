@@ -1,0 +1,87 @@
+<style>
+
+.gauge { transform: scale(1); transform-origin: 0 0; }
+
+#attitudeGaugeContainer { position:absolute; left: 0px; top: 0px; }
+#rpmGaugeContainer { visibility:hidden; position:absolute; left: 250px; top: 0px; }
+#speedGaugeContainer { position:absolute; left: 250px; top: 0px; }
+#variometerGaugeContainer { position:absolute; left: 0px; top: 250px; }
+#yawHeadingWindGaugeContainer { position:absolute; left: 250px; top: 250px; }
+
+#graph                {
+	visibility: hidden;
+	width: 750px; height: 190px; position:absolute; left: 1145px; top: 375px;
+}
+
+#graphAltitude        {
+	visibility: hidden;
+	width: 750px; height: 195px; position:absolute; left: 1145px; top: 565px;
+}
+
+#dataTableContainer   { position:absolute; left: 0px; top: 510px; }
+#airplaneTravelVisualContainer   { position:absolute; left: 0px; top: 510px; visibility:hidden; visibility:hidden; background-color: black; }
+
+#indicatorsContainer {
+	width: 750px;
+	position:absolute; left: 0px; top: 620px;
+	display:table;
+	transform: scale(0.95); 
+}
+
+.indicator {
+	float:left;/*fix for  buggy browsers*/
+    display:table-column;
+	padding: 1px;
+}
+
+#vtolBatteryIndicatorContainer { visibility: hidden; width: 0px; }
+#travelStatusIndicatorContainer { position:absolute; left:188; top:802px;}
+
+#ledsContainer {
+	visibility: hidden;
+	position:absolute; left: 995px; top: 375px;
+	display:table;
+}
+
+.led {
+	transform: scale(0.93); 
+	display:block;
+	padding: 2.5px;
+}
+
+#video {
+	visibility: hidden;
+	width: 960px; height: 625px; position: absolute; left: 15px; top: 375px; background-color: black;
+}
+
+</style>
+
+<canvas id="graph" width="750" height="190"></canvas>
+<canvas id="graphAltitude"  width="750" height="195"></canvas>
+
+<div class="gauge" id="travelStatusIndicatorContainer"></div>
+<div class="gauge" id="attitudeGaugeContainer"></div>
+<div class="gauge" id="rpmGaugeContainer"></div>
+<div class="gauge" id="speedGaugeContainer"></div>
+<div class="gauge" id="variometerGaugeContainer"></div>
+<div class="gauge" id="yawHeadingWindGaugeContainer"></div>
+<img id="video" style="-webkit-user-select: none;" src="" onerror="this.src='noFPV.png'">
+
+<div id="dataTableContainer" class="gauge"></div>
+<div id="airplaneTravelVisualContainer" class="gauge"></div>
+
+<div id="ledsContainer" class="gauge">
+</div>
+
+<div id="indicatorsContainer" class="gauge">
+	<div class="indicator" id="powerIndicatorContainer"></div>
+	<div class="indicator" id="vtolBatteryIndicatorContainer"></div>
+	<div class="indicator" id="fuelIndicatorContainer"></div>
+	<div class="indicator" id="calcFuelIndicatorContainer"></div>
+	<div class="indicator" id="ectIndicatorContainer"></div>
+	<div class="indicator" id="iatIndicatorContainer"></div>
+	<div class="indicator" id="hotnoseIndicatorContainer"></div>
+	<div class="indicator" id="travelHoverIndicatorContainer"></div>
+	<div class="indicator" id="gpsIndicatorContainer"></div>
+	<div class="indicator" id="dataLinkIndicatorContainer"></div>
+</div>

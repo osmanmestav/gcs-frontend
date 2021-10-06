@@ -1,0 +1,36 @@
+﻿<style>
+#videoPlayer {
+  background-color: rgba(0, 0, 0, 0);
+  color: white;
+  position: fixed;
+  width:480px;
+  height:360px;
+  bottom: 0px;
+  right: 0px;
+  font-size: 8px;  
+}
+</style>
+
+<video id="videoPlayer" tabindex="0" autobuffer preload>
+<source id="videoOGGSrc" type="video/ogg">
+</video>
+
+<script>
+
+$('#videoPlayer').hide();
+
+function loadVideo(src) {
+	document.getElementById("videoOGGSrc").src = src;
+	document.getElementById("videoPlayer").load();
+	$('#videoPlayer').show();
+}
+
+function setVideoTime(seconds) {
+	document.getElementById("videoPlayer").currentTime = seconds;
+}
+
+function hideVideoPlayer() {
+	$('#videoPlayer').hide();
+}
+
+</script>

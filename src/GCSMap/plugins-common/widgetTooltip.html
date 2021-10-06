@@ -1,0 +1,33 @@
+<style>
+#tooltip {
+	display: none;
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	pointer-events: none;
+}
+</style>
+<div id="tooltip" class="cesium-box"></div>
+<script>
+
+var tooltip = {
+	initialize: function() {
+		this.overlay = document.getElementById("tooltip");
+	},
+	show: function(x,y,content) {
+		if (!content||!content.length) { this.hide(); return; }
+		x += 10;
+		y = window.innerHeight - y + 10;
+	
+		this.overlay.style.display = 'block';
+		this.overlay.style.bottom = y + 'px';
+		this.overlay.style.left = x + 'px';
+		this.overlay.innerHTML = content;
+	},
+	hide: function() {
+		this.overlay.style.display = 'none';
+	}
+}
+tooltip.initialize();
+		
+</script>

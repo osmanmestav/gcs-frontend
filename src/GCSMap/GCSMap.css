@@ -1,0 +1,109 @@
+@import url(Cesium/Widgets/widgets.css);
+@import url(external/fontawesome-all.min.css);
+
+html, body, #cesiumContainer {
+  width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
+}
+
+#left-toolbar {
+	position: absolute;
+	left: 5px;
+	top: 5px;
+	z-index: 100;
+}
+
+.cesium-viewer {
+    font-size: 10pt;
+}
+
+.cesium-box {
+	background: rgba(42, 42, 42, 0.8);
+	padding: 4px;
+	border-radius: 4px;
+	color: #eee;
+	font-family: sans-serif;
+	font-size: 10pt;
+	z-index: 100;
+}
+
+.title {
+	text-align: center;
+	font-weight: bold;
+}
+
+.emptyLine {
+	height: 5px;
+}
+
+.ui-menu-item {
+	font-size: 10pt;
+}
+
+.ui-slider-horizontal {
+	height: 8px;
+}
+
+.ui-slider .ui-slider-handle {
+	height: 15px;
+}
+  
+.ui-progressbar {
+	position: relative;
+}
+	
+.progress-label {
+	position: absolute;
+	font-size: 10pt;
+	text-align: center;
+	width: 100%;
+}
+
+// Dropdown menu starts
+
+.dropdown-menu span {
+	float: left;
+	white-space: nowrap;
+}
+
+.dropdown-menu {
+    position: relative;
+    display: inline-block;
+	float: left;
+}
+
+.dropdown-menu:hover .dropdown-menu-content {
+    visibility: visible;
+}
+
+.dropdown-menu-content li {
+	font-size: 10pt;
+	white-space: nowrap;
+}
+
+.dropdown-menu-content li:hover {
+	background-color: white;
+	color: black;
+}
+
+.dropdown-menu-content {
+    position: absolute;
+    z-index: 200;
+    visibility: hidden;
+}
+
+// dropdown menu ends
+.context-menu li {
+	font-size: 11px;
+	white-space: nowrap;
+}
+
+.context-menu li:hover {
+	background-color: white;
+	color: black;
+}
+
+.context-menu {
+    position: absolute;
+    display: inline-block;
+	float: left;
+}

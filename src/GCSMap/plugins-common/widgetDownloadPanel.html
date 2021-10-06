@@ -1,0 +1,602 @@
+<style>
+	.downloadContainer {
+	  position: fixed;
+	  top: 70px;
+	  left: 0px;
+	}
+
+	.switchDownload {
+	  text-align: center;
+	  font-weight: bold;
+	  border: 1px solid #ffffff;
+	}
+</style>
+<div id="downloadContainer" class="downloadContainer cesium-box">
+  <table>
+	<tr>
+		<td class="title">Download Map Panel</td>
+	</tr>
+	<tr>
+		<td>
+			<table>
+				<tr>
+					<td>West:</td>
+					<td id="west"></td>
+					<td>&nbsp; &nbsp;</td>
+					<td>South:</td>
+					<td id="south"></td>
+				</tr>
+				<tr>
+					<td>East:</td>
+					<td id="east"></td>
+					<td></td>
+					<td>North:</td>
+					<td id="north"></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr><td class="emptyLine"></td></tr>
+	<tr>
+		<td>
+			<table>
+				<tr>
+					<td id="imageZoomLevelSlider" class="sliderStyle"></td>
+					</td>
+				</tr>
+				<tr>
+					<td>Image Zoom Level:</td>
+					<td id="imageZoomLevel"></td>
+				</tr>
+				<tr>
+					<td>Image Tile Count:</td>
+					<td id="imageTileCount"></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr><td class="emptyLine"></td></tr>
+	<tr>
+		<td>
+			<table>
+				<tr>
+					<td id="terrainZoomLevelSlider" class="sliderStyle"></td>
+					</td>
+				</tr>
+				<tr>
+					<td>Terrain Zoom Level:</td>
+					<td id="terrainZoomLevel"></td>
+				</tr>
+				<tr>
+					<td>Terrain Tile Count:</td>
+					<td id="terrainTileCount"></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr><td class="emptyLine"></td></tr>
+	<tr>
+		<td class="title">
+			<button id="downloadButton" class="cesium-button">Download</button>
+		</td>
+	</tr>
+	<tr>
+		<td id="imageProgress">Image Download Success Rate: <span id="imageSuccessRate">NA</span>% </td>
+	</tr>
+	<tr>
+		<td><div id="imageProgressBar"><div class="progress-label"></div></div></td>
+	</tr>
+	<tr><td id="emptyLine1" class="emptyLine"></td></tr>
+	<tr>
+		<td id="terrainProgress">Terrain Download Success Rate: <span id="terrainSuccessRate">NA</span>% </td>
+	</tr>
+	<tr>
+		<td><div id="terrainProgressBar"><div class="progress-label"></div></div></td>
+	</tr>
+		
+	<tr><td id="emptyLine2" class="emptyLine"></td></tr>	
+	<tr>
+		<td id="hideDownload" class="switchDownload cesium-button">Hide</td>
+	</tr>
+</table>
+</div>
+<div id="downloadContainerHide" class="downloadContainer cesium-box">
+<table>
+	<tr>
+		<td id="showDownload" class="switchDownload">Map download in progress...</td>
+	</tr>
+</table> 
+</div>
+
+<script>
+
+$('#downloadContainer').hide();
+$('#downloadContainerHide').hide();
+
+function mapSource(type) {
+	
+	this.type = type;
+	this.recentLimitPerThread = 3;
+	
+	if(type=="image") {
+		this.provider = bingImage;
+		this.minimumLevel = bingImage.minimumLevel;
+		this.maximumLevel = bingImage.maximumLevel;
+		this.allowedMaximumLevel = 16;
+	} else if(type=="terrain") {
+		this.provider = cesiumTerrain;
+		this.minimumLevel = 0;
+		this.maximumLevel = this.allowedMaximumLevel = 16;
+	}
+	
+	this.init = function() {
+		this.count = 0;
+		this.success = 0;
+		this.fail = 0;
+		this.error = 0;
+		this.noTile = 0;
+		this.threadCount = 1;
+		this.threadEndCount = 0;
+		this.alive = true;
+		this.downloading = true;
+		this.recentCount = 0;
+		this.recentError = 0;
+		this.startTime = Date.now();
+		this.endTime = 0;
+		this.calculateTileCount();
+		this.level = this.minimumLevel;
+		this.initLevel();	
+	}
+
+	this.initLevel = function() {
+		this.nw = this.provider.tilingScheme.positionToTileXY(Cesium.Cartographic.fromDegrees(this.west, this.north), this.level);
+		this.se = this.provider.tilingScheme.positionToTileXY(Cesium.Cartographic.fromDegrees(this.east, this.south), this.level);
+		this.x = this.nw.x;
+		this.y = this.nw.y;
+	};
+
+	this.calculateTileCount = function() {
+		this.count = 0;
+		for(var level=this.minimumLevel; level<=this.allowedMaximumLevel; level++) {
+			var nw = this.provider.tilingScheme.positionToTileXY(Cesium.Cartographic.fromDegrees(this.west, this.north), level);
+			var se = this.provider.tilingScheme.positionToTileXY(Cesium.Cartographic.fromDegrees(this.east, this.south), level);
+			this.count += (se.x - nw.x + 1) * (se.y - nw.y + 1);
+		}
+	};
+
+	this.next = function() {
+		var result = {
+			x : this.x,
+			y : this.y,
+			level : this.level
+		};
+
+		this.y++;
+		if(this.y > this.se.y)
+		{
+			this.x++;
+			this.y = this.nw.y;			
+		}
+		if(this.x > this.se.x)
+		{
+			this.level++;
+			this.initLevel();
+		}
+		
+		return result;
+	};
+
+	this.printRatio = function() {
+		csharp.earthMessage("");
+		csharp.earthMessage(""+this.type);
+		csharp.earthMessage("Count  : " + this.count);
+		csharp.earthMessage("Success: " + this.success);
+		csharp.earthMessage("Fail   : " + this.fail);
+		csharp.earthMessage("Error  : " + this.error);
+		csharp.earthMessage("NoTile : " + this.noTile);
+		if(this.success + this.fail > 0) csharp.earthMessage("Ratio  : " + (this.success)/(this.success + this.fail));
+	};
+
+	this.resetRecent = function() {
+		this.recentCount = 0;
+		this.recentError = 0;	
+	};
+
+	this.checkRecent = function() {
+		if(this.recentError >= 2) {
+			if(this.threadCount>1) {
+				this.threadCount--;
+				//csharp.earthMessage("DEC: " + this.threadCount);
+			}
+			this.resetRecent();
+		} else if(this.recentCount >= this.recentLimitPerThread * this.threadCount) {
+			if(this.recentError == 0) {
+				this.threadCount++;
+				//csharp.earthMessage("INC: " + this.threadCount);
+				this.get(this.threadCount-1, undefined, false, 0, this.next(), true);
+			}
+			this.resetRecent();
+		}
+	};
+
+	this.haveRecentSuccess = function() {
+		this.recentCount++;
+		this.checkRecent();
+	};
+
+	this.haveRecentError = function() {
+		this.recentCount++;
+		this.recentError++;
+		this.checkRecent();
+	};
+
+	this.haveSuccess = function() {
+		this.success++;
+		if(this.alive) this.haveRecentSuccess();
+	};
+
+	this.haveFail = function() {
+		this.fail++;
+	};
+
+	this.haveNoTile = function() {
+		this.noTile++;
+		if(this.alive) this.haveRecentSuccess();
+	};
+	
+	this.haveError = function() {
+		this.error++;
+		if(this.alive) this.haveRecentError();
+	};
+
+	this.endThread = function() {
+		this.alive = false;
+		this.threadEndCount++;
+		if(this.threadEndCount==this.threadCount)
+		{
+			this.endTime = Date.now();
+			this.downloading = false;
+			this.printRatio();
+			csharp.earthMessage("Time   : " + ((this.endTime-this.startTime)/1000));
+		}
+	};
+	
+	this.getStep = function(id, promise, noTile, undefinedCount, target, first) {
+		
+		var proceed = true;
+	
+		if(first) {
+			proceed = false;
+		} if(promise!=undefined) {
+			this.haveSuccess();
+		} else if(noTile) {
+			this.haveNoTile();
+		} else if(undefinedCount>4) {
+			this.haveError();
+			this.haveFail();
+		} else if(promise==undefined) {
+			this.haveError();
+			undefinedCount++;
+			proceed = false;
+		}
+		
+		if(proceed) {
+			if(id >= this.threadCount) return;
+			target = this.next();
+			undefinedCount = 0;
+		}
+		
+		if(target.level > this.allowedMaximumLevel)
+		{
+			this.endThread();
+			return;
+		}
+		
+		//csharp.earthMessage(id + " " + target.level + " " + target.x + " " + target.y + " " + promise + " " + noTile + " " + undefinedCount);
+		
+		var p;
+		if(this.type=="image") {
+			p = this.provider.requestImage(target.x, target.y, target.level);	
+		} else if(this.type=="terrain") {
+			p = this.provider.requestTileGeometry(target.x, target.y, target.level);
+		}
+
+		if(p==undefined) 
+			this.get(id, undefined, false, undefinedCount, target, false);
+		else {
+			p.then(
+				this.get.bind(this, id, p, 			false, undefinedCount, target, false),
+				this.get.bind(this, id, undefined, 	true,  undefinedCount, target, false)
+			);			
+		}
+	};
+
+	this.get = function(id, promise, noTile, undefinedCount, target, first) {
+		var time = 0;
+		if(promise==undefined && !first && !noTile) time = 250;
+		setTimeout(this.getStep.bind(this, id, promise, noTile, undefinedCount, target, first),time);
+	};
+
+	this.getRegion = function() {
+		this.init();
+		for(var i=0; i<this.threadCount; i++)
+			this.get(i, undefined, false, 0, this.next(), true);
+	};
+	
+	this.abort = function() {
+		this.level = this.allowedMaximumLevel + 1;
+	}
+	
+}
+
+function downloadMap() {
+
+	if(!(imageSource.downloading) && !(terrainSource.downloading)) {
+	
+		var range = 0.01;
+				
+		mapMarker.west = mouse.coordinates.longitude-range;
+		mapMarker.east = mouse.coordinates.longitude+range;
+		mapMarker.north = mouse.coordinates.latitude+range;
+		mapMarker.south = mouse.coordinates.latitude-range;
+		mapMarker.altitude = mouse.coordinates.altitude + 500;
+		
+		$('#west').text(mapMarker.west.toFixed(7));
+		$('#east').text(mapMarker.east.toFixed(7));
+		$('#north').text(mapMarker.north.toFixed(7));
+		$('#south').text(mapMarker.south.toFixed(7));
+		$('#downloadContainerHide').hide();
+		$('#downloadContainer').show();
+		mapMarker.show();
+
+		imageSource.west = terrainSource.west = mapMarker.west;
+		imageSource.east = terrainSource.east = mapMarker.east;
+		imageSource.north = terrainSource.north = mapMarker.north;
+		imageSource.south = terrainSource.south = mapMarker.south;	
+		
+		imageSource.calculateTileCount();
+		$('#imageTileCount').text(imageSource.count);
+
+		terrainSource.calculateTileCount();
+		$('#terrainTileCount').text(terrainSource.count);
+	}
+}
+
+var imageSource = new mapSource("image");
+var terrainSource = new mapSource("terrain");
+
+function initProgressBar(progressbar,source,successRate) {
+  progressbar.height(15);
+
+  var  progressLabel = progressbar.find( ".progress-label" );
+  successRate.text("NA")
+  
+  progressbar.progressbar({
+	  value: 0,
+	  change: function () {
+		  progressLabel.text(progressbar.progressbar("value") + "%");
+	  },
+	  complete: function () {
+		  progressLabel.text("Complete!");
+	  }
+  });
+
+};
+
+function progress(progressbar,source,successRate) {
+  var  progressLabel = progressbar.find( ".progress-label" );  
+  if((source.success+source.fail)>0) successRate.text(Math.floor(((source.success)/(source.success+source.fail))*100));
+  progressbar.progressbar("value", Math.floor(((source.success+source.fail+source.noTile)/(source.count))*100));
+  if(source.downloading) setTimeout(progress.bind(this,progressbar,source,successRate), 100);
+   else if(!(imageSource.downloading) && !(terrainSource.downloading)) $('#downloadButton').text('Set New Download');
+}
+
+downloadButton.onclick=function(){
+	if($('#downloadButton').text()=="Download") {
+		$('#downloadButton').text('Abort');
+		$('#imageZoomLevelSlider').hide("slide", {}, 500, function(){});
+		$('#terrainZoomLevelSlider').hide("slide", {}, 500, function(){});
+		$("#imageProgress").show("slide", {}, 500, function(){});
+		$("#imageProgressBar").show("slide", {}, 500, function(){});
+		$("#terrainProgress").show("slide", {}, 500, function(){});
+		$("#terrainProgressBar").show("slide", {}, 500, function(){});
+		$('#emptyLine1').show("slide", {}, 500, function(){});
+		$('#emptyLine2').show("slide", {}, 500, function(){});
+		imageSource.getRegion();
+		terrainSource.getRegion();
+		initProgressBar($("#imageProgressBar"),imageSource,$("#imageSuccessRate"));
+		progress($("#imageProgressBar"),imageSource,$("#imageSuccessRate"));
+		initProgressBar($("#terrainProgressBar"),terrainSource,$("#terrainSuccessRate"));						
+		progress($("#terrainProgressBar"),terrainSource,$("#terrainSuccessRate"));
+	} else if($('#downloadButton').text()=="Abort") {
+		$('#downloadButton').text('Set New Download');
+		imageSource.abort();
+		terrainSource.abort();
+	} else if($('#downloadButton').text()=="Set New Download") {
+		$('#downloadButton').text('Download');
+		$('#imageZoomLevelSlider').show("slide", {}, 500, function(){});
+		$('#terrainZoomLevelSlider').show("slide", {}, 500, function(){});
+		$("#imageProgress").hide("slide", {}, 500, function(){});
+		$("#imageProgressBar").hide("slide", {}, 500, function(){});
+		$("#terrainProgress").hide("slide", {}, 500, function(){});
+		$("#terrainProgressBar").hide("slide", {}, 500, function(){});
+		$('#emptyLine1').hide("slide", {}, 500, function(){});
+		$('#emptyLine2').hide("slide", {}, 500, function(){});					
+	}
+};
+
+$('#hideDownload').click(function(){
+	mapMarker.hide();
+	$("#downloadContainer").hide("slide", {direction : "up"}, 1000, function(){
+		if((imageSource.downloading) || (terrainSource.downloading))
+		 $("#downloadContainerHide").show("slide", {direction : "up"}, 500, function(){});
+	});
+});
+$('#showDownload').click(function(){
+	mapMarker.show();
+	$("#downloadContainerHide").hide("slide", {direction : "up"}, 500, function(){
+		$("#downloadContainer").show("slide", {direction : "up"}, 1000, function(){});
+	});
+});	
+
+// Map related functions
+
+function createMapMarkerLine() {
+	var line = viewer.entities.add({
+		rectangle : {
+			material : Cesium.Color.BLUE.withAlpha(0.1),
+			outline : true,
+			outlineColor : Cesium.Color.WHITE,
+			extrudedHeight : new Cesium.CallbackProperty(function() {
+				return mapMarker.altitude;
+			}, false)
+		}
+	});
+	return line;
+}
+
+var mapMarker = {};
+
+function createMapMarker() {
+	var infinitesimal = 0.00001;
+
+	mapMarker.west = 0;
+	mapMarker.east = 1;
+	mapMarker.north = 1;
+	mapMarker.south = 0;
+	mapMarker.altitude = 500;
+	
+	mapMarker.lines = {
+		"west" : createMapMarkerLine(),
+		"east" : createMapMarkerLine(),
+		"north" : createMapMarkerLine(),
+		"south" : createMapMarkerLine()
+	};
+		
+	mapMarker.lines["west"].name = "mapMarker:west";
+	mapMarker.lines["west"].rectangle.coordinates = new Cesium.CallbackProperty(function() {
+		return Cesium.Rectangle.fromDegrees(
+			mapMarker.west, mapMarker.south,
+			mapMarker.west+infinitesimal, mapMarker.north
+		);
+	}, false);
+	
+	mapMarker.lines["east"].name = "mapMarker:east";
+	mapMarker.lines["east"].rectangle.coordinates = new Cesium.CallbackProperty(function() {
+		return Cesium.Rectangle.fromDegrees(
+			mapMarker.east, mapMarker.south,
+			mapMarker.east+infinitesimal, mapMarker.north
+		);
+	}, false);
+
+	mapMarker.lines["north"].name = "mapMarker:north";
+	mapMarker.lines["north"].rectangle.coordinates = new Cesium.CallbackProperty(function() {
+		return Cesium.Rectangle.fromDegrees(
+			mapMarker.west, mapMarker.north,
+			mapMarker.east, mapMarker.north+infinitesimal
+		);
+	}, false);
+
+	mapMarker.lines["south"].name = "mapMarker:south";
+	mapMarker.lines["south"].rectangle.coordinates = new Cesium.CallbackProperty(function() {
+		return Cesium.Rectangle.fromDegrees(
+			mapMarker.west, mapMarker.south,
+			mapMarker.east, mapMarker.south+infinitesimal
+		);
+	}, false);
+	
+	mapMarker.hide = function() {
+		for(var index in mapMarker.lines) mapMarker.lines[index].show = false;
+	}
+
+	mapMarker.show = function() {
+		for(var index in mapMarker.lines) mapMarker.lines[index].show = true;
+	}
+	
+	mapMarker.hide();
+}
+
+$(function() {
+	createMapMarker();
+	$("#imageZoomLevel").text(imageSource.allowedMaximumLevel);
+	$( "#imageZoomLevelSlider" ).slider({
+	  range: "min",
+	  min: imageSource.minimumLevel,
+	  max: imageSource.maximumLevel,
+	  value: imageSource.allowedMaximumLevel,
+	  slide: function( event, ui ) {
+		$("#imageZoomLevel").text(ui.value);
+		imageSource.allowedMaximumLevel = ui.value;
+		imageSource.calculateTileCount();
+		$("#imageTileCount").text(imageSource.count);
+	  }
+	});
+	$("#terrainZoomLevel").text(terrainSource.allowedMaximumLevel);
+	$( "#terrainZoomLevelSlider" ).slider({
+	  range: "min",
+	  min: terrainSource.minimumLevel,
+	  max: terrainSource.maximumLevel,
+	  value: terrainSource.allowedMaximumLevel,
+	  slide: function( event, ui ) {
+		$("#terrainZoomLevel").text(ui.value);
+		terrainSource.allowedMaximumLevel = ui.value;
+		terrainSource.calculateTileCount();
+		$("#terrainTileCount").text(terrainSource.count);
+	  }
+	});
+	$("#imageProgress").hide();
+	$("#imageProgressBar").hide();
+	initProgressBar($("#imageProgressBar"),imageSource,$("#imageSuccessRate"));
+	$("#terrainProgress").hide();
+	$("#terrainProgressBar").hide();
+	initProgressBar($("#terrainProgressBar"),terrainSource,$("#terrainSuccessRate"));
+});
+
+
+mouse.registerDragDropHandler("mapMarker",{
+	drag: function(coordinates) {
+		if(imageSource.downloading || terrainSource.downloading) return false;
+		var changeOccurred = false;
+		switch(mouse.targetIndex) {
+		case "east":
+			if(coordinates.longitude > mapMarker.west) {
+				changeOccurred = true;
+				imageSource.east = terrainSource.east = mapMarker.east = coordinates.longitude;
+				$('#east').text(coordinates.longitude.toFixed(7));
+			}
+			break;
+		case "west":
+			if(coordinates.longitude < mapMarker.east) {
+				changeOccurred = true;
+				imageSource.west = terrainSource.west = mapMarker.west = coordinates.longitude;
+				$('#west').text(coordinates.longitude.toFixed(7));
+			}
+			break;
+		case "north":
+			if(coordinates.latitude > mapMarker.south) {
+				changeOccurred = true;
+				imageSource.north = terrainSource.north = mapMarker.north = coordinates.latitude;
+				$('#north').text(coordinates.latitude.toFixed(7));
+			}
+			break;
+		case "south":
+			if(coordinates.latitude < mapMarker.north) {
+				changeOccurred = true;
+				imageSource.south = terrainSource.south = mapMarker.south = coordinates.latitude;
+				$('#south').text(coordinates.latitude.toFixed(7));
+			}
+			break;
+		}
+		
+		if(changeOccurred) {
+			imageSource.calculateTileCount();
+			$('#imageTileCount').text(imageSource.count);
+			terrainSource.calculateTileCount();
+			$('#terrainTileCount').text(terrainSource.count);
+		}
+	}
+});
+
+contextMenus.default.addItem("Download map", downloadMap);
+
+</script>

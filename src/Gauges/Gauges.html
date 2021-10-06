@@ -1,0 +1,90 @@
+<html>
+<head>
+<style>
+body {
+   background-color: #2e2824;
+   position: fixed;
+   padding: 10px;
+   
+   transform: scale(1);
+}
+
+</style>
+
+<script src="../libs/types.js"></script>
+<script src="../libs/flightSummary.js"></script>
+<script src="../libs/configInfo.js"></script>
+<script src="../libs/commandExpanded.js"></script>
+
+<script src="../libs/unitsHelper.js"></script>
+<script src="../libs/geoHelper.js"></script>
+
+<script src="values.js"></script>
+<script src="helpers.js"></script>
+</head>
+
+<body oncontextmenu="return false" onload="init()" onresize="resizeLayout()">
+
+<div id="layout"></div>
+
+<script>
+
+window.layoutSize = { width: 1920, height: 1017 };
+
+function resizeLayout(width,height)
+{
+	if (width&&height)
+		window.layoutSize = { width: width, height: height };
+	else { width = window.layoutSize.width; height = window.layoutSize.height; }
+    var scaleWidth = window.innerWidth / width;
+    var scaleHeight = window.innerHeight / height;
+	var scale = (scaleWidth<scaleHeight)? scaleWidth : scaleHeight;
+	document.body.style.transform="scale("+scale+")";
+}
+
+var statusColors = {
+	Disabled: "#5b4e45",
+	Failed: "#ff0000",
+	Unhealthy: "#ff8000",
+	Healthy: "#126612"
+};
+statusColors[0] = statusColors.Disabled;
+statusColors[1] = statusColors.Failed;
+statusColors[2] = statusColors.Unhealthy;
+statusColors[3] = statusColors.Healthy;
+
+var uiColors = {
+	disabledBackground: "#110e0c",//"#4b3e35",
+	normalBackground: "#110e0c"
+};
+
+var gauges = [];
+
+function draw() {
+	if (window.unitType) {
+		gauges.forEach(function(gauge) { gauge.update(); });
+	}
+	else
+		if (window.unitsHelper)
+			loadUnitTypes();
+	setTimeout(draw, 200);
+}
+
+function init() {
+	var url = new URL(document.URL);
+	var isTiny = (url.search == "?size=tiny");
+	if (isTiny) {
+		alertSound.parentElement.removeChild(alertSound);
+		resizeLayout(500, 700);
+	}
+	else
+		resizeLayout(1920, 1017);
+	loadContent("layout",isTiny? "LayoutTiny.html" : "Layout.html",function() {
+		["js/gaugeAttitude.js","js/gaugeRPM.js","js/gaugeSpeed.js","js/gaugeVariometer.js","js/gaugeYawHeadingWind.js","js/indicators.js","js/leds.js","js/dataTable.js","js/graph.js","js/graphAltitude.js","js/airplaneTravelVisual.js"].forEach(loadScript);		
+		setTimeout(draw, 1000);
+	});
+};
+</script>
+
+</body>
+</html>

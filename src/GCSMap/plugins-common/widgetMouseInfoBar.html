@@ -1,0 +1,31 @@
+<style>
+#mouseInfoBar {
+	position: absolute;
+	left: 5px;
+	top: 40px;
+}
+
+#mouseInfoBar span {
+	margin: 2px;
+	padding: 5px 12px;
+}
+</style>
+
+<div id="mouseInfoBar" class="cesium-box">
+	<span id="mouseInfoBarLatitude">0</span>
+	<span id="mouseInfoBarLongitude">0</span>
+	<span id="mouseInfoBarAltitude">0</span>
+</div>
+
+<script>
+
+function updateMouseInfoBar() {
+	var c = mouse.coordinates;
+	if (c) {
+		$('#mouseInfoBarLatitude').text(c.latitude.toFixed(7));
+		$('#mouseInfoBarLongitude').text(c.longitude.toFixed(7));
+		$('#mouseInfoBarAltitude').text(convert("Altitude",c.altitude));
+	}
+}
+	
+</script>

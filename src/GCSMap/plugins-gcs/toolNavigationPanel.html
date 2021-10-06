@@ -1,0 +1,297 @@
+<style>
+
+#navigateItem {
+	background-image: url("plugins-gcs/toolNavigate.png");
+	width: 32px;
+	height: 32px;
+	float: left;
+}
+
+#navigationPanel {
+	display: none;
+	position: fixed;
+	top: 43px;
+	right: 0px;
+	width: 220px;
+}
+
+#navigationPanel .ui-button-text {
+	font-size: 8px; /* Or whatever smaller value works for you. */
+}
+
+#startManualNavigationPanel {
+	width:100%;
+	text-align: center;
+}
+
+#navigationControlPanel {
+	width:100%;
+}
+
+</style>
+<button class="cesium-button" id="navigateItem"></button>
+<table id="navigationPanel" class="cesium-box">
+	<tr>
+		<td>
+			<table id="startManualNavigationPanel">
+				<tr>
+					<td class="cesium-button">
+						<button id="startManualNavigation" class="btn fa fa-lock">Start</button>	
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	
+	<tr>
+		<td>
+			<table id="navigationControlPanel">
+				<tr>
+					<td id="title">Manual Navigation Panel</td>
+				</tr>			
+				<tr>
+					<td>
+						<table style="width:100%; border: 1px solid white;">
+							<tr>
+								<td>Yaw:<span id="currentYaw"></span></td>
+								<td>Target:<span id="targetYaw"></span></td>
+							</tr>
+							<tr>
+								<td colspan="2" style="text-align: center;">
+									<button id="decreaseYaw" class="fa fa-arrow-left cesium-button"></button>
+									<button id="increaseYaw" class="fa fa-arrow-right cesium-button"></button>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2">
+									<div id="yawProgressBar"></div>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				
+				<tr><td class="emptyLine"></td></tr>
+
+				<tr>
+					<td>
+						<table style="width:100%; border: 1px solid white;">
+							<tr>
+								<td>Altitude:<span id="currentAltitude"></span></td>
+								<td>Target:<span id="targetAltitude"></span></td>
+							</tr>
+							<tr>
+								<td colspan="2" style="text-align: center;">
+									<button id="increaseAltitude" class="fa fa-arrow-up cesium-button"></button>
+									<button id="decreaseAltitude" class="fa fa-arrow-down cesium-button"></button>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2">
+									<div id="altitudeProgressBar"></div>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				
+				<tr><td class="emptyLine"></td></tr>
+				
+				<tr>
+					<td>
+						<table style="width:100%; border: 1px solid white;">
+							<tr><th>Step Size</th></tr>
+							<tr style="height:5px"><td></td></tr>
+							<tr>
+								<td id="yawStepSlider" class="sliderStyle" colspan="3"></td>
+							</tr>
+							<tr>
+								<td>
+									Yaw: <span id="yawStepIndicator"></span> degrees
+								</td>
+							</tr>
+							<tr style="height:10px"><td></td></tr>
+							<tr>
+								<td id="altitudeStepSlider" class="sliderStyle" colspan="3"></td>
+							</tr>
+							<tr>
+								<td>
+									Altitude: <span id="altitudeStepIndicator"></span>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>				
+</table> 
+
+<script>
+
+function navigationControl(type) {
+	this.type = type;
+	this.step = 0;
+	if(type=="yaw") this.step = 15;
+	 else if(type=="altitude") this.step = 100;
+	this.initial = 0;
+	this.target = 0;
+	this.inProgress = false;
+}
+
+function angularSubtraction(a,b) {
+	var result = a - b;
+	while(result > 180) result -= 360;
+	while(result < -180) result += 360;
+	return result;
+}
+
+function progressNavigation(bar, data) {
+	var current, target;
+
+	if(data.type=="yaw") {
+		current = angularSubtraction(plane.yaw,data.initial);
+		target = angularSubtraction(data.target,data.initial);
+	} else if(data.type=="altitude") {
+		current = plane.altitude - data.initial;
+		target = data.target - data.initial;		
+	}
+	
+	var ratio = current/target,
+		value = 0;
+		
+	if(ratio > 0) {
+		value = Math.round(ratio*100);
+		if(value>97) value = 100;
+	}
+			
+	bar.progressbar("value",value);
+	if(value<100) setTimeout(progressNavigation.bind(this,bar,data), 50);
+	else {
+		data.inProgress = false;
+		bar.hide("slide", {direction:"right"}, 300, function(){});
+	}
+}
+
+function setNavigation(data,change) {
+	var value;
+	if(data.type=="yaw") value = plane.yaw;
+	 else if(data.type=="altitude") value = plane.altitude;
+
+	data.initial = value;
+	if(data.inProgress == false) data.target = value;
+	data.target += change;
+	
+	if(data.type=="yaw") {
+		while(data.target>180) data.target -= 360;
+		while(data.target<-180) data.target += 360;
+	}
+	
+	csharp.setCourse(altitudeControl.target.toFixed(1),yawControl.target.toFixed(0));
+	if(data.inProgress == false) {
+		data.inProgress = true;
+		var bar = $("#"+data.type+"ProgressBar");
+		bar.show("slide", {direction:"right"}, 300, function(){});
+		progressNavigation(bar,data);
+	}
+}
+	
+function updateIndicators() {
+	$("#currentYaw").text(plane.yaw.toFixed(0));
+	$("#targetYaw").text(yawControl.target.toFixed(0));
+	$("#currentAltitude").text(convert("Altitude",plane.altitude));
+	$("#targetAltitude").text(convert("Altitude",altitudeControl.target));
+	if($("#navigationControlPanel").is( ":visible" )) setTimeout(updateIndicators,100);	
+}
+
+var yawControl = new navigationControl("yaw"),
+	altitudeControl = new navigationControl("altitude");
+
+$("#startManualNavigation").button({
+	icons: {
+		primary: "ui-icon-locked"
+	},
+	text: false
+});
+
+$("#yawProgressBar").height(15);
+
+$("#yawProgressBar").progressbar({
+	value: 100,
+	change: function () {
+	},
+	complete: function () {
+	}
+});
+
+$("#altitudeProgressBar").height(15);
+
+$("#altitudeProgressBar").progressbar({
+	value: 100,
+	change: function () {
+	},
+	complete: function () {
+	}
+});
+$("#altitudeStepIndicator").text(convert("Altitude",altitudeControl.step));
+$("#yawStepIndicator").text(yawControl.step);
+
+$("#increaseAltitude").click(function(event) {
+	setNavigation(altitudeControl,altitudeControl.step);
+});
+
+$("#decreaseAltitude").click(function(event) {
+	setNavigation(altitudeControl,-(altitudeControl.step));
+});
+
+$("#decreaseYaw").click(function(event) {
+	setNavigation(yawControl,-(yawControl.step));
+});
+
+$("#increaseYaw").click(function(event) {
+	setNavigation(yawControl,yawControl.step);
+});	
+
+$( "#altitudeStepSlider" ).slider({
+	range: "min",
+	min: 1,
+	max: 200,
+	value: altitudeControl.step,
+	slide: function( event, ui ) {
+		altitudeControl.step = ui.value;
+		$("#altitudeStepIndicator").text(convert("Altitude",altitudeControl.step));
+	}
+});
+
+$("#yawStepSlider" ).slider({
+	range: "min",
+	min: 1,
+	max: 45,
+	value: yawControl.step,
+	slide: function( event, ui ) {
+		yawControl.step = ui.value;
+		$("#yawStepIndicator").text(yawControl.step);
+	}
+});
+
+$("#navigateItem").click(function(event) {
+	if($("#navigationPanel").is( ":hidden" )) {
+		$("#startManualNavigationPanel").show();
+		$("#navigationControlPanel").hide();
+	}
+	$("#navigationPanel").toggle("slide", {direction : "up"}, 300, function(){});
+});
+
+$("#startManualNavigation").click(function(event) {
+	if (!window.plane) return;
+	$("#yawProgressBar").hide();
+	$("#altitudeProgressBar").hide();
+	yawControl.target = plane.yaw;
+	altitudeControl.target = plane.altitude;
+	csharp.setCourse(altitudeControl.target.toFixed(1),yawControl.target.toFixed(0));
+	$("#startManualNavigationPanel").hide("slide", {direction:"right"}, 300, function(){});
+	$("#navigationControlPanel").show("slide", {direction:"right"}, 300, function(){});
+	updateIndicators();
+});
+	
+</script>

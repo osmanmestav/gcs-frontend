@@ -1,0 +1,24 @@
+Attitude->AoA
+Yaw->HomeDirection
+RPM->Throttle,TPS  (RPM led)
+Variometer
+Airspeed, GroundSpeed  (stall led)
+
+Altitude/DistanceToGround/HomeAltitude
+DistanceToTrack (+-50)
+
+Vtol Battery Level (az kalınca uyarı)
+System Voltage (az kalınca uyarı)
+Fuel Level (az kalınca uyarı)
+GPS (az çekiyorsa uyarı)
+IAT (buzlanma icin uyarı)
+ECT (aşırı ısınma için uyarı)
+
+Yerdeyim sviçi
+
+Stall
+Vtol motors
+Thrust loss/motor susması/RPM durması
+Aileron
+Elevatör
+Uplink/downlink

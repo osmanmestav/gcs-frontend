@@ -1,0 +1,99 @@
+<style>
+#pathProfile {
+	position: fixed;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	background-color: rgba(0, 0, 0, 0.6)!important;
+	display: none;
+}
+</style>
+<div id="pathProfile" class="cesium-box" width="1000" height="200"></div>
+<script>
+	
+var estimatedFlightPath = {
+	init: function() {
+		this.trace = new Trace();
+		this.trace.init({
+			wall: Cesium.Color.LIGHTGREEN.withAlpha(0.3),
+			line: Cesium.Color.LIGHTGREEN
+		}, 100000); // There is a tighter limit on the C# side
+	},
+	addPoint: function (coor, distanceTravelled, time) {
+		coor.distanceTravelled = distanceTravelled;
+		coor.time = time;
+		this.trace.addPoint(coor);
+	},
+	clear: function() {
+		if (this.trace && this.trace.clear) {
+			this.trace.clear();
+			$("#pathProfile").hide();
+			if (window.Plotly) Plotly.purge("pathProfile");
+		}
+	},
+	show: function() {
+		if (!this.trace || this.trace.points.length==0) return;
+		$("#pathProfile").attr("width",window.innerWidth);
+		
+		var cartographics = this.trace.points.map(function(c) { return Cesium.Cartographic.fromDegrees(c.longitude, c.latitude); });
+		var promise = Cesium.sampleTerrain(viewer.terrainProvider, window.terrainLevelUsed, cartographics);
+		Cesium.when(promise, function(coors) {
+			$("#pathProfile").show();
+			var groundAlt = {
+				x: [], 
+				y: [], 
+				fill: 'tozeroy',
+				line: {color: '#BBB080'},
+				mode: 'lines',
+				name: "groundAlt"
+			};
+			var aircraftAlt = {
+				x: [], 
+				y: [],
+				line: {color: '#A0FFA0'},
+				mode: 'lines',
+				name: "aircraftAlt"
+			};
+
+			coors.forEach(function(c,i) {
+				var x = estimatedFlightPath.trace.points[i].distanceTravelled;
+				groundAlt.x.push(x);
+				groundAlt.y.push(convertNumber("Altitude", c.height));
+				aircraftAlt.x.push(x);
+				aircraftAlt.y.push(convertNumber("Altitude",estimatedFlightPath.trace.points[i].altitude));
+			});
+			Plotly.newPlot("pathProfile", [groundAlt, aircraftAlt],{
+				showlegend: false,
+				margin: { l: 50, r: 10, b: 50, t: 10, pad: 4 },
+				paper_bgcolor: 'rgba(0,0,0,0)',
+				plot_bgcolor: 'rgba(0,0,0,0)',
+				font: { color: '#A0A0A0' },
+				xaxis: { showgrid: false },
+				yaxis: { gridcolor: '#606060', gridwidth:2 }
+			});
+		});
+	}
+}
+
+estimatedFlightPath.init();
+
+// C# compatibility
+function addEstimatedFlightPathPoint(a,b,c) { estimatedFlightPath.addPoint(a,b,c); }
+
+function showFlightPath() { estimatedFlightPath.show(); }
+
+function clearEstimatedFlightPath() { estimatedFlightPath.clear(); }
+
+
+$(function() {
+	var button = $("<button></button>", { style: "float:left;" })
+	.addClass("cesium-button")
+	.text("Clear traces")
+	.click(()=> {
+		estimatedFlightPath.clear();
+		if (window.plane) plane.trace.clear();
+	});
+	$('#left-toolbar').append(button);
+});
+
+</script>

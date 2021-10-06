@@ -1,0 +1,51 @@
+{
+  "name": "gcs-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@aws-amplify/pubsub": "^4.1.11",
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.1.0",
+    "@testing-library/user-event": "^12.1.10",
+    "@types/jest": "^26.0.15",
+    "@types/node": "^12.0.0",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "aws-amplify": "^4.3.1",
+    "copy-webpack-plugin": "^6.1.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "4.0.3",
+    "typescript": "^4.1.2",
+    "web-vitals": "^1.0.1",
+    "webpack": "4.44.2",
+    "webpack-cli": "^3.1.0",
+    "webpack-dev-server": "3.11.1"
+  },
+  "scripts": {
+    "webpack-build": "webpack",
+    "webpack-watch": "webpack --watch",
+    "start": "webpack --mode development && react-scripts start",
+    "build": "webpack --mode production && react-scripts build",
+    "test": "webpack && react-scripts test",
+    "eject": "webpack && react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
