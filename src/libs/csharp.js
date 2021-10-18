@@ -7,7 +7,7 @@ var csharp = {
     showMessage(msg) {
         alert(msg);
     },
-    playAlarm( message) 
+    playAlarm( message)
     {
         FlightSummary.addToSummary(SummaryEntryType.Message, "Alarm: "+message);
     },
@@ -156,7 +156,7 @@ var csharp = {
     },
 
     async buildAndUploadScanMissionToAllAircrafts()
-    {   
+    {
         console.log("csharp.buildAndUploadScanMissionToAllAircrafts: Not implemented");
         /*
         operation.Post(delegate (object arg)
@@ -176,7 +176,7 @@ var csharp = {
                 MessageBox.Show("First waypoint needs to be Launch", "Hey!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            
+
             if (allWaypoints.Count(p => p.command == Command.WayPoint) < 4)
             {
                 MessageBox.Show("You need to have at least 4 regular waypoints.", "Hey!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -283,7 +283,7 @@ var csharp = {
     },
 
     async startAllMissions()
-    {   
+    {
         console.log("csharp.calibrateAllAirspeedSensors: Not implemented");
         /*
         operation.Post(delegate (object arg)
@@ -384,7 +384,7 @@ var csharp = {
         }
         catch(err) { console.log(err); }
     },
-    
+
     async setMapAltitude(aircraftId, mapAltitude)
     {
         try {
@@ -514,7 +514,7 @@ var csharp = {
         }
         catch(err) { console.log(err); }
     },
-    
+
     async changeLandingRunway(index, halfRunwayLength)
     {
         console.log("csharp.changeLandingRunway: Not implemented");
@@ -539,12 +539,12 @@ var csharp = {
     {
         this.addWaypoint(0, "Takeoff-Runway", latitude, longitude, altitude, direction);
     },
-    
+
     async setLaunch(latitude, longitude, altitude, yaw)
     {
         this.addWaypoint(0, "Takeoff-Launch", latitude, longitude, altitude, direction);
     },
-    
+
     async setRunwayLanding(latitude, longitude, altitude, yaw)
     {
         if (yaw < 0) yaw += 360;
@@ -596,13 +596,13 @@ var csharp = {
 
     async clearSelection()
     {
-        this.selectedWaypointIndices = [];        
+        this.selectedWaypointIndices = [];
         window.dispatchEvent(new CustomEvent('WaypointSelectionChanged',{detail: this.selectedWaypointIndices}));
     },
 
     async selectWaypoint(index)
     {
-        try {            
+        try {
             if (index<0||index>=this.mission.waypoints.length)
                 throw "Invalid index";
             if (this.selectedWaypointIndices.indexOf(index)<0) {
@@ -615,7 +615,7 @@ var csharp = {
 
     async deselectWaypoint(index)
     {
-        try {            
+        try {
             if (index<0||index>=this.mission.waypoints.length)
                 throw "Invalid index";
             let i = this.selectedWaypointIndices.indexOf(index);
@@ -650,7 +650,7 @@ var csharp = {
                 let wp = new WayPoint(index, command, latitude, longitude, altitude, parameter);
                 if (index<0)
                     index = this.mission.waypoints.length;
-                else 
+                else
                     if (index>this.mission.waypoints.length)
                         throw "Invalid index";
                 this.mission.waypoints.splice(index,0,wp);
@@ -804,7 +804,7 @@ var csharp = {
     async deleteWaypoint(index)
     {
         try {
-            
+
             if (index<0||index>=this.mission.waypoints.length)
                 throw "Invalid index";
             this.mission.waypoints.splice(index,1);
