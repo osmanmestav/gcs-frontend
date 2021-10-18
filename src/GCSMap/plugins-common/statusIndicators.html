@@ -10,7 +10,7 @@
 .aircraftStatusIndicator {
     float: left;
     padding: 5px;
-    visibility: hidden;
+    visibility: visible;
 }
 
 </style>
@@ -142,13 +142,13 @@ class AircraftStatusIndicator {
             if (icon.statusProp.indexOf("link") >= 0 && st == 2) st = 3; // Adapt LinkStatus to SensorStatus
             return st;
         }
-	
+
 		// Update overall status
         let status = this.icons
             .map(getStatus)
-			.reduce((acc, cur) => (cur&&cur<acc)? cur:acc,IndicatorStatus.Healthy);		
+			.reduce((acc, cur) => (cur&&cur<acc)? cur:acc,IndicatorStatus.Healthy);
 		this.frame.style.stroke = statusColors[status];
-		
+
 		// Update individual statuses
 		let updateIcon = (icon) => {
 			try {
