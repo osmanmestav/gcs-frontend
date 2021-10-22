@@ -4,7 +4,8 @@ import Button from 'react-bootstrap/Button'
 import Tabs from 'react-bootstrap/Tabs'
 import Tab from 'react-bootstrap/Tab'
 
-function WaypointsTable() {
+
+function WaypointsTable(props) {
 
     let CommandListArray = [];
     const [Agl, setAgl] = useState(400);
@@ -59,17 +60,17 @@ function WaypointsTable() {
 
 
     useEffect(() => {
-        document.getElementById('gcsMap').contentWindow.addEventListener("WaypointAdded", AddWaypoint);
-        document.getElementById('gcsMap').contentWindow.addEventListener("WaypointChanged", ChangedWaypoint);
-        document.getElementById('gcsMap').contentWindow.addEventListener("WaypointsCleared", ClearWaypoint);
-        document.getElementById('gcsMap').contentWindow.addEventListener("WaypointRemoved", RemoveWaypoint);
-        document.getElementById('gcsMap').contentWindow.addEventListener("HomeChanged", SetMapHome);
+        props.mapWindow.addEventListener("WaypointAdded", AddWaypoint);
+            props.mapWindow.addEventListener("WaypointChanged", ChangedWaypoint);
+            props.mapWindow.addEventListener("WaypointsCleared", ClearWaypoint);
+            props.mapWindow.addEventListener("WaypointRemoved", RemoveWaypoint);
+            props.mapWindow.addEventListener("HomeChanged", SetMapHome);
         return () => {
-            document.getElementById('gcsMap').contentWindow.removeEventListener("WaypointAdded", AddWaypoint);
-            document.getElementById('gcsMap').contentWindow.removeEventListener("WaypointChanged", ChangedWaypoint);
-            document.getElementById('gcsMap').contentWindow.removeEventListener("WaypointsCleared", ClearWaypoint);
-            document.getElementById('gcsMap').contentWindow.removeEventListener("WaypointRemoved", RemoveWaypoint);
-            document.getElementById('gcsMap').contentWindow.removeEventListener("HomeChanged", SetMapHome);
+            props.mapWindow.removeEventListener("WaypointAdded", AddWaypoint);
+            props.mapWindow.removeEventListener("WaypointChanged", ChangedWaypoint);
+            props.mapWindow.removeEventListener("WaypointsCleared", ClearWaypoint);
+            props.mapWindow.removeEventListener("WaypointRemoved", RemoveWaypoint);
+            props.mapWindow.removeEventListener("HomeChanged", SetMapHome);
         };
     });
 

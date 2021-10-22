@@ -58,6 +58,7 @@ async function signIn(username,password) {
 			// the object would contain the req attributes	
         		Auth.completeNewPassword(user,password, {}); 
 		}
+		// eslint-disable-next-line no-restricted-globals
 		location.href = "/";
 	} catch (E) {
 		console.log(E);	

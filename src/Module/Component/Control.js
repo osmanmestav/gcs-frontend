@@ -5,15 +5,13 @@ import {
     Button,
 } from 'react-bootstrap'
 
-function SidebarControlButtons() {
-    useEffect(() => {
-
-    });
+function SidebarControlButtons(props) {
+    
     return (
         <div style={{height: '100%', minHeight: '200px', marginTop: '20px'}}>
             <Row>
                 <Col>
-                    <Button style={{marginRight: '5px'}} variant="primary" size="sm" id="gaugesButton">Open Gauges</Button>
+                    <Button style={{marginRight: '5px'}} variant="primary" size="sm" id="gaugesButton" onClick={props.openGauges}>Open Gauges</Button>
                 </Col>
                 <Col>
                     <Button style={{marginRight: '5px'}} variant="primary" size="sm" id="simulateTelemetry">Simulate Telemetry</Button>

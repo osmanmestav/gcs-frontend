@@ -19,25 +19,25 @@ window.addEventListener('load', function () {
     mapWindow = document.getElementById("gcsMap");
     mapWindow = mapWindow && mapWindow.contentWindow;
     if (document.getElementById("gaugesButton")) {
-        document.getElementById("gaugesButton").addEventListener("click", () => {
-            if (!gaugesWindow || ~gaugesWindow.window) {
-                window.gaugesWindow = gaugesWindow = window.open("Gauges/Gauges.html", "GaugesWindow");
-                gaugesWindow.csharp = mapWindow.csharp;
-            }
-        });
-        try {
-            Auth.currentAuthenticatedUser().then(u => {
-                user = u;
-                console.log("Logged in.");
-                console.log(user);
-                initializeMQTT();
-            }).catch(err => {
-                console.log(err);
-                location.href = loginURL;
-            });
-        } catch (E) {
-            console.log(E);
-        }
+        // document.getElementById("gaugesButton").addEventListener("click", () => {
+        //     if (!gaugesWindow || ~gaugesWindow.window) {
+        //         window.gaugesWindow = gaugesWindow = window.open("Gauges/Gauges.html", "GaugesWindow");
+        //         gaugesWindow.csharp = mapWindow.csharp;
+        //     }
+        // });
+        // try {
+        //     Auth.currentAuthenticatedUser().then(u => {
+        //         user = u;
+        //         console.log("Logged in.");
+        //         console.log(user);
+        //         initializeMQTT();
+        //     }).catch(err => {
+        //         console.log(err);
+        //         location.href = loginURL;
+        //     });
+        // } catch (E) {
+        //     console.log(E);
+        // }
     }
     var simulateTelemetryButton = document.getElementById("simulateTelemetry");
     //if (simulateTelemetryButton) {
