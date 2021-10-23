@@ -14,7 +14,7 @@ function SidebarControlButtons(props) {
                     <Button style={{marginRight: '5px'}} variant="primary" size="sm" id="gaugesButton" onClick={props.openGauges}>Open Gauges</Button>
                 </Col>
                 <Col>
-                    <Button style={{marginRight: '5px'}} variant="primary" size="sm" id="simulateTelemetry">Simulate Telemetry</Button>
+                    <Button style={{marginRight: '5px'}} variant="primary" size="sm" id="simulateTelemetry" onClick={props.startTelemetrySimulation}>Simulate Telemetry</Button>
                 </Col>
             </Row>
             <Row style={{marginTop: '20px'}}>

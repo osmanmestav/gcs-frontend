@@ -225,14 +225,14 @@ window.addEventListener('load', function () {
             setTimeout(simulateTelemetry, 1000 * deltaT);
         });
     };
-    simulateTelemetryButton.addEventListener("click", () => {
-        simulateTelemetryButton.enabled = false;
-        simulateTelemetry();
-        document.getElementById('gcsMap').contentWindow.window.dispatchEvent(new CustomEvent("planeChanged", {"detail": sampleTelemetryMessage}));
-        setTimeout(function () {
-            document.getElementById('gcsMap').contentWindow.window.dispatchEvent(new CustomEvent("planeChanged", {"detail": sampleTelemetryMessage}));
-        }, 3000);
-    });
+    // simulateTelemetryButton.addEventListener("click", () => {
+    //     simulateTelemetryButton.enabled = false;
+    //     simulateTelemetry();
+    //     document.getElementById('gcsMap').contentWindow.window.dispatchEvent(new CustomEvent("planeChanged", {"detail": sampleTelemetryMessage}));
+    //     setTimeout(function () {
+    //         document.getElementById('gcsMap').contentWindow.window.dispatchEvent(new CustomEvent("planeChanged", {"detail": sampleTelemetryMessage}));
+    //     }, 3000);
+    // });
     //}
 });
 

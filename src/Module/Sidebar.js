@@ -9,7 +9,7 @@ import {
 function Sidebar(props) {
     return (
         <Row>
-            <Control openGauges={props.openGauges}></Control>
+            <Control openGauges={props.openGauges} startTelemetrySimulation={props.startTelemetrySimulation}></Control>
             <WaypointsTable mapWindow={props.mapWindow}></WaypointsTable>
             <Console></Console>
         </Row>
