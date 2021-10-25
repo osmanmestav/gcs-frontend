@@ -5,8 +5,20 @@ import {
     Button,
 } from 'react-bootstrap'
 
-function SidebarControlButtons(props) {
-    
+function SidebarControlButtons(props:any) {
+        const Download = () =>{
+            props.mapWindow.csharp.downloadMission();
+        }
+        const Upload = () =>{
+            props.mapWindow.csharp.uploadMission();
+        }
+        const startAllMissions = () =>{
+            props.mapWindow.csharp.startAllMissions();
+        }
+        const stopAllMissions = () =>{
+            props.mapWindow.csharp.stopAllMissions();
+        }
+
     return (
         <div style={{height: '100%', minHeight: '200px', marginTop: '20px'}}>
             <Row>
@@ -39,15 +51,16 @@ function SidebarControlButtons(props) {
                     <Button className="mb-2" style={{width: '100%', height:'45px'}} variant="primary" size="sm">Loiter</Button>
                 </Col>
                 <Col lg="2">
-                    <Button className="mb-2" style={{width:'100%',height: '45%'}} variant="primary" size="sm"><i class="fas fa-play"></i> Start Mission</Button>
-                    <Button className="mb-2" style={{width:'100%',height: '45%'}} variant="primary" size="sm"><i class="fas fa-box"></i> Continue</Button>
+                    <Button className="mb-2" style={{width:'100%',height: '28%'}} variant="primary" size="sm" onClick={startAllMissions}><i className="fas fa-play"></i> Start Mission</Button>
+                    <Button className="mb-2" style={{width:'100%',height: '28%'}} variant="primary" size="sm" onClick={stopAllMissions}><i className="fas fa-stop"></i> Stop Mission</Button>
+                    <Button className="mb-2" style={{width:'100%',height: '28%'}} variant="primary" size="sm"><i className="fas fa-box"></i> Continue</Button>
                 </Col>
 
                 <Col lg="12" className="mt-2 mb-2">
-                    <Button style={{width:'24%',marginRight: '5px'}} variant="primary" size="sm"><i class="fas fa-cloud-download-alt"></i> Download</Button>
-                    <Button style={{width:'24%',marginRight: '5px'}} variant="primary" size="sm"><i class="fas fa-cloud-upload-alt"></i> Upload</Button>
-                    <Button style={{width:'24%',marginRight: '5px'}} variant="primary" size="sm"><i class="fas fa-spinner"></i> Load</Button>
-                    <Button style={{width:'25%'}} variant="primary" size="sm"><i class="fas fa-file-export"></i> Save</Button>
+                    <Button style={{width:'24%',marginRight: '5px'}} variant="primary" size="sm" onClick={Download}><i className="fas fa-cloud-download-alt"></i> Download</Button>
+                    <Button style={{width:'24%',marginRight: '5px'}} variant="primary" size="sm" onClick={Upload}><i className="fas fa-cloud-upload-alt"></i> Upload</Button>
+                    <Button style={{width:'24%',marginRight: '5px'}} variant="primary" size="sm"><i className="fas fa-spinner"></i> Load</Button>
+                    <Button style={{width:'25%'}} variant="primary" size="sm"><i className="fas fa-file-export"></i> Save</Button>
                 </Col>
             </Row>
         </div>

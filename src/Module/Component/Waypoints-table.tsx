@@ -5,66 +5,80 @@ import Tabs from 'react-bootstrap/Tabs'
 import Tab from 'react-bootstrap/Tab'
 
 
-function WaypointsTable(props) {
+function WaypointsTable(props: any) {
 
-    let CommandListArray = [];
+    let CommandListArray: any[];
+
     const [Agl, setAgl] = useState(400);
-    const [CommandList, setCommandList] = useState([]);
-    const [HomeLocation, setHomeLocation] = useState({
+    const [CommandList, setCommandList] = useState<any>([]);
+    const [HomeLocation, setHomeLocation] = useState<any>({
         latitude: 0,
         longitude: 0,
         altitude: 0,
     });
 
-    function AddWaypoint(e) {
-        CommandListArray.splice();
+    // @ts-ignore
+    const AddWaypoint = ({detail}) => {
+        CommandListArray = [];
         CommandListArray.push({
-            index: e.detail.index,
-            command: e.detail.command,
-            latitude: e.detail.latitude,
-            longitude: e.detail.longitude,
-            altitude: e.detail.altitude,
+            index: detail.index,
+            command: detail.command,
+            latitude: detail.latitude,
+            longitude: detail.longitude,
+            altitude: detail.altitude,
             agl: Agl,
         })
+        // @ts-ignore
         setCommandList([...CommandList, ...CommandListArray]);
-    }
+    };
 
     function ClearWaypoint() {
         setCommandList([]);
     }
 
-    function RemoveWaypoint(e) {
-        const filteredData = CommandList.filter(item => item.index !== e.detail);
+    const RemoveWaypoint = (e: { detail: any; }) => {
+        // @ts-ignore
+        const filteredData = CommandList.filter(({index: index}) => index !== e.detail);
         for (let i = 0; i < filteredData.length; i++) {
+            // @ts-ignore
             filteredData[i].index = i;
         }
         setCommandList(filteredData);
-    }
+    };
 
-    function SetMapHome(e) {
-        setHomeLocation({latitude: e.detail.latitude, altitude: e.detail.altitude, longitude: e.detail.longitude})
-    }
+    // @ts-ignore
+    const SetMapHome = ({detail: {altitude: altitude, latitude: latitude, longitude: longitude}}) => {
+        setHomeLocation({latitude: latitude, altitude: altitude, longitude: longitude})
+    };
 
-    function ChangedWaypoint(e) {
+    // @ts-ignore
+    const ChangedWaypoint = ({detail: {altitude: altitude, command: command, index: index, latitude: latitude, longitude: longitude}}) => {
         try {
             let newComandlistItem = [...CommandList];
-            newComandlistItem[e.detail.index].command = e.detail.command;
-            newComandlistItem[e.detail.index].latitude = e.detail.latitude;
-            newComandlistItem[e.detail.index].longitude = e.detail.longitude;
-            newComandlistItem[e.detail.index].altitude = e.detail.altitude;
+            // @ts-ignore
+            newComandlistItem[index].command = command;
+            // @ts-ignore
+            newComandlistItem[index].latitude = latitude;
+            // @ts-ignore
+            newComandlistItem[index].longitude = longitude;
+            // @ts-ignore
+            newComandlistItem[index].altitude = altitude;
             setCommandList(newComandlistItem);
         } catch (e) {
             console.log(e)
         }
-    }
+    };
+
+    // @ts-ignore
+    const setsAgl = ({target: {value: value}}) => setAgl(value)
 
 
     useEffect(() => {
         props.mapWindow.addEventListener("WaypointAdded", AddWaypoint);
-            props.mapWindow.addEventListener("WaypointChanged", ChangedWaypoint);
-            props.mapWindow.addEventListener("WaypointsCleared", ClearWaypoint);
-            props.mapWindow.addEventListener("WaypointRemoved", RemoveWaypoint);
-            props.mapWindow.addEventListener("HomeChanged", SetMapHome);
+        props.mapWindow.addEventListener("WaypointChanged", ChangedWaypoint);
+        props.mapWindow.addEventListener("WaypointsCleared", ClearWaypoint);
+        props.mapWindow.addEventListener("WaypointRemoved", RemoveWaypoint);
+        props.mapWindow.addEventListener("HomeChanged", SetMapHome);
         return () => {
             props.mapWindow.removeEventListener("WaypointAdded", AddWaypoint);
             props.mapWindow.removeEventListener("WaypointChanged", ChangedWaypoint);
@@ -74,6 +88,11 @@ function WaypointsTable(props) {
         };
     });
 
+    const jumpToWaypoint = (index: any) => {
+        props.mapWindow.csharp.jumpToWaypoint(index)
+    }
+
+    // @ts-ignore
     return (
         <div style={{height: '450px', minHeight: '400px', overflow: 'scroll'}}>
 
@@ -94,7 +113,7 @@ function WaypointsTable(props) {
                             <td>{HomeLocation.latitude}</td>
                             <td>{HomeLocation.longitude}</td>
                             <td>{HomeLocation.altitude.toFixed(0)}</td>
-                            <td><input type="number" value={Agl} onChange={e => setAgl(e.target.value)}/> m</td>
+                            <td><input type="number" value={Agl} onChange={e => setsAgl(e)}/> m</td>
                         </tr>
                         </tbody>
                     </Table>
@@ -113,18 +132,24 @@ function WaypointsTable(props) {
                         </tr>
                         </thead>
                         <tbody>
-                        {CommandList.map((data, index) =>
-                            <tr key={index}>
-                                <td>{(index + 1)}</td>
-                                <td>{data.command}</td>
-                                <td>{data.latitude}</td>
-                                <td>{data.longitude}</td>
-                                <td>{data.altitude.toFixed(0)} m</td>
-                                <td>{data.agl} m</td>
-                                <td></td>
-                                <td><Button variant="primary" size="sm">Jump</Button></td>
-                            </tr>
-                        )}
+                        {// @ts-ignore
+                            CommandList.map(({agl: agl, altitude: altitude, command: command, latitude: latitude, longitude: longitude}, index) => {
+                                    return <tr key={index}>
+                                        <td>{(index + 1)}</td>
+                                        <td>{command}</td>
+                                        <td>{latitude}</td>
+                                        <td>{longitude}</td>
+                                        <td>{altitude} m</td>
+                                        <td>{agl} m</td>
+                                        <td></td>
+                                        <td>
+                                            <Button variant="primary" size="sm" onClick={() => {
+                                                jumpToWaypoint(index)
+                                            }}>Jump</Button>
+                                        </td>
+                                    </tr>;
+                                }
+                            )}
 
                         </tbody>
                     </Table>
