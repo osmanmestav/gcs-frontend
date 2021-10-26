@@ -29,7 +29,7 @@ export default class MQTTManager {
         // Apply plugin with configuration
         Amplify.addPluggable(new AWSIoTProvider(this.awsIoTProviderOptions));
 
-        PubSub.subscribe('UL/U/CGT50-560/T').subscribe({
+        PubSub.subscribe('UL/U/dev1/T').subscribe({
             next: data => {
                 //console.log('Message received', data.value);
                 let values = preprocessTelemetry(data.value);
@@ -46,7 +46,7 @@ export default class MQTTManager {
             complete: () => console.log('Done'),
         });
     
-        PubSub.subscribe('UL/U/CGT50-560/M').subscribe({
+        PubSub.subscribe('UL/U/dev1/M').subscribe({
             next: data => {
                 console.log('Mission received', data.value);
                 let csharp = this.getcsharp();
@@ -61,7 +61,7 @@ export default class MQTTManager {
         this.mapsWindow.addEventListener("CommandRequest", (e: any) => {
             requestId++;
             e.detail.requestId = requestId;
-            PubSub.publish('UL/U/CGT50-560/C', e.detail);
+            PubSub.publish('UL/U/dev1/C', e.detail);
         });
 
         this.publishHeartBeat();
@@ -79,7 +79,7 @@ export default class MQTTManager {
             command: "HeartBeat",
             requestId: 0
         };
-        PubSub.publish('UL/U/CGT50-560/T', req).then(() => {
+        PubSub.publish('UL/U/dev1/C', req).then(() => {
             console.log("Sent heartbeat");
             setTimeout(this.publishHeartBeat, 1000);
         }).catch(err => {
@@ -89,7 +89,7 @@ export default class MQTTManager {
     };
 
     publishTelemetry = (sampleTelemetryMessage: any) => {
-        PubSub.publish('UL/U/CGT50-560/T', sampleTelemetryMessage).then(() => {
+        PubSub.publish('UL/U/dev1/T', sampleTelemetryMessage).then(() => {
         }).catch(err => {
             console.log(err);
         });
