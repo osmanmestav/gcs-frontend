@@ -1,156 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Use correct character set. -->
-  <meta charset="utf-8">
-  <!-- Tell IE to use the latest, best version. -->
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
-  <title>Ground Control Station</title>
-  <script type="text/javascript" src="external/jquery-ui-1.11.4/external/jquery/jquery.js"></script>
-  <script type="text/javascript" src="external/jquery-ui-1.11.4/jquery-ui.min.js"></script>
-  <link rel="stylesheet" href="external/jquery-ui-1.11.4/jquery-ui.min.css">
-  <link rel="stylesheet" href="GCSMap.css">
-<!--  <script src="libs/offline.js"></script>-->
-  <script src="external/plotly-latest.min.js"></script>
-  <script src="external/math.min.js"></script>
-  <script src="../libs/types.js"></script>
-  <script src="../libs/flightSummary.js"></script>
-  <script src="../libs/configInfo.js"></script>
-  <script src="../libs/commandExpanded.js"></script>
+    <!-- Use correct character set. -->
+    <meta charset="utf-8">
+    <!-- Tell IE to use the latest, best version. -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>Ground Control Station</title>
+    <script type="text/javascript" src="external/jquery-ui-1.11.4/external/jquery/jquery.js"></script>
+    <script type="text/javascript" src="external/jquery-ui-1.11.4/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="external/jquery-ui-1.11.4/jquery-ui.min.css">
+    <link rel="stylesheet" href="GCSMap.css">
+    <!--  <script src="libs/offline.js"></script>-->
+    <script src="external/plotly-latest.min.js"></script>
+    <script src="external/math.min.js"></script>
+    <script src="../libs/types.js"></script>
+    <script src="../libs/flightSummary.js"></script>
+    <script src="../libs/configInfo.js"></script>
+    <script src="../libs/commandExpanded.js"></script>
 
-  <script src="../libs/unitsHelper.js"></script>
-  <script src="../libs/geoHelper.js"></script>
-  <script src="../libs/csharp.js"></script>
+    <script src="../libs/unitsHelper.js"></script>
+    <script src="../libs/geoHelper.js"></script>
+    <script src="../libs/csharp.js"></script>
 
-  <script src="Cesium/Cesium.js"></script>
+    <script src="Cesium/Cesium.js"></script>
 </head>
 <body oncontextmenu="return false;">
-  <div id="cesiumContainer"></div>
-  <script>
-  
-if (!window.csharp) {
-	window.csharp = { };
-	["setMapReady","setHome","requestLook","addGeoFence","getCommands"]
-	.forEach((a)=>{ window.csharp[a]= ()=>console.log("Invoked csharp."+a); });
-	var h = window.csharp.getCommands;
-	window.csharp.getCommands = ()=> { h(); return ["Waypoint","Loiter"]; };
-}
-  
-Cesium.Math.setRandomNumberSeed(3);
-Cesium.BingMapsApi.defaultKey = 'hGEV0ElLskiRIlZzgg2F~fhiQv6pgjLrqY2fA81Z5aA~AjSy2id6LLKDtprhaSwoo6awtO6F8NKXtVdGG9IxFAlFVTkrJqkQ7zMckQ9-EYtJ';
+<div id="cesiumContainer"></div>
+<script>
 
-var bingImage = new Cesium.BingMapsImageryProvider({
-	url : 'https://dev.virtualearth.net',
-	mapStyle : Cesium.BingMapsStyle.AERIAL
-});
+    if (!window.csharp) {
+        window.csharp = {};
+        ["setMapReady", "setHome", "requestLook", "addGeoFence", "getCommands"]
+            .forEach((a) => {
+                window.csharp[a] = () => console.log("Invoked csharp." + a);
+            });
+        var h = window.csharp.getCommands;
+        window.csharp.getCommands = () => {
+            h();
+            return ["Waypoint", "Loiter"];
+        };
+    }
 
-var cesiumTerrain = new Cesium.VRTheWorldTerrainProvider({ url : 'https://map.remotegcs.com/vr-theworld/tiles/1.0.0/73/', credit : 'Terrain data courtesy VT MÄK' });
-window.terrainLevelUsed = 11;
-  
-var viewer = new Cesium.Viewer('cesiumContainer',{
-	animation : false,
-	baseLayerPicker : false,
-	fullscreenButton : false,
-	geocoder : false,
-	homeButton : false,
-	infoBox : false,
-	navigationInstructionsInitiallyVisible : false,
-	selectionIndicator : false,
-	timeline : false,
-	imageryProvider : bingImage,
-	terrainProvider : cesiumTerrain,
-	targetFrameRate: 15,
-	requestRenderMode: true
-});
+    Cesium.Math.setRandomNumberSeed(3);
+    Cesium.BingMapsApi.defaultKey = 'hGEV0ElLskiRIlZzgg2F~fhiQv6pgjLrqY2fA81Z5aA~AjSy2id6LLKDtprhaSwoo6awtO6F8NKXtVdGG9IxFAlFVTkrJqkQ7zMckQ9-EYtJ';
 
-var scene = viewer.scene;
-scene.globe.depthTestAgainstTerrain = true;
-scene.globe.tileCacheSize = 1000;
-scene.fog.enabled = false;
+    var bingImage = new Cesium.BingMapsImageryProvider({
+        url: 'https://dev.virtualearth.net',
+        mapStyle: Cesium.BingMapsStyle.AERIAL
+    });
 
-var pinBuilder = new Cesium.PinBuilder();
-var eventHandler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
+    var cesiumTerrain = new Cesium.VRTheWorldTerrainProvider({ url : 'https://map.remotegcs.com/vr-theworld/tiles/1.0.0/73/', credit : 'Terrain data courtesy VT MÄK' });
+    /*var cesiumTerrain = new Cesium.EllipsoidTerrainProvider({
+        tilingScheme: new Cesium.WebMercatorTilingScheme()
+    });*/
+    window.terrainLevelUsed = 11;
 
-function loadToolbarItem(file) {
-	$.get(file, function(data) {
-		$(data).insertBefore(".cesium-navigationHelpButton-wrapper");
-	});
-}
+    var viewer = new Cesium.Viewer('cesiumContainer', {
+        animation: false,
+        baseLayerPicker: false,
+        fullscreenButton: false,
+        geocoder: false,
+        homeButton: false,
+        infoBox: false,
+        navigationInstructionsInitiallyVisible: false,
+        selectionIndicator: false,
+        timeline: false,
+        imageryProvider: bingImage,
+        terrainProvider: cesiumTerrain,
+        targetFrameRate: 15,
+        requestRenderMode: true
+    });
 
-function loadWidget(file) {
-	$.get(file, function(data) {
-		$('.cesium-viewer-cesiumWidgetContainer').prepend($(data));
-	});
-}
+    var scene = viewer.scene;
+    scene.globe.depthTestAgainstTerrain = true;
+    scene.globe.tileCacheSize = 1000;
+    scene.fog.enabled = false;
 
-$.getMultiScripts = function(arr, callback) {	
-	function loadScript(index) {
-		var src = arr[index];
-		if (!src) {
-			if (callback) callback();
-			return;
-		}
-		$.getScript(src)
-		.done(function( script, textStatus ) {
-			setTimeout(loadScript,0,index+1);
-		})
-		.fail(function( jqxhr, settings, exception ) {
-			console.log("Error loading "+src);
-			console.error(exception);
-			setTimeout(loadScript,0,index+1);
-		});
-	}
-	loadScript(0);
-};
+    var pinBuilder = new Cesium.PinBuilder();
+    var eventHandler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
 
-cesiumTerrain.readyPromise.then(function() {
-	$(".cesium-viewer").prepend($("<div></div>", { id: "left-toolbar" }));
+    function loadToolbarItem(file) {
+        $.get(file, function (data) {
+            $(data).insertBefore(".cesium-navigationHelpButton-wrapper");
+        });
+    }
 
-	$('.cesium-sceneModePicker-wrapper').hide();
-	
-	var scripts = [
-		"libs/unitConversion.js",
-		"libs/menus.js",
-		"libs/mapHelpers.js",
-		"libs/mouse.js",
-		"plugins-common/viewerCesiumNavigationMixin.min.js",
-		"plugins-common/describer.js",
-		"plugins-common/cameraMode.js",
-		"plugins-common/trace.js",
-		"plugins-common/plane.js",
-		"plugins-common/ruler.js",
-		"plugins-gcs/missionMenu.js",
-		"plugins-gcs/speedControl.js",
-		"plugins-gcs/controlMode.js",
-		"plugins-gcs/beaconApproacher.js",
-		"plugins-common/waypoints.js",
-		"plugins-gcs/waypoints-editor.js",
-		"plugins-common/geoFence.js",
-		"plugins-gcs/geoFence-editor.js",
-		"plugins-common/home.js",
-		"plugins-gcs/home-editor.js",
-		"plugins-common/rtkBase.js",
-		"plugins-common/beacon.js",
-		"plugins-common/landmarks.js",
-		"plugins-common/requestLook.js",
-		"plugins-gcs/swarmManager.js"
-	];
+    function loadWidget(file) {
+        $.get(file, function (data) {
+            $('.cesium-viewer-cesiumWidgetContainer').prepend($(data));
+        });
+    }
 
-	$.getMultiScripts(scripts,function() {
-		viewer.extend(Cesium.viewerCesiumNavigationMixin, {});
-		loadWidget("plugins-common/widgetTooltip.html");
-		loadWidget("plugins-common/widgetMouseInfoBar.html");
-		loadWidget("plugins-common/widgetEstimatedFlightPath.html");
-		loadWidget("plugins-common/widgetDownloadPanel.html");
-		loadWidget("plugins-common/widgetVideoPlayer.html");
-		loadWidget("plugins-gcs/widgetAddRelativePoint.html");
-		loadToolbarItem("plugins-gcs/toolNavigationPanel.html");
-		loadWidget("plugins-common/statusIndicators.html");
-		csharp.setMapReady();
-	});
-});
+    $.getMultiScripts = function (arr, callback) {
+        function loadScript(index) {
+            var src = arr[index];
+            if (!src) {
+                if (callback) callback();
+                return;
+            }
+            $.getScript(src)
+                .done(function (script, textStatus) {
+                    setTimeout(loadScript, 0, index + 1);
+                })
+                .fail(function (jqxhr, settings, exception) {
+                    console.log("Error loading " + src);
+                    console.error(exception);
+                    setTimeout(loadScript, 0, index + 1);
+                });
+        }
+
+        loadScript(0);
+    };
+
+    cesiumTerrain.readyPromise.then(function () {
+        $(".cesium-viewer").prepend($("<div></div>", {id: "left-toolbar"}));
+
+        $('.cesium-sceneModePicker-wrapper').hide();
+
+        var scripts = [
+            "libs/unitConversion.js",
+            "libs/menus.js",
+            "libs/mapHelpers.js",
+            "libs/mouse.js",
+            "plugins-common/viewerCesiumNavigationMixin.min.js",
+            "plugins-common/describer.js",
+            "plugins-common/cameraMode.js",
+            "plugins-common/trace.js",
+            "plugins-common/plane.js",
+            "plugins-common/ruler.js",
+            "plugins-gcs/missionMenu.js",
+            "plugins-gcs/speedControl.js",
+            "plugins-gcs/controlMode.js",
+            "plugins-gcs/beaconApproacher.js",
+            "plugins-common/waypoints.js",
+            "plugins-gcs/waypoints-editor.js",
+            "plugins-common/geoFence.js",
+            "plugins-gcs/geoFence-editor.js",
+            "plugins-common/home.js",
+            "plugins-gcs/home-editor.js",
+            "plugins-common/rtkBase.js",
+            "plugins-common/beacon.js",
+            "plugins-common/landmarks.js",
+            "plugins-common/requestLook.js",
+            "plugins-gcs/swarmManager.js"
+        ];
+
+        $.getMultiScripts(scripts, function () {
+            viewer.extend(Cesium.viewerCesiumNavigationMixin, {});
+            loadWidget("plugins-common/widgetTooltip.html");
+            loadWidget("plugins-common/widgetMouseInfoBar.html");
+            loadWidget("plugins-common/widgetEstimatedFlightPath.html");
+            loadWidget("plugins-common/widgetDownloadPanel.html");
+            loadWidget("plugins-common/widgetVideoPlayer.html");
+            loadWidget("plugins-gcs/widgetAddRelativePoint.html");
+            loadToolbarItem("plugins-gcs/toolNavigationPanel.html");
+            loadWidget("plugins-common/statusIndicators.html");
+            csharp.setMapReady();
+        });
+    });
 
 </script>
 </body>

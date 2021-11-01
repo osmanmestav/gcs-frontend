@@ -40,7 +40,7 @@ function addWaypointMap(waypoint)
 {
 	waypoint = CommandExpanded.fromWaypoint(waypoint);
 	waypoints.splice(waypoint.index, 0, waypoint);
-	
+
 	createMarker(waypoint);
 
 	for(var i = waypoint.index; i < waypoints.length; i++)
@@ -80,7 +80,7 @@ function addWaypointMap(waypoint)
 			}, true);
 			line.polyline.positions = new Cesium.CallbackProperty(function() {
 				var fromPoint = waypoints[waypoint.index-1];
-				fromPoint = fromPoint.exitPoint || fromPoint.data; 
+				fromPoint = fromPoint.exitPoint || fromPoint.data;
 				return Cesium.Cartesian3.fromDegreesArrayHeights([
 					fromPoint.longitude, fromPoint.latitude, fromPoint.altitude,
 					waypoint.data.longitude, waypoint.data.latitude, waypoint.data.altitude
@@ -95,7 +95,7 @@ function addWaypointMap(waypoint)
 				return line.polyline.positions.getValue();
 			}, true);
 			line.polyline.positions = new Cesium.CallbackProperty(function() {
-				var fromPoint = waypoint.exitPoint || waypoint.data; 
+				var fromPoint = waypoint.exitPoint || waypoint.data;
 				return Cesium.Cartesian3.fromDegreesArrayHeights([
 					fromPoint.longitude, fromPoint.latitude, fromPoint.altitude,
 					waypoints[waypoint.index+1].data.longitude, waypoints[waypoint.index+1].data.latitude, waypoints[waypoint.index+1].data.altitude
@@ -107,7 +107,7 @@ function addWaypointMap(waypoint)
 				}, true);
 				waypoints[waypoint.index-1].line.polyline.positions = new Cesium.CallbackProperty(function() {
 					var fromPoint = waypoints[waypoint.index-1];
-					fromPoint = fromPoint.isLandingApproach? fromPoint.exitPoint : fromPoint.data; 
+					fromPoint = fromPoint.isLandingApproach? fromPoint.exitPoint : fromPoint.data;
 					return Cesium.Cartesian3.fromDegreesArrayHeights([
 						fromPoint.longitude, fromPoint.latitude, fromPoint.altitude,
 						waypoint.data.longitude, waypoint.data.latitude, waypoint.data.altitude
@@ -166,7 +166,7 @@ function createMarker(waypoint)
 		}
 	});
 	if (waypoint.isLandingApproach)
-		updateApproachLandingExitPoint(waypoint); 
+		updateApproachLandingExitPoint(waypoint);
 }
 
 function refreshMapObjects(waypoint)
@@ -179,7 +179,7 @@ function refreshMapObjects(waypoint)
 	if(waypoint.isLanding)
 		refreshRunway(waypoint.runway,latitude,longitude,altitude,waypoint.data.parameter,waypoint.runwayWidth,waypoints[waypoint.index-1].data.parameter);
 	if (waypoint.isLandingApproach)
-		updateApproachLandingExitPoint(waypoint); 
+		updateApproachLandingExitPoint(waypoint);
 }
 
 function refreshLoiter(waypoint,material) {
@@ -234,8 +234,10 @@ function refreshCurrentWayPoint(waypoint,commandSource)
 	if (!currentWaypoint.marker) {
 		createMarker(currentWaypoint);
 		currentWaypoint.marker.name = "currentWaypoint:"+currentWaypoint.index;
-		currentWaypoint.marker.allowPicking = false; 
-		currentWaypoint.marker.billboard.image = new Cesium.ConstantProperty(pinBuilder.fromText("C",Cesium.Color.DARKRED, 48));
+		currentWaypoint.marker.allowPicking = false;
+		currentWaypoint.marker.billboard.image = new Cesium.ConstantProperty(pinBuilder.fromText("C",Cesium.Color.DARKRED, 58));
+		currentWaypoint.ellipse.zIndex = 99999;
+		currentWaypoint.polyline.zIndex = -1000;
 	}
 	else
 		currentWaypoint.marker.name = "currentWaypoint:"+currentWaypoint.index;

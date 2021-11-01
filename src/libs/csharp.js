@@ -1,62 +1,67 @@
-
 var csharp = {
     aircrafts: {},
     selectedAircraft: {},
-    mission: { home: {}, waypoints:[], geoFence: null /*{ isActive, isVisible, minAltitude, maxAltitude, returnPoint: {}, points:[] }*/ },
+    mission: {
+        home: {},
+        waypoints: [],
+        geoFence: null /*{ isActive, isVisible, minAltitude, maxAltitude, returnPoint: {}, points:[] }*/
+    },
     selectedWaypointIndices: [],
     showMessage(msg) {
         alert(msg);
     },
-    playAlarm( message)
-    {
-        FlightSummary.addToSummary(SummaryEntryType.Message, "Alarm: "+message);
+    playAlarm(message) {
+        FlightSummary.addToSummary(SummaryEntryType.Message, "Alarm: " + message);
     },
-    pauseAlarm()
-    {
-        FlightSummary.addToSummary(SummaryEntryType.Message,"Alarm stopped");
+    pauseAlarm() {
+        FlightSummary.addToSummary(SummaryEntryType.Message, "Alarm stopped");
     },
-    indicatorStatusChanged(name, value)
-    {
+    indicatorStatusChanged(name, value) {
         let category = SummaryEntryType.Message;
-        if (value=="Failed"||value==1) category = SummaryEntryType.Error;
-        if (value=="Disabled"||value==0) category = SummaryEntryType.Warning;
-        if (value=="Unhealthy"||value==2) category = SummaryEntryType.Warning;
-        FlightSummary.addToSummary(category,"Status changed: "+name+"="+value);
+        if (value == "Failed" || value == 1) category = SummaryEntryType.Error;
+        if (value == "Disabled" || value == 0) category = SummaryEntryType.Warning;
+        if (value == "Unhealthy" || value == 2) category = SummaryEntryType.Warning;
+        FlightSummary.addToSummary(category, "Status changed: " + name + "=" + value);
     },
     getCommands() {
-        return ["Waypoint","Loiter","Hover","Taxi","Takeoff-Runway","Takeoff-Launch","Takeoff-Vtol","Land-Runway","Land-Vtol","Land-Chute"];
+        return ["Waypoint", "Loiter", "Hover", "Taxi", "Takeoff-Runway", "Takeoff-Launch", "Takeoff-Vtol", "Land-Runway", "Land-Vtol", "Land-Chute"];
     },
     setMapReady() {
         this.mapReady = true;
         window.dispatchEvent(new CustomEvent('mapReady'));
     },
-    async addAircraft(aircraftId) {
+    async addAircraft(aircraftState) {
+        let aircraftId = aircraftState.aircraftId;
         this.aircrafts[aircraftId] = {aircraftId};
-        window.dispatchEvent(new CustomEvent('AircraftAdded', { detail: aircraftId }));
+        window.dispatchEvent(new CustomEvent('AircraftAdded', {detail: aircraftId}));
         if (!this.selectedAircraft || !this.selectedAircraft.aircraftId)
-            this.selectAircraft(aircraftId);
+            this.selectAircraft(aircraftState);
     },
     async removeAircraft(aircraftId) {
         try {
             delete this.aircrafts[aircraftId];
-            if (this.selectedAircraft && this.selectedAircraft.aircraftId==aircraftId)
+            if (this.selectedAircraft && this.selectedAircraft.aircraftId == aircraftId)
                 this.selectedAircraft = null;
-            window.dispatchEvent(new CustomEvent('AircraftRemoved', { detail: aircraftId }));
+            window.dispatchEvent(new CustomEvent('AircraftRemoved', {detail: aircraftId}));
+        } catch (err) {
+            console.log(err);
         }
-        catch(err) { console.log(err); };
+        ;
     },
     async updateAircraft(aircraftState) {
         if (!this.mapReady) return;
         try {
             let aircraft = this.aircrafts[aircraftState.aircraftId];
             if (!aircraft) {
-                this.addAircraft(aircraftState.aircraftId);
+                this.addAircraft(aircraftState);
                 aircraft = this.aircrafts[aircraftState.aircraftId];
             }
-            Object.assign(aircraft,aircraftState);
-            window.dispatchEvent(new CustomEvent('AircraftChanged', { detail: aircraft }));
+            Object.assign(aircraft, aircraftState);
+            window.dispatchEvent(new CustomEvent('AircraftChanged', {detail: aircraft}));
+        } catch (err) {
+            console.log(err);
         }
-        catch(err) { console.log(err); };
+        ;
     },
     async uploadMissionToAllAircrafts() {
         FlightSummary.addToSummary(SummaryEntryType.Warning, "********************************************");
@@ -67,20 +72,24 @@ var csharp = {
         for (const aircraft of this.aircrafts) {
             var result = await this.uploadMissionToAircraft(aircraft);
             if (!result) failedAircrafts += "\r\n" + aircraftName;
-        };
+        }
+        ;
         if (failedAircrafts == "")
             this.showMessage("Mission upload was successful!", "Congrats!", MessageBoxButtons.OK, MessageBoxIcon.Information);
         else
             this.showMessage("Mission upload was failed for: " + failedAircrafts, "Hey!", MessageBoxButtons.OK, MessageBoxIcon.Error);
     },
 
-    async selectAircraft(aircraftId)
-    {
+    async selectAircraft(aircraftState) {
+        let aircraftId = aircraftState.aircraftId;
         try {
             this.selectedAircraft = this.aircrafts[aircraftId];
-            window.dispatchEvent(new CustomEvent('AircraftSelectionChanged', { detail: aircraftId }));
+            window.dispatchEvent(new CustomEvent('AircraftSelectionChanged', {detail: aircraftId}));
+            window.dispatchEvent(new CustomEvent('SelectionAircraft', {detail: aircraftState}));
+        } catch (err) {
+            console.log(err);
         }
-        catch(err) { console.log(err); };
+        ;
     },
 
     async downloadMission() {
@@ -89,20 +98,17 @@ var csharp = {
 
     async downloadMissionFromAircraft(aircraft) {
         var aircraftName = aircraft.aircraftName + " (" + aircraft.aircraftId + ")";
-        if (aircraft.upLinkStatus != ConnectionStatus.Healthy)
-        {
+        if (aircraft.upLinkStatus != ConnectionStatus.Healthy) {
             FlightSummary.addToSummary(SummaryEntryType.Error, "Aircraft is not connected, cannot download mission: " + aircraftName);
             return false;
-        }
-        else
-        {
+        } else {
             let req = {
                 aircraftId: aircraft.aircraftId,
                 aircraftName: aircraft.aircraftName,
                 command: "DownloadMission"
             };
-            window.dispatchEvent(new CustomEvent('CommandRequest', { detail: req }));
-            FlightSummary.addToSummary(SummaryEntryType.Message, "Mission download requested: "+aircraftName);
+            window.dispatchEvent(new CustomEvent('CommandRequest', {detail: req}));
+            FlightSummary.addToSummary(SummaryEntryType.Message, "Mission download requested: " + aircraftName);
             return true;
         }
     },
@@ -112,13 +118,10 @@ var csharp = {
     },
     async uploadMissionToAircraft(aircraft) {
         var aircraftName = aircraft.aircraftName + " (" + aircraft.aircraftId + ")";
-        if (aircraft.upLinkStatus != ConnectionStatus.Healthy)
-        {
+        if (aircraft.upLinkStatus != ConnectionStatus.Healthy) {
             FlightSummary.addToSummary(SummaryEntryType.Error, "Aircraft is not connected, cannot upload mission: " + aircraftName);
             return false;
-        }
-        else
-        {
+        } else {
             let req = {
                 aircraftId: aircraft.aircraftId,
                 aircraftName: aircraft.aircraftName,
@@ -126,37 +129,41 @@ var csharp = {
                 mission: {
                     mission: {
                         home: this.mission.home,
-                        waypoints: this.mission.waypoints.map(w=>({...w,command:CommandLookup[w.command],parameter:w.parameter.valueAsInt})) },
+                        waypoints: this.mission.waypoints.map(w => ({
+                            ...w,
+                            command: CommandLookup[w.command],
+                            parameter: w.parameter.valueAsInt
+                        }))
+                    },
                     geoFence: this.mission.geoFence
                 }
             };
-            window.dispatchEvent(new CustomEvent('CommandRequest', { detail: req }));
-            FlightSummary.addToSummary(SummaryEntryType.Message, "Mission upload requested: "+aircraftName);
+            window.dispatchEvent(new CustomEvent('CommandRequest', {detail: req}));
+            FlightSummary.addToSummary(SummaryEntryType.Message, "Mission upload requested: " + aircraftName);
             return true;
         }
     },
 
     async receivedMission(mission) {
         await this.clearWaypoints();
-        for(var i=0;i<mission.mission.waypoints.length;i++){
+        for (var i = 0; i < mission.mission.waypoints.length; i++) {
             let w = mission.mission.waypoints[i];
-            let wp = new WayPoint(i,Command[w.command],w.latitude,w.longitude,w.altitude,w.parameter);
+            let wp = new WayPoint(i, Command[w.command], w.latitude, w.longitude, w.altitude, w.parameter);
             this.mission.waypoints.push(wp);
-            window.dispatchEvent(new CustomEvent('WaypointAdded',{detail: wp }));
+            window.dispatchEvent(new CustomEvent('WaypointAdded', {detail: wp}));
         }
         this.mission.home = mission.mission.home;
         this.mission.geoFence = mission.geoFence;
-        window.dispatchEvent(new CustomEvent('HomeChanged',{detail: this.mission.home}));
-        window.dispatchEvent(new CustomEvent('GeoFenceChanged',{detail: this.mission.geoFence}));
+        window.dispatchEvent(new CustomEvent('HomeChanged', {detail: this.mission.home}));
+        window.dispatchEvent(new CustomEvent('GeoFenceChanged', {detail: this.mission.geoFence}));
+
     },
 
-    async buildScanPath()
-    {
+    async buildScanPath() {
         console.log("csharp.buildScanPath: Not implemented");
     },
 
-    async buildAndUploadScanMissionToAllAircrafts()
-    {
+    async buildAndUploadScanMissionToAllAircrafts() {
         console.log("csharp.buildAndUploadScanMissionToAllAircrafts: Not implemented");
         /*
         operation.Post(delegate (object arg)
@@ -282,8 +289,16 @@ var csharp = {
         */
     },
 
-    async startAllMissions()
-    {
+    startMission() {
+        let req = {
+            aircraftId: this.selectedAircraft.aircraftId,
+            aircraftName: this.selectedAircraft.aircraftName,
+            command: "StartMission",
+        }
+        window.dispatchEvent(new CustomEvent('CommandRequest', {detail: req}));
+    },
+
+    async startAllMissions() {
         console.log("csharp.calibrateAllAirspeedSensors: Not implemented");
         /*
         operation.Post(delegate (object arg)
@@ -293,10 +308,12 @@ var csharp = {
             FlightPlanner.instance.AddToSummary(result ? SummaryEntryType.Message : SummaryEntryType.Error, message);
         }, null);
         */
+        /*var packet = new GCSPacket() { type = GCSPacketType.ExecuteCommand };
+            packet.command.flightCommand.command = Command.None;
+            return Request(packet).HasValue;*/
     },
 
-    async stopAllMissions()
-    {
+    async stopAllMissions() {
         console.log("csharp.calibrateAllAirspeedSensors: Not implemented");
         /*
         operation.Post(delegate (object arg)
@@ -310,91 +327,88 @@ var csharp = {
         */
     },
 
-    async calibrateAllAirspeedSensors()
-    {
+    async calibrateAllAirspeedSensors() {
         console.log("csharp.calibrateAllAirspeedSensors: Not implemented");
     },
 
-    async setHome(latitude, longitude, altitude)
-    {
-        this.mission.home = {latitude,longitude,altitude};
-        window.dispatchEvent(new CustomEvent('HomeChanged',{detail: this.mission.home}));
+    async setHome(latitude, longitude, altitude) {
+        this.mission.home = {latitude, longitude, altitude};
+        window.dispatchEvent(new CustomEvent('HomeChanged', {detail: this.mission.home}));
     },
 
-    async changeGeoFencePoint(index, latitude, longitude)
-    {
+    async changeGeoFencePoint(index, latitude, longitude) {
         try {
             if (!this.mission.geoFence.points[index])
                 throw "Invalid index";
             var p = this.mission.geoFence.points[index];
             p.latitude = latitude;
             p.longitude = longitude;
-            window.dispatchEvent(new CustomEvent('GeoFenceChanged',{detail: this.mission.geoFence}));
+            window.dispatchEvent(new CustomEvent('GeoFenceChanged', {detail: this.mission.geoFence}));
+        } catch (err) {
+            console.log(err);
         }
-        catch(err) { console.log(err); }
     },
 
-    async deleteGeoFencePoint(index)
-    {
+    async deleteGeoFencePoint(index) {
         try {
             if (!this.mission.geoFence.points[index])
                 throw "Invalid index";
-            this.mission.geoFence.points.splice(index,1)
-            window.dispatchEvent(new CustomEvent('GeoFenceChanged',{detail: this.mission.geoFence}));
+            this.mission.geoFence.points.splice(index, 1)
+            window.dispatchEvent(new CustomEvent('GeoFenceChanged', {detail: this.mission.geoFence}));
+        } catch (err) {
+            console.log(err);
         }
-        catch(err) { console.log(err); }
     },
 
-    async changeGeoFenceReturn(latitude, longitude)
-    {
+    async changeGeoFenceReturn(latitude, longitude) {
         try {
             this.mission.geoFence.returnPoint = {latitude, longitude};
-            window.dispatchEvent(new CustomEvent('GeoFenceChanged',{detail: this.mission.geoFence}));
+            window.dispatchEvent(new CustomEvent('GeoFenceChanged', {detail: this.mission.geoFence}));
+        } catch (err) {
+            console.log(err);
         }
-        catch(err) { console.log(err); }
     },
 
-    async addGeoFence(latitude, longitude, altitude)
-    {
+    async addGeoFence(latitude, longitude, altitude) {
         try {
-            this.mission.geoFence = { isActive: false, isVisible: true };
+            this.mission.geoFence = {isActive: false, isVisible: true};
             this.mission.geoFence.returnPoint = {latitude, longitude};
-            this.mission.geoFence.minAltitude = altitude+50;
-            this.mission.geoFence.maxAltitude = altitude+500;
+            this.mission.geoFence.minAltitude = altitude + 50;
+            this.mission.geoFence.maxAltitude = altitude + 500;
             this.mission.geoFence.points = [
-                GeoHelper.getDestination(latitude,longitude,  45,2500),
-                GeoHelper.getDestination(latitude,longitude, -45,2500),
-                GeoHelper.getDestination(latitude,longitude,-135,2500),
-                GeoHelper.getDestination(latitude,longitude, 135,2500)
-            ].map(c=>({latitude:c.latitude,longitude:c.longitude}));
-            window.dispatchEvent(new CustomEvent('GeoFenceChanged',{detail: this.mission.geoFence}));
+                GeoHelper.getDestination(latitude, longitude, 45, 2500),
+                GeoHelper.getDestination(latitude, longitude, -45, 2500),
+                GeoHelper.getDestination(latitude, longitude, -135, 2500),
+                GeoHelper.getDestination(latitude, longitude, 135, 2500)
+            ].map(c => ({latitude: c.latitude, longitude: c.longitude}));
+            window.dispatchEvent(new CustomEvent('GeoFenceChanged', {detail: this.mission.geoFence}));
+        } catch (err) {
+            console.log(err);
         }
-        catch(err) { console.log(err); }
     },
 
-    async addGeoFencePoint(index, latitude, longitude)
-    {
+    async addGeoFencePoint(index, latitude, longitude) {
         try {
-            if (index==this.mission.geoFence.points.length)
+            if (index == this.mission.geoFence.points.length)
                 index = 0;
             if (!this.mission.geoFence.points[index])
                 throw "Invalid index.";
-            this.mission.geoFence.points.splice(index,0,{latitude,longitude});
-            window.dispatchEvent(new CustomEvent('GeoFenceChanged',{detail: this.mission.geoFence}));
+            this.mission.geoFence.points.splice(index, 0, {latitude, longitude});
+            window.dispatchEvent(new CustomEvent('GeoFenceChanged', {detail: this.mission.geoFence}));
+        } catch (err) {
+            console.log(err);
         }
-        catch(err) { console.log(err); }
     },
 
-    async setMapAltitude(aircraftId, mapAltitude)
-    {
+    async setMapAltitude(aircraftId, mapAltitude) {
         try {
             this.aircrafts[aircraftId].terrainMSL = mapAltitude;
+        } catch (err) {
+            console.log(err);
         }
-        catch(err) { console.log(err); }
     },
 
-    calculateRunwayLanding(latitude, longitude, altitude, landingLoiterAltitude, isLoiterClockwise, landingDirection, halfRunwayLength)
-    {
+    calculateRunwayLanding(latitude, longitude, altitude, landingLoiterAltitude, isLoiterClockwise, landingDirection, halfRunwayLength) {
         var descendAltitude = landingLoiterAltitude - altitude;
         var loiterRadius = ConfigInfo.LoiterRadius;
         var descendAngleStart = GeoHelper.toRadians(ConfigInfo.LandingDescendAngleStart);
@@ -402,12 +416,12 @@ var csharp = {
         var loiterPointDistance = 2 * descendAltitude / (descendAngleStart + descendAngleEnd);
         var loiterPointAngle = GeoHelper.toDegrees(Math.atan2(loiterRadius, loiterPointDistance));
 
-        var landingPoint = {latitude,longitude,altitude};
+        var landingPoint = {latitude, longitude, altitude};
 
         var loiterDirection = (isLoiterClockwise ? -1 : 1);
-        var loiterPoint = GeoHelper.getDestination(landingPoint.latitude,landingPoint.longitude, landingDirection + 180 + loiterDirection * loiterPointAngle, Math.sqrt(loiterRadius * loiterRadius + loiterPointDistance * loiterPointDistance));
+        var loiterPoint = GeoHelper.getDestination(landingPoint.latitude, landingPoint.longitude, landingDirection + 180 + loiterDirection * loiterPointAngle, Math.sqrt(loiterRadius * loiterRadius + loiterPointDistance * loiterPointDistance));
         loiterPoint.altitude = landingPoint.altitude;
-        var exitPoint = GeoHelper.getDestination(landingPoint.latitude,landingPoint.longitude, landingDirection, halfRunwayLength);
+        var exitPoint = GeoHelper.getDestination(landingPoint.latitude, landingPoint.longitude, landingDirection, halfRunwayLength);
         exitPoint.altitude = landingPoint.altitude;
 
         var result = [];
@@ -423,8 +437,7 @@ var csharp = {
         return result;
     },
 
-    calculateVtolLanding(latitude, longitude, altitude, landingLoiterAltitude, isLoiterClockwise, landingDirection, vtolLandAGL)
-    {
+    calculateVtolLanding(latitude, longitude, altitude, landingLoiterAltitude, isLoiterClockwise, landingDirection, vtolLandAGL) {
         var descendAltitude = landingLoiterAltitude - altitude;
         var loiterRadius = ConfigInfo.LoiterRadius;
         var descendAngle = GeoHelper.toRadians(ConfigInfo.VtolLandingDescendAngle);
@@ -437,7 +450,7 @@ var csharp = {
         var distance = descendDistance + vtolMotorsCheckDistance + vtolStopDistance;
         var loiterExitPoint = GeoHelper.getDestination(latitude, longitude, landingDirection - 180, distance);
         loiterExitPoint.altitude = landingLoiterAltitude;
-        var loiterPoint = GeoHelper.getDestination(loiterExitPoint.latitude,loiterExitPoint.longitude, landingDirection + (isLoiterClockwise ? 90 : -90), ConfigInfo.LoiterRadius);
+        var loiterPoint = GeoHelper.getDestination(loiterExitPoint.latitude, loiterExitPoint.longitude, landingDirection + (isLoiterClockwise ? 90 : -90), ConfigInfo.LoiterRadius);
         loiterPoint.altitude = loiterExitPoint.altitude;
         var descendPointDist = descendDistance + ConfigInfo.NavigationPointReachLimit;
         var descendPoint = GeoHelper.getDestination(loiterExitPoint.latitude, loiterExitPoint.longitude, landingDirection, descendPointDist);
@@ -450,15 +463,14 @@ var csharp = {
         return list;
     },
 
-    calculateChuteLanding(latitude, longitude, altitude, landingLoiterAltitude, isLoiterClockwise, landingDirection, chuteLandAGL)
-    {
+    calculateChuteLanding(latitude, longitude, altitude, landingLoiterAltitude, isLoiterClockwise, landingDirection, chuteLandAGL) {
         var descendAltitude = landingLoiterAltitude - altitude;
         var loiterRadius = ConfigInfo.LoiterRadius;
         var descendAngle = GeoHelper.toRadians(ConfigInfo.VtolLandingDescendAngle);
         var initialSpeed = ConfigInfo.CruiseSpeed;
         var descendDistance = (descendAltitude - chuteLandAGL) / descendAngle;
         if (descendDistance < 0) descendDistance = 0;
-        var distance = descendDistance+ConfigInfo.ChuteTimeToWaitBeforeLaunch*initialSpeed;
+        var distance = descendDistance + ConfigInfo.ChuteTimeToWaitBeforeLaunch * initialSpeed;
         var loiterExitPoint = GeoHelper.getDestination(latitude, longitude, landingDirection - 180, distance);
         loiterExitPoint.altitude = landingLoiterAltitude;
         var loiterPoint = GeoHelper.getDestination(loiterExitPoint.latitude, loiterExitPoint.longitude, landingDirection + (isLoiterClockwise ? 90 : -90), ConfigInfo.LoiterRadius);
@@ -474,162 +486,145 @@ var csharp = {
         return list;
     },
 
-    async changeLandingRunway(index, halfRunwayLength)
-    {
+    async changeLandingRunway(index, halfRunwayLength) {
         try {
-            var prevParam = this.mission.waypoints[index-1].parameter;
+            var prevParam = this.mission.waypoints[index - 1].parameter;
             var cmd = this.mission.waypoints[index];
             var landingLoiterAltitude = this.mission.waypoints[index - 1].altitude;
             var result = this.calculateRunwayLanding(cmd.latitude, cmd.longitude, cmd.altitude, landingLoiterAltitude, prevParam.isLoiterClockwise, prevParam.loiterExitAngle, halfRunwayLength);
-            this.changeWaypoint(index, result[3], result[4], result[5], { landingLongitudinalTolerance: halfRunwayLength });
+            this.changeWaypoint(index, result[3], result[4], result[5], {landingLongitudinalTolerance: halfRunwayLength});
             this.changeWaypoint(index + 1, result[6], result[7], result[8], 0);
+        } catch (err) {
+            console.log(err);
         }
-        catch(err) { console.log(err); }
     },
 
-    changeLanding(index, latitude, longitude, altitude)
-    {
+    changeLanding(index, latitude, longitude, altitude) {
         try {
             var param = this.mission.waypoints[index].parameter;
-            var prevParam = this.mission.waypoints[index-1].parameter;
-            var landingLoiterAltitude = this.mission.waypoints[index-1].altitude;
+            var prevParam = this.mission.waypoints[index - 1].parameter;
+            var landingLoiterAltitude = this.mission.waypoints[index - 1].altitude;
             var result = this.calculateRunwayLanding(latitude, longitude, altitude, landingLoiterAltitude, prevParam.isLoiterClockwise, prevParam.loiterExitAngle, param.landingLongitudinalTolerance);
             this.changeWaypoint(index - 1, result[0], result[1], result[2]);
             this.changeWaypoint(index, result[3], result[4], result[5]);
             this.changeWaypoint(index + 1, result[6], result[7], result[8]);
+        } catch (err) {
+            console.log(err);
         }
-        catch(err) { console.log(err); }
     },
 
-    changeLandingBearing(index, bearing)
-    {
+    changeLandingBearing(index, bearing) {
         try {
             var cmd = this.mission.waypoints[index];
-            var prevParam = this.mission.waypoints[index-1].parameter;
-            var landingLoiterAltitude = this.mission.waypoints[index-1].altitude;
+            var prevParam = this.mission.waypoints[index - 1].parameter;
+            var landingLoiterAltitude = this.mission.waypoints[index - 1].altitude;
             var result = this.calculateRunwayLanding(cmd.latitude, cmd.longitude, cmd.altitude, landingLoiterAltitude, prevParam.isLoiterClockwise, bearing, cmd.param.landingLongitudinalTolerance);
-            this.changeWaypoint(index - 1, result[0], result[1], result[2], { loiterExitAngle: bearing });
+            this.changeWaypoint(index - 1, result[0], result[1], result[2], {loiterExitAngle: bearing});
             this.changeWaypoint(index, result[3], result[4], result[5], cmd.param);
             this.changeWaypoint(index + 1, result[6], result[7], result[8], 0);
+        } catch (err) {
+            console.log(err);
         }
-        catch(err) { console.log(err); }
     },
 
-    async changeLandingRunway(index, halfRunwayLength)
-    {
+    async changeLandingRunway(index, halfRunwayLength) {
         console.log("csharp.changeLandingRunway: Not implemented");
     },
 
-    async changeLanding(index, latitude, longitude, altitude)
-    {
+    async changeLanding(index, latitude, longitude, altitude) {
         console.log("csharp.changeLanding: Not implemented");
     },
 
-    async changeLandingBearing(index, bearing)
-    {
+    async changeLandingBearing(index, bearing) {
         console.log("csharp.changeLandingBearing: Not implemented");
     },
 
-    async changeApproachLandingPoint(index, latitude, longitude, altitude, loiterExitAngle)
-    {
+    async changeApproachLandingPoint(index, latitude, longitude, altitude, loiterExitAngle) {
         this.changeWaypoint(index, latitude, longitude, altitude, {loiterExitAngle: loiterExitAngle});
     },
 
-    async setTakeoff(latitude, longitude, altitude, yaw)
-    {
+    async setTakeoff(latitude, longitude, altitude, yaw) {
         this.addWaypoint(0, "Takeoff-Runway", latitude, longitude, altitude, direction);
     },
 
-    async setLaunch(latitude, longitude, altitude, yaw)
-    {
+    async setLaunch(latitude, longitude, altitude, yaw) {
         this.addWaypoint(0, "Takeoff-Launch", latitude, longitude, altitude, direction);
     },
 
-    async setRunwayLanding(latitude, longitude, altitude, yaw)
-    {
+    async setRunwayLanding(latitude, longitude, altitude, yaw) {
         if (yaw < 0) yaw += 360;
         this.addWaypoint(-1, "Land-Runway", latitude, longitude, altitude, yaw);
     },
 
-    async setVtolTakeoff(latitude, longitude, altitude, direction)
-    {
+    async setVtolTakeoff(latitude, longitude, altitude, direction) {
         if (direction < 0) direction += 360;
         this.addWaypoint(0, "Takeoff-Vtol", latitude, longitude, altitude, direction);
     },
 
-    async setVtolLanding(latitude, longitude, altitude, direction)
-    {
+    async setVtolLanding(latitude, longitude, altitude, direction) {
         if (direction < 0) direction += 360;
         this.addWaypoint(-1, "Land-Vtol", latitude, longitude, altitude, direction);
     },
 
-    async setChuteLanding(latitude, longitude, altitude, direction)
-    {
+    async setChuteLanding(latitude, longitude, altitude, direction) {
         if (direction < 0) direction += 360;
         this.addWaypoint(-1, "Land-Chute", latitude, longitude, altitude, direction);
     },
 
-    async setCourse(altitude, bearing)
-    {
+    async setCourse(altitude, bearing) {
         console.log("csharp.setCourse: Not implemented");
     },
 
-    async setAirspeed(speed)
-    {
+    async setAirspeed(speed) {
         console.log("csharp.setAirspeed: Not implemented");
     },
 
-    async setAltitudeRelaxation(isRelaxed)
-    {
+    async setAltitudeRelaxation(isRelaxed) {
         console.log("csharp.setAltitudeRelaxation: Not implemented");
     },
 
-    getWayPointCount()
-    {
+    getWayPointCount() {
         return this.mission.waypoints.length;
     },
 
-    async getCommandExpandedAt(index)
-    {
+    async getCommandExpandedAt(index) {
         return CommandExpanded.fromWaypoint(this.mission.waypoints[index]);
     },
 
-    async clearSelection()
-    {
+    async clearSelection() {
         this.selectedWaypointIndices = [];
-        window.dispatchEvent(new CustomEvent('WaypointSelectionChanged',{detail: this.selectedWaypointIndices}));
+        window.dispatchEvent(new CustomEvent('WaypointSelectionChanged', {detail: this.selectedWaypointIndices}));
     },
 
-    async selectWaypoint(index)
-    {
+    async selectWaypoint(index) {
         try {
-            if (index<0||index>=this.mission.waypoints.length)
+            if (index < 0 || index >= this.mission.waypoints.length)
                 throw "Invalid index";
-            if (this.selectedWaypointIndices.indexOf(index)<0) {
+            if (this.selectedWaypointIndices.indexOf(index) < 0) {
                 this.selectedWaypointIndices.push(index);
-                window.dispatchEvent(new CustomEvent('WaypointSelectionChanged',{detail: this.selectedWaypointIndices }));
+                window.dispatchEvent(new CustomEvent('WaypointSelectionChanged', {detail: this.selectedWaypointIndices}));
             }
+        } catch (err) {
+            console.log(err);
         }
-        catch(err) { console.log(err); }
     },
 
-    async deselectWaypoint(index)
-    {
+    async deselectWaypoint(index) {
         try {
-            if (index<0||index>=this.mission.waypoints.length)
+            if (index < 0 || index >= this.mission.waypoints.length)
                 throw "Invalid index";
             let i = this.selectedWaypointIndices.indexOf(index);
-            if (i>=0) {
-                this.selectedWaypointIndices.splice(i,1);
-                window.dispatchEvent(new CustomEvent('WaypointSelectionChanged',{detail: this.selectedWaypointIndices }));
+            if (i >= 0) {
+                this.selectedWaypointIndices.splice(i, 1);
+                window.dispatchEvent(new CustomEvent('WaypointSelectionChanged', {detail: this.selectedWaypointIndices}));
             }
+        } catch (err) {
+            console.log(err);
         }
-        catch(err) { console.log(err); }
     },
 
-    async deleteSelectedWaypoints()
-    {
-        this.selectedWaypointIndices.forEach((i)=>this.deleteWaypoint(i));
+    async deleteSelectedWaypoints() {
+        this.selectedWaypointIndices.forEach((i) => this.deleteWaypoint(i));
         this.clearSelection();
     },
 
@@ -640,119 +635,115 @@ var csharp = {
     },
 
     getCommandIndex(command) {
-        return this.mission.waypoints.findIndex((w)=>w.command===command);
+        return this.mission.waypoints.findIndex((w) => w.command === command);
     },
 
-    async addWaypoint(index, command, latitude, longitude, altitude, parameter)
-    {
-        let AddWaypoint = (index, command, latitude, longitude, altitude, parameter)=> {
+    async addWaypoint(index, command, latitude, longitude, altitude, parameter) {
+        let AddWaypoint = (index, command, latitude, longitude, altitude, parameter) => {
             try {
                 let wp = new WayPoint(index, command, latitude, longitude, altitude, parameter);
-                if (index<0)
+                if (index < 0)
                     index = this.mission.waypoints.length;
-                else
-                    if (index>this.mission.waypoints.length)
-                        throw "Invalid index";
-                this.mission.waypoints.splice(index,0,wp);
-                for(var i=index;i<this.mission.waypoints.length;i++)
+                else if (index > this.mission.waypoints.length)
+                    throw "Invalid index";
+                this.mission.waypoints.splice(index, 0, wp);
+                for (var i = index; i < this.mission.waypoints.length; i++)
                     this.mission.waypoints[i].index = i;
-                window.dispatchEvent(new CustomEvent('WaypointAdded',{detail: wp }));
+                window.dispatchEvent(new CustomEvent('WaypointAdded', {detail: wp}));
+            } catch (err) {
+                console.log(err);
             }
-            catch(err) { console.log(err); }
         }
 
-        if (index <= 0)
-        {
-            if (command.startsWith("Takeoff"))
-            {
+        if (index <= 0) {
+            if (command.startsWith("Takeoff")) {
                 index = 0;
                 var i = this.getCommandIndex(Command.TakeOff);
                 if (i == -1) i = this.getCommandIndex(Command.Launch);
                 if (i != -1) this.deleteWaypoint(i);
+            } else if (command.startsWith("Land")) {
+                var i = this.getCommandIndex(Command.ApproachLanding);
+                if (i != -1) this.deleteWaypoint(i);
             }
-            else
-                if (command.startsWith("Land"))
-                {
-                    var i = this.getCommandIndex(Command.ApproachLanding);
-                    if (i != -1) this.deleteWaypoint(i);
-                }
         }
         var homeAltitude = this.mission.home.altitude || 0;
         if (altitude == 0) altitude = homeAltitude;
-        switch(command) {
+        switch (command) {
             case "Waypoint":
-                AddWaypoint(index, Command.WayPoint, latitude, longitude, altitude + ConfigInfo.AltitudeOverHome, { followTrack: true });
+                AddWaypoint(index, Command.WayPoint, latitude, longitude, altitude + ConfigInfo.AltitudeOverHome, {followTrack: true});
                 break;
             case "Loiter":
-                AddWaypoint(index, Command.LoiterUnlimited, latitude, longitude, altitude + ConfigInfo.AltitudeOverHome, { followTrack: true });
+                AddWaypoint(index, Command.LoiterUnlimited, latitude, longitude, altitude + ConfigInfo.AltitudeOverHome, {followTrack: true});
                 break;
-            case "Land-Runway":
-                {
-                    var index1, index2, index3;
-                    if (index == -1) index1 = index2 = index3 = index;
-                    else
-                    {
-                        index1 = index;
-                        index2 = index + 1;
-                        index3 = index + 2;
-                    }
+            case "Land-Runway": {
+                var index1, index2, index3;
+                if (index == -1) index1 = index2 = index3 = index;
+                else {
+                    index1 = index;
+                    index2 = index + 1;
+                    index3 = index + 2;
+                }
 
-                    var landingLoiterAltitude = altitude + ConfigInfo.LandingLoiterAltitude;
-                    var result = this.calculateRunwayLanding(latitude, longitude, altitude, landingLoiterAltitude, false, parameter, 100);
+                var landingLoiterAltitude = altitude + ConfigInfo.LandingLoiterAltitude;
+                var result = this.calculateRunwayLanding(latitude, longitude, altitude, landingLoiterAltitude, false, parameter, 100);
 
-                    AddWaypoint(index1, Command.ApproachLanding, result[0], result[1], result[2], { followTrack: true, loiterExitAngle: parameter });
-                    AddWaypoint(index2, Command.Land, result[3], result[4], result[5], { landingLongitudinalTolerance: 100 });
-                    AddWaypoint(index3, Command.TaxiStop, result[6], result[7], result[8]);
-                    /*if (index3 == -1) index3 = this.mission.waypoints.length - 1;
-                    window.dispatchEvent(new CustomEvent('WaypointChanged',{detail: this.mission.waypoints[index3]}));*/
-                }
+                AddWaypoint(index1, Command.ApproachLanding, result[0], result[1], result[2], {
+                    followTrack: true,
+                    loiterExitAngle: parameter
+                });
+                AddWaypoint(index2, Command.Land, result[3], result[4], result[5], {landingLongitudinalTolerance: 100});
+                AddWaypoint(index3, Command.TaxiStop, result[6], result[7], result[8]);
+                /*if (index3 == -1) index3 = this.mission.waypoints.length - 1;
+                window.dispatchEvent(new CustomEvent('WaypointChanged',{detail: this.mission.waypoints[index3]}));*/
+            }
                 break;
-            case "Takeoff-Runway":
-                {
-                    if (index == -1) index = 0;
-                    var dest = GeoHelper.getDestination(latitude, longitude, parameter, 100);
-                    AddWaypoint(index, Command.TaxiSpeedUp, dest.latitude, dest.longitude, altitude);
-                    AddWaypoint(index + 1, Command.TakeOff, dest.latitude, dest.longitude, altitude + ConfigInfo.LandingLoiterAltitude);
-                }
+            case "Takeoff-Runway": {
+                if (index == -1) index = 0;
+                var dest = GeoHelper.getDestination(latitude, longitude, parameter, 100);
+                AddWaypoint(index, Command.TaxiSpeedUp, dest.latitude, dest.longitude, altitude);
+                AddWaypoint(index + 1, Command.TakeOff, dest.latitude, dest.longitude, altitude + ConfigInfo.LandingLoiterAltitude);
+            }
                 break;
-            case "Takeoff-Launch":
-                {
-                    if (index == -1) index = 0;
-                    AddWaypoint(index, Command.Launch, latitude, longitude, altitude + ConfigInfo.LandingLoiterAltitude);
-                }
+            case "Takeoff-Launch": {
+                if (index == -1) index = 0;
+                AddWaypoint(index, Command.Launch, latitude, longitude, altitude + ConfigInfo.LandingLoiterAltitude);
+            }
                 break;
-            case "Takeoff-Vtol":
-                {
-                    if (index == -1) index = 0;
-                    var dest = GeoHelper.getDestination(latitude, longitude, parameter, 100);
-                    AddWaypoint(index, Command.VtolTakeOff, dest.latitude, dest.longitude, altitude + 20);
-                    AddWaypoint(index + 1, Command.VtolSpeedUp, dest.latitude, dest.longitude, altitude + 20 + ConfigInfo.VtolSpeedUpAltitudeAddOn);
-                    AddWaypoint(index + 2, Command.TakeOff, dest.latitude, dest.longitude, altitude + ConfigInfo.LandingLoiterAltitude);
-                }
+            case "Takeoff-Vtol": {
+                if (index == -1) index = 0;
+                var dest = GeoHelper.getDestination(latitude, longitude, parameter, 100);
+                AddWaypoint(index, Command.VtolTakeOff, dest.latitude, dest.longitude, altitude + 20);
+                AddWaypoint(index + 1, Command.VtolSpeedUp, dest.latitude, dest.longitude, altitude + 20 + ConfigInfo.VtolSpeedUpAltitudeAddOn);
+                AddWaypoint(index + 2, Command.TakeOff, dest.latitude, dest.longitude, altitude + ConfigInfo.LandingLoiterAltitude);
+            }
                 break;
-            case "Land-Vtol":
-                {
-                    var vtolLandAGL = 20;
-                    var landingLoiterAltitude = altitude+ConfigInfo.LandingLoiterAltitude;
-                    var coors = this.calculateVtolLanding(latitude, longitude, altitude, landingLoiterAltitude, false, parameter, vtolLandAGL);
-                    AddWaypoint(index, Command.ApproachLanding, coors[0].latitude, coors[0].longitude, coors[0].altitude, { followTrack: true, loiterExitAngle: parameter});
-                    if (index >= 0) index++;
-                    AddWaypoint(index, Command.WayPoint, coors[2].latitude, coors[2].longitude, coors[2].altitude, { followTrack: true });
-                    if (index >= 0) index++;
-                    AddWaypoint(index, Command.ChuteLand, coors[3].latitude, coors[3].longitude, coors[3].altitude,  vtolLandAGL);
-                }
+            case "Land-Vtol": {
+                var vtolLandAGL = 20;
+                var landingLoiterAltitude = altitude + ConfigInfo.LandingLoiterAltitude;
+                var coors = this.calculateVtolLanding(latitude, longitude, altitude, landingLoiterAltitude, false, parameter, vtolLandAGL);
+                AddWaypoint(index, Command.ApproachLanding, coors[0].latitude, coors[0].longitude, coors[0].altitude, {
+                    followTrack: true,
+                    loiterExitAngle: parameter
+                });
+                if (index >= 0) index++;
+                AddWaypoint(index, Command.WayPoint, coors[2].latitude, coors[2].longitude, coors[2].altitude, {followTrack: true});
+                if (index >= 0) index++;
+                AddWaypoint(index, Command.ChuteLand, coors[3].latitude, coors[3].longitude, coors[3].altitude, vtolLandAGL);
+            }
                 break;
-            case "Land-Chute":
-                {
-                    var chuteLandAGL = ConfigInfo.ChuteDeploymentAltitude;
-                    var landingLoiterAltitude = altitude + ConfigInfo.LandingLoiterAltitude;
-                    var coors = this.calculateChuteLanding(latitude, longitude, altitude, landingLoiterAltitude, false, parameter, chuteLandAGL);
-                    AddWaypoint(index, Command.ApproachLanding, coors[0].latitude, coors[0].longitude, coors[0].altitude, { followTrack: true, loiterExitAngle: parameter});
-                    if (index >= 0) index++;
-                    AddWaypoint(index, Command.WayPoint, coors[2].latitude, coors[2].longitude, coors[2].altitude, { followTrack: true });
-                    if (index >= 0) index++;
-                    AddWaypoint(index, Command.ChuteLand, coors[3].latitude, coors[3].longitude, coors[3].altitude, chuteLandAGL);
-                }
+            case "Land-Chute": {
+                var chuteLandAGL = ConfigInfo.ChuteDeploymentAltitude;
+                var landingLoiterAltitude = altitude + ConfigInfo.LandingLoiterAltitude;
+                var coors = this.calculateChuteLanding(latitude, longitude, altitude, landingLoiterAltitude, false, parameter, chuteLandAGL);
+                AddWaypoint(index, Command.ApproachLanding, coors[0].latitude, coors[0].longitude, coors[0].altitude, {
+                    followTrack: true,
+                    loiterExitAngle: parameter
+                });
+                if (index >= 0) index++;
+                AddWaypoint(index, Command.WayPoint, coors[2].latitude, coors[2].longitude, coors[2].altitude, {followTrack: true});
+                if (index >= 0) index++;
+                AddWaypoint(index, Command.ChuteLand, coors[3].latitude, coors[3].longitude, coors[3].altitude, chuteLandAGL);
+            }
                 break;
             case "Taxi":
                 AddWaypoint(index, Command.TaxiToPoint, latitude, longitude, altitude);
@@ -764,13 +755,17 @@ var csharp = {
 
     },
 
-    async setCurrentWaypoint(waypoint,commandSource) {
-        window.dispatchEvent(new CustomEvent('CurrentWaypointChanged', { detail: {waypoint,commandSource}}));
+    async getWaypoint() {
+        return this.mission.waypoints;
+    },
+
+    async setCurrentWaypoint(waypoint, commandSource) {
+        window.dispatchEvent(new CustomEvent('CurrentWaypointChanged', {detail: {waypoint, commandSource}}));
     },
 
     async setWaypoint(index, command, latitude, longitude, altitude, parameter) {
         try {
-            if (index<0||index>=this.mission.waypoints.length)
+            if (index < 0 || index >= this.mission.waypoints.length)
                 throw "Invalid index";
             var wp = this.mission.waypoints[index];
             wp.command = command;
@@ -778,61 +773,58 @@ var csharp = {
             wp.longitude = longitude;
             wp.altitude = altitude;
             wp.parameter.assign(parameter);
-            window.dispatchEvent(new CustomEvent('WaypointChanged',{detail: wp }));
+            window.dispatchEvent(new CustomEvent('WaypointChanged', {detail: wp}));
+        } catch (err) {
+            console.log(err);
         }
-        catch(err) { console.log(err); }
     },
 
-    async changeWaypoint(index, latitude, longitude, altitude, parameter)
-    {
+    async changeWaypoint(index, latitude, longitude, altitude, parameter) {
         try {
             var wp = this.mission.waypoints[index];
             wp.latitude = latitude;
             wp.longitude = longitude;
             wp.altitude = altitude;
             wp.parameter.assign(parameter);
-            window.dispatchEvent(new CustomEvent('WaypointChanged',{detail: wp}));
+            window.dispatchEvent(new CustomEvent('WaypointChanged', {detail: wp}));
+        } catch (err) {
+            console.log(err);
         }
-        catch(err) { console.log(err); }
     },
 
-    async editWaypoint(index)
-    {
+    async editWaypoint(index) {
         console.log("csharp.editWaypoint: Not implemented");
     },
 
-    async deleteWaypoint(index)
-    {
+    async deleteWaypoint(index) {
         try {
 
-            if (index<0||index>=this.mission.waypoints.length)
+            if (index < 0 || index >= this.mission.waypoints.length)
                 throw "Invalid index";
-            this.mission.waypoints.splice(index,1);
-            for(var i=index;i<this.mission.waypoints.length;i++)
+            this.mission.waypoints.splice(index, 1);
+            for (var i = index; i < this.mission.waypoints.length; i++)
                 this.mission.waypoints[i].index = i;
-            window.dispatchEvent(new CustomEvent('WaypointRemoved',{detail: index }));
+            window.dispatchEvent(new CustomEvent('WaypointRemoved', {detail: index}));
+        } catch (err) {
+            console.log(err);
         }
-        catch(err) { console.log(err); }
     },
 
-    async instantCommandIssue(command, latitude, longitude, altitude, isLoiterClockwise, followTrack)
-    {
+    async instantCommandIssue(command, latitude, longitude, altitude, isLoiterClockwise, followTrack) {
         console.log("csharp.instantCommandIssue: Not implemented");
     },
 
-    async jumpToWaypoint(index)
-    {
+    async jumpToWaypoint(index) {
         let req = {
             aircraftId: this.selectedAircraft.aircraftId,
             aircraftName: this.selectedAircraft.aircraftName,
             command: "Jump",
             index: index
         }
-        window.dispatchEvent(new CustomEvent('CommandRequest',{detail: req }));
+        window.dispatchEvent(new CustomEvent('CommandRequest', {detail: req}));
     },
 
-    async requestLook(latitude, longitude, mslAltitude)
-    {
+    async requestLook(latitude, longitude, mslAltitude) {
         console.log("csharp.requestLook: Not implemented");
     }
 };

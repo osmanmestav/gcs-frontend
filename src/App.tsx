@@ -18,6 +18,8 @@ function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [mqttManager, setMQTTManager] = useState<MQTTManager | null>(null);
     const [simulationStarted, setSimulationStarted] = useState(false);
+    const [aircraftList, setaircraftList] = useState<any>([]);
+    const [aircraftId, setaircraftId] = useState<any>(null);
 
     useEffect(() => {
         var gcsMap = document.getElementById('gcsMap') as any;
@@ -50,6 +52,17 @@ function App() {
         });
     }, [])
 
+    useEffect(() => {
+        console.log(mapsWindow);
+        if (mapsWindow) {
+            mapsWindow.addEventListener("SelectionAircraft", (data: any) => {
+                console.log(data);
+                mqttManager?.AircraftSubscribe('dev1');
+                mqttManager?.initializeMQTT();
+            });
+        }
+    }, [mapsWindow])
+
     const openGauges = () => {
         let newWindow: any = null;
         (window as any).gaugesWindow = newWindow = window.open("Gauges/Gauges.html", "GaugesWindow") as any;
@@ -72,6 +85,11 @@ function App() {
         if (simulationStarted)
             setInterval(startSimulation, 100);
     }, [simulationStarted]);
+
+
+    const AddAifcraft = () => {
+        mqttManager?.addAircraftSimilator();
+    }
 
     return (
         <Container fluid style={{paddingLeft: '0'}}>
