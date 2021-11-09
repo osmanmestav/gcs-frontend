@@ -24,7 +24,15 @@ yarn-error.log*
 
 
 
-#amplify
+#public
+public/amplify
+public/Gauges
+public/GCSMap
+public/libs
+public/login
+public/main.bundle.js
+
+#amplify-do-not-edit-begin
 amplify/\#current-cloud-backend
 amplify/.config/local-*
 amplify/logs
@@ -43,11 +51,5 @@ amplify-build-config.json
 amplify-gradle-config.json
 amplifytools.xcconfig
 .secret-*
-
-#public
-public/amplify
-public/Gauges
-public/GCSMap
-public/libs
-public/login
-public/main.bundle.js
+**.sample
+#amplify-do-not-edit-end

@@ -2,7 +2,7 @@
   "features": {
     "graphqltransformer": {
       "addmissingownerfields": true,
-      "improvepluralization": true,
+      "improvepluralization": false,
       "validatetypenamereservedwords": true,
       "useexperimentalpipelinedtransformer": false,
       "enableiterativegsiupdates": true,
