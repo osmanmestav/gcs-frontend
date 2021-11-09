@@ -653,6 +653,7 @@ var csharp = {
             } catch (err) {
                 console.log(err);
             }
+            console.log(this.mission.waypoints)
         }
 
         if (index <= 0) {

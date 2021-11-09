@@ -21,10 +21,14 @@ td {
     z-index: 100;
     box-shadow: inset -1px 0 0 rgb(0 0 0 / 10%);
     min-width: 650px;
+    overflow: scroll;
+    height: 100vh;
 }
+
 .sidebar.open {
     right: 0;
 }
+
 .openButton {
     position: fixed;
     width: 100px !important;

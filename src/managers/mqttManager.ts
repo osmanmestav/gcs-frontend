@@ -403,9 +403,9 @@ export default class MQTTManager {
                     if (csharp) {
                         csharp.updateAircraft(values);
                         csharp.getWaypoint().then((value: any) => {
-                            console.log("Selected", this.SelectAircraft);
+                            //console.log("Selected", this.SelectAircraft);
                             if (value[data.value.wayPointIndex]) {
-                                console.log(value[data.value.wayPointIndex]);
+                                //console.log(value[data.value.wayPointIndex]);
                                 csharp.setCurrentWaypoint(value[data.value.wayPointIndex], data.value.commandSource);
                             }
                         })
