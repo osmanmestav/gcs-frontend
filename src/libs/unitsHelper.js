@@ -21,45 +21,84 @@ let UnitType = {
 
 // Default unit system is SI. Need to override this object as below for US units:
 // unitDictionary[UnitType.Distance] = UnitSystem.US;
-let unitDictionary = { };
-Object.values(UnitType).forEach(k=>unitDictionary[k]=UnitSystem.SI);
+let unitDictionary = {};
+Object.values(UnitType).forEach(k => unitDictionary[k] = UnitSystem.SI);
 
 let Length = {
     value: 0,
-    fromMeters: (v) => { value=v; return this; },
-    fromFeet: (v) => { value=v*0.3048; return this; },
-    fromNauticalMiles: (v) => { value=v*1852; return this; },
-    fromKilometers: (v) => { value*1000; return this; },
-    toMeters: function() { return value; },
-    toFeet: function() { return value/0.3048; },
-    toNauticalMiles: function() { return value/1852; },
-    toKilometers: function() { return value/1000; }
+    fromMeters: (v) => {
+        value = v;
+        return this;
+    },
+    fromFeet: (v) => {
+        value = v * 0.3048;
+        return this;
+    },
+    fromNauticalMiles: (v) => {
+        value = v * 1852;
+        return this;
+    },
+    fromKilometers: (v) => {
+        value * 1000;
+        return this;
+    },
+    toMeters: function () {
+        return value;
+    },
+    toFeet: function () {
+        return value / 0.3048;
+    },
+    toNauticalMiles: function () {
+        return value / 1852;
+    },
+    toKilometers: function () {
+        return value / 1000;
+    }
 };
 
 let Speed = {
     value: 0,
-    fromMetersPerSecond: function(v) { value=v; return this; },
-    fromFeetPerSecond: function(v) { value=v*0.3048; return this; },
-    fromKnots: function(v) { value=v*0.514444; return this; },
-    fromKilometersPerHour: function(v) { value=v/3.6; return this; },
-    toMetersPerSecond: function() { return value; },
-    toFeetPerSecond: function() { return value/0.3048; },
-    toKnots: function() { return value/0.514444; },
-    toKilometersPerHour: function() { return value*3.6; }
+    fromMetersPerSecond: function (v) {
+        value = v;
+        return this;
+    },
+    fromFeetPerSecond: function (v) {
+        value = v * 0.3048;
+        return this;
+    },
+    fromKnots: function (v) {
+        value = v * 0.514444;
+        return this;
+    },
+    fromKilometersPerHour: function (v) {
+        value = v / 3.6;
+        return this;
+    },
+    toMetersPerSecond: function () {
+        return value;
+    },
+    toFeetPerSecond: function () {
+        return value / 0.3048;
+    },
+    toKnots: function () {
+        return value / 0.514444;
+    },
+    toKilometersPerHour: function () {
+        return value * 3.6;
+    }
 };
 
 let UnitsHelper = {
-    loadUnits: function(unitDict) {
+    loadUnits: function (unitDict) {
         unitDictionary = unitDict;
     },
     setUnitSystem(/*UnitType*/type,/*UnitSystem*/system) {
         unitDictionary[type] = system;
     },
-    convertToString: function(/*UnitType*/ type, /*double*/ value) {
+    convertToString: function (/*UnitType*/ type, /*double*/ value) {
         var unitSystem = this.getUnitSystem(type);
         var intValue = Math.round(value);
-        switch (type)
-        {
+        switch (type) {
             case UnitType.LatLon:
                 var minutes = (value - Math.floor(value)) * 60.0;
                 var seconds = (minutes - Math.floor(minutes)) * 60.0;
@@ -75,154 +114,211 @@ let UnitsHelper = {
                 var sec = intValue % 60;
                 return `${hour}:${min}.${sec}`;
         }
-        switch(unitSystem)
-        {
+        switch (unitSystem) {
             case UnitSystem.SI:
-                switch(type)
-                {
-                    case UnitType.Altitude: return Math.round(value) + " m";
-                    case UnitType.Distance: return Math.round(value) + " m";
-                    case UnitType.ShortDistance: return Math.round(value, 1).toFixed(1) + " m";
-                    case UnitType.LongDistance: return Math.round(Length.fromMeters(value).toKilometers(), 1) + " km";
-                    case UnitType.HorizontalSpeed: return Math.round(value, 1).toFixed(1) + " m/s";
-                    case UnitType.VerticalSpeed: return Math.round(value, 1).toFixed(1) + " m/s";
-                    case UnitType.WindSpeed: return Math.round(Speed.fromMetersPerSecond(value).toKilometersPerHour(), 0) + " kmph";
-                    case UnitType.Weight: return Math.round(value, 1) + " kg";
-                    case UnitType.Volume: return Math.round(value, 1) + " lt";
-                    case UnitType.Temperature: return Math.round(value, 1) + "°C";
+                switch (type) {
+                    case UnitType.Altitude:
+                        return Math.round(value) + " m";
+                    case UnitType.Distance:
+                        return Math.round(value) + " m";
+                    case UnitType.ShortDistance:
+                        return Math.round(value, 1).toFixed(1) + " m";
+                    case UnitType.LongDistance:
+                        return Math.round(Length.fromMeters(value).toKilometers(), 1) + " km";
+                    case UnitType.HorizontalSpeed:
+                        return Math.round(value, 1).toFixed(1) + " m/s";
+                    case UnitType.VerticalSpeed:
+                        return Math.round(value, 1).toFixed(1) + " m/s";
+                    case UnitType.WindSpeed:
+                        return Math.round(Speed.fromMetersPerSecond(value).toKilometersPerHour(), 0) + " kmph";
+                    case UnitType.Weight:
+                        return Math.round(value, 1) + " kg";
+                    case UnitType.Volume:
+                        return Math.round(value, 1) + " lt";
+                    case UnitType.Temperature:
+                        return Math.round(value, 1) + "°C";
                 }
                 break;
             case UnitSystem.US:
-                switch(type)
-                {
-                    case UnitType.Altitude: return Math.round(Length.fromMeters(value).toFeet()) + " ft";
-                    case UnitType.Distance: return Math.round(Length.fromMeters(value).toFeet()) + " ft";
-                    case UnitType.ShortDistance: return Math.round(Length.fromMeters(value).toFeet(), 1).toFixed(1) + " ft";
-                    case UnitType.LongDistance: return Math.round(Length.fromMeters(value).toNauticalMiles(), 1) + " NM";
-                    case UnitType.HorizontalSpeed: return Math.round(Speed.fromMetersPerSecond(value).toKnots(),1).toFixed(1) + " kt";
-                    case UnitType.VerticalSpeed: return Math.round(Speed.fromMetersPerSecond(value).toFeetPerSecond() * 60) + " ft/min";
-                    case UnitType.WindSpeed: return Math.round(Speed.fromMetersPerSecond(value).toKnots(), 1).toFixed(1) + " kt";
-                    case UnitType.Weight: return Math.round(value * 2.20462, 1) + " lb";
-                    case UnitType.Volume: return Math.round(value * 0.264172, 1) + " gal";
-                    case UnitType.Temperature: return Math.round(value*1.8+32)+"°F";
+                switch (type) {
+                    case UnitType.Altitude:
+                        return Math.round(Length.fromMeters(value).toFeet()) + " ft";
+                    case UnitType.Distance:
+                        return Math.round(Length.fromMeters(value).toFeet()) + " ft";
+                    case UnitType.ShortDistance:
+                        return Math.round(Length.fromMeters(value).toFeet(), 1).toFixed(1) + " ft";
+                    case UnitType.LongDistance:
+                        return Math.round(Length.fromMeters(value).toNauticalMiles(), 1) + " NM";
+                    case UnitType.HorizontalSpeed:
+                        return Math.round(Speed.fromMetersPerSecond(value).toKnots(), 1).toFixed(1) + " kt";
+                    case UnitType.VerticalSpeed:
+                        return Math.round(Speed.fromMetersPerSecond(value).toFeetPerSecond() * 60) + " ft/min";
+                    case UnitType.WindSpeed:
+                        return Math.round(Speed.fromMetersPerSecond(value).toKnots(), 1).toFixed(1) + " kt";
+                    case UnitType.Weight:
+                        return Math.round(value * 2.20462, 1) + " lb";
+                    case UnitType.Volume:
+                        return Math.round(value * 0.264172, 1) + " gal";
+                    case UnitType.Temperature:
+                        return Math.round(value * 1.8 + 32) + "°F";
                 }
                 break;
         }
         return "";
     },
 
-    convertToSI: function(/*UnitType*/ unit, /*double*/ value)
-    {
+    convertToSI: function (/*UnitType*/ unit, /*double*/ value) {
         var unitSystem = unitDictionary[unit];
         if (unitSystem == UnitSystem.SI)
             return value;
-        switch (unit)
-        {
-            case UnitType.Altitude: return Length.fromFeet(value).toMeters();
-            case UnitType.Distance: return Length.fromFeet(value).toMeters();
-            case UnitType.ShortDistance: return Length.fromFeet(value).toMeters();
-            case UnitType.LongDistance: return Length.fromNauticalMiles(value).toKilometers();
-            case UnitType.HorizontalSpeed: return Speed.fromKnots(value).toMetersPerSecond();
-            case UnitType.VerticalSpeed: return Speed.fromFeetPerSecond(value / 60).toMetersPerSecond();
-            case UnitType.WindSpeed: return Speed.fromKnots(value).toMetersPerSecond();
-            case UnitType.Weight: return (value / 2.20462);
-            case UnitType.Volume: return (value / 0.264172);
-            case UnitType.Temperature: return ((value - 32) / 1.8);
+        switch (unit) {
+            case UnitType.Altitude:
+                return Length.fromFeet(value).toMeters();
+            case UnitType.Distance:
+                return Length.fromFeet(value).toMeters();
+            case UnitType.ShortDistance:
+                return Length.fromFeet(value).toMeters();
+            case UnitType.LongDistance:
+                return Length.fromNauticalMiles(value).toKilometers();
+            case UnitType.HorizontalSpeed:
+                return Speed.fromKnots(value).toMetersPerSecond();
+            case UnitType.VerticalSpeed:
+                return Speed.fromFeetPerSecond(value / 60).toMetersPerSecond();
+            case UnitType.WindSpeed:
+                return Speed.fromKnots(value).toMetersPerSecond();
+            case UnitType.Weight:
+                return (value / 2.20462);
+            case UnitType.Volume:
+                return (value / 0.264172);
+            case UnitType.Temperature:
+                return ((value - 32) / 1.8);
         }
         return 0;
     },
 
-    convertNumber: function(/*UnitType*/ type, /*double*/ value)
-    {
+    convertNumber: function (/*UnitType*/ type, /*double*/ value) {
         var unitSystem = unitDictionary[type];
-        switch (unitSystem)
-        {
+        switch (unitSystem) {
             case UnitSystem.SI:
-                switch (type)
-                {
-                    case UnitType.Altitude: return Math.round(value);
-                    case UnitType.Distance: return Math.round(value);
-                    case UnitType.ShortDistance: return Math.round(value, 1);
-                    case UnitType.LongDistance: return Math.round(Length.fromMeters(value).toKilometers());
-                    case UnitType.HorizontalSpeed: return Math.round(value, 1);
-                    case UnitType.VerticalSpeed: return Math.round(value, 1);
-                    case UnitType.WindSpeed: return Math.round(Speed.fromMetersPerSecond(value).toKilometersPerHour(), 0);
-                    case UnitType.Weight: return Math.round(value, 1);
-                    case UnitType.Volume: return Math.round(value, 1);
-                    case UnitType.Temperature: return Math.round(value, 1);
+                switch (type) {
+                    case UnitType.Altitude:
+                        return Math.round(value);
+                    case UnitType.Distance:
+                        return Math.round(value);
+                    case UnitType.ShortDistance:
+                        return Math.round(value, 1);
+                    case UnitType.LongDistance:
+                        return Math.round(Length.fromMeters(value).toKilometers());
+                    case UnitType.HorizontalSpeed:
+                        return Math.round(value, 1);
+                    case UnitType.VerticalSpeed:
+                        return Math.round(value, 1);
+                    case UnitType.WindSpeed:
+                        return Math.round(Speed.fromMetersPerSecond(value).toKilometersPerHour(), 0);
+                    case UnitType.Weight:
+                        return Math.round(value, 1);
+                    case UnitType.Volume:
+                        return Math.round(value, 1);
+                    case UnitType.Temperature:
+                        return Math.round(value, 1);
                 }
                 break;
             case UnitSystem.US:
-                switch (type)
-                {
-                    case UnitType.Altitude: return Math.round(Length.fromMeters(value).toFeet());
-                    case UnitType.Distance: return Math.round(Length.fromMeters(value).toFeet());
-                    case UnitType.ShortDistance: return Math.round(Length.fromMeters(value).toFeet(), 1);
-                    case UnitType.LongDistance: return Math.round(Length.fromMeters(value).toNauticalMiles());
-                    case UnitType.HorizontalSpeed: return Math.round(Speed.fromMetersPerSecond(value).toKnots(), 1);
-                    case UnitType.VerticalSpeed: return Math.round(Speed.fromMetersPerSecond(value).toFeetPerSecond() * 60);
-                    case UnitType.WindSpeed: return Math.round(Speed.fromMetersPerSecond(value).toKnots(), 1);
-                    case UnitType.Weight: return Math.round(value * 2.20462, 1);
-                    case UnitType.Volume: return Math.round(value * 0.264172, 1);
-                    case UnitType.Temperature: return Math.round(value * 1.8 + 32);
+                switch (type) {
+                    case UnitType.Altitude:
+                        return Math.round(Length.fromMeters(value).toFeet());
+                    case UnitType.Distance:
+                        return Math.round(Length.fromMeters(value).toFeet());
+                    case UnitType.ShortDistance:
+                        return Math.round(Length.fromMeters(value).toFeet(), 1);
+                    case UnitType.LongDistance:
+                        return Math.round(Length.fromMeters(value).toNauticalMiles());
+                    case UnitType.HorizontalSpeed:
+                        return Math.round(Speed.fromMetersPerSecond(value).toKnots(), 1);
+                    case UnitType.VerticalSpeed:
+                        return Math.round(Speed.fromMetersPerSecond(value).toFeetPerSecond() * 60);
+                    case UnitType.WindSpeed:
+                        return Math.round(Speed.fromMetersPerSecond(value).toKnots(), 1);
+                    case UnitType.Weight:
+                        return Math.round(value * 2.20462, 1);
+                    case UnitType.Volume:
+                        return Math.round(value * 0.264172, 1);
+                    case UnitType.Temperature:
+                        return Math.round(value * 1.8 + 32);
                 }
                 break;
         }
         return 0;
     },
 
-    getUnitText: function(/*UnitType*/ type)
-    {
+    getUnitText: function (/*UnitType*/ type) {
         var unitSystem = unitDictionary[type];
-        switch (unitSystem)
-        {
+        switch (unitSystem) {
             case UnitSystem.SI:
-                switch (type)
-                {
-                    case UnitType.Altitude: return "m";
-                    case UnitType.Distance: return "m";
-                    case UnitType.ShortDistance: return "m";
-                    case UnitType.LongDistance: return "km";
-                    case UnitType.HorizontalSpeed: return "m/s";
-                    case UnitType.VerticalSpeed: return "m/s";
-                    case UnitType.WindSpeed: return "kmph";
-                    case UnitType.Weight: return "kg";
-                    case UnitType.Volume: return "lt";
-                    case UnitType.Temperature: return "°C";
+                switch (type) {
+                    case UnitType.Altitude:
+                        return "m";
+                    case UnitType.Distance:
+                        return "m";
+                    case UnitType.ShortDistance:
+                        return "m";
+                    case UnitType.LongDistance:
+                        return "km";
+                    case UnitType.HorizontalSpeed:
+                        return "m/s";
+                    case UnitType.VerticalSpeed:
+                        return "m/s";
+                    case UnitType.WindSpeed:
+                        return "kmph";
+                    case UnitType.Weight:
+                        return "kg";
+                    case UnitType.Volume:
+                        return "lt";
+                    case UnitType.Temperature:
+                        return "°C";
                 }
                 break;
             case UnitSystem.US:
-                switch (type)
-                {
-                    case UnitType.Altitude: return "ft";
-                    case UnitType.Distance: return "ft";
-                    case UnitType.ShortDistance: return "ft";
-                    case UnitType.LongDistance: return "NM";
-                    case UnitType.HorizontalSpeed: return "kt";
-                    case UnitType.VerticalSpeed: return "ft/min";
-                    case UnitType.WindSpeed: return "kt";
-                    case UnitType.Weight: return "lb";
-                    case UnitType.Volume: return "gal";
-                    case UnitType.Temperature: return "°F";
+                switch (type) {
+                    case UnitType.Altitude:
+                        return "ft";
+                    case UnitType.Distance:
+                        return "ft";
+                    case UnitType.ShortDistance:
+                        return "ft";
+                    case UnitType.LongDistance:
+                        return "NM";
+                    case UnitType.HorizontalSpeed:
+                        return "kt";
+                    case UnitType.VerticalSpeed:
+                        return "ft/min";
+                    case UnitType.WindSpeed:
+                        return "kt";
+                    case UnitType.Weight:
+                        return "lb";
+                    case UnitType.Volume:
+                        return "gal";
+                    case UnitType.Temperature:
+                        return "°F";
                 }
                 break;
         }
         return "";
     },
 
-    /*UnitSystem*/ getUnitSystem: function(/*UnitType*/ type)
-    {
+    /*UnitSystem*/ getUnitSystem: function (/*UnitType*/ type) {
         return unitDictionary[type] || UnitSystem.SI;
     },
 
     // Used in browser js
-    /*string*/ getUnitSystemName: function(/*UnitType*/ type)
-    {
+    /*string*/ getUnitSystemName: function (/*UnitType*/ type) {
         return Object.keys(UnitSystem)[this.getUnitSystem(type)];
     },
 
     // Used in browser js
-    /*string[]*/ getUnitTypes: function() { return Object.keys(UnitType); },
+    /*string[]*/ getUnitTypes: function () {
+        return Object.keys(UnitType);
+    },
 }
 
 var unitsHelper = UnitsHelper;

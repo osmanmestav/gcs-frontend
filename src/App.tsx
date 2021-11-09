@@ -5,7 +5,7 @@ import './App.css';
 import Sidebar from './Module/Sidebar.tsx'
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {Container, Row, Col,} from 'react-bootstrap'
+import {Container, Row, Col, Button} from 'react-bootstrap'
 import {Auth} from 'aws-amplify';
 import MQTTManager from './managers/mqttManager';
 import simulateTelemetry from './managers/simulateTelemetry';
@@ -18,8 +18,7 @@ function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [mqttManager, setMQTTManager] = useState<MQTTManager | null>(null);
     const [simulationStarted, setSimulationStarted] = useState(false);
-    const [aircraftList, setaircraftList] = useState<any>([]);
-    const [aircraftId, setaircraftId] = useState<any>(null);
+    const [sidebarStatus, setsidebarStatus] = useState("close");
 
     useEffect(() => {
         var gcsMap = document.getElementById('gcsMap') as any;
@@ -57,8 +56,17 @@ function App() {
         if (mapsWindow) {
             mapsWindow.addEventListener("SelectionAircraft", (data: any) => {
                 console.log(data);
-                mqttManager?.AircraftSubscribe('dev1');
-                mqttManager?.initializeMQTT();
+                mqttManager?.AircraftSubscribe(data.detail.aircraftName);
+                mqttManager?.AircraftUnSubscribe();
+                setTimeout(() => {
+                    mqttManager?.SelectionAircraft(data.detail.aircraftName);
+                    mapsWindow?.csharp.downloadMission();
+                    mapsWindow?.goToPlane();
+                }, 2000);
+
+                console.log(mapsWindow);
+                console.log('Select Aircraft: ', data.detail.aircraftName)
+
             });
         }
     }, [mapsWindow])
@@ -87,15 +95,20 @@ function App() {
     }, [simulationStarted]);
 
 
-    const AddAifcraft = () => {
-        mqttManager?.addAircraftSimilator();
+    const sidebarOpenClose = () => {
+        if (sidebarStatus == "close") {
+            setsidebarStatus("open");
+        } else if (sidebarStatus == "open") {
+            setsidebarStatus("close");
+        }
+
     }
 
     return (
         <Container fluid style={{paddingLeft: '0'}}>
             {isLoggedIn &&
             <Row>
-                <Col>
+                <Col lg="12" className="mr-0 p-0">
                     <iframe id="gcsMap" src="GCSMap/GCSMap.html" style={{
                         width: '100%',
                         height: '99.80vh',
@@ -104,7 +117,8 @@ function App() {
                         margin: '0px'
                     }}></iframe>
                 </Col>
-                <Col lg="4">
+                <Button size="sm" variant="primary" className="openButton" onClick={sidebarOpenClose}><i className="fas fa-align-justify"></i></Button>
+                <Col lg="4" className={"sidebar " + sidebarStatus}>
                     {mapsWindow &&
                     <Sidebar mapWindow={mapsWindow} openGauges={openGauges}
                              startTelemetrySimulation={startTelemetrySimulation}/>}
