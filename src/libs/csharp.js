@@ -576,7 +576,14 @@ var csharp = {
     },
 
     async setAirspeed(speed) {
-        console.log("csharp.setAirspeed: Not implemented");
+        console.log(speed)
+        let req = {
+            aircraftId: this.selectedAircraft.aircraftId,
+            aircraftName: this.selectedAircraft.aircraftName,
+            command: "SetAirSpeed",
+            speed: speed,
+        }
+        window.dispatchEvent(new CustomEvent('CommandRequest', {detail: req}));
     },
 
     async setAltitudeRelaxation(isRelaxed) {

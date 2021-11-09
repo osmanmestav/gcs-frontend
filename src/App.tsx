@@ -117,7 +117,7 @@ function App() {
                         margin: '0px'
                     }}></iframe>
                 </Col>
-                <Button size="sm" variant="primary" className="openButton" onClick={sidebarOpenClose}><i className="fas fa-align-justify"></i></Button>
+                <Button size="sm" variant="dark" className="openButton" onClick={sidebarOpenClose}><i className="fas fa-align-justify"></i></Button>
                 <Col lg="4" className={"sidebar " + sidebarStatus}>
                     {mapsWindow &&
                     <Sidebar mapWindow={mapsWindow} openGauges={openGauges}
