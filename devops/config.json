@@ -1,0 +1,16 @@
+{
+    "Aws":{
+        "Region_Name":"eu-west-1",
+        "Signature_Version":"v4",
+        "MaxAttempts":10,
+        "Mode":"standart"
+     },
+     "Iot-Core":{
+         "Default-Policy-Name":"C569B29A9ECF843F0AF9E4B46CA84DC8B52F86C7C9B5D6B2CDC13B7E72479891"
+     },
+     "S3":{
+         "Bucket-Name":"",
+         "Access-Key-Id":"",
+         "Secret-Access-Key":""
+     }
+}
