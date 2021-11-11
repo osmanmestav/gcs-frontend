@@ -8,9 +8,10 @@ export default class MQTTManager {
         this.mapsWindow = maps;
         this.gaugesWindow = null;
         this.aircraftData = {name: null, id: null};
-        this.T = null;
-        this.M = null;
+        this.T = [];
+        this.M = [];
         this.AircraftList = [];
+        this.SelectAircraft = null;
     };
 
     mapsWindow: any;
@@ -19,6 +20,7 @@ export default class MQTTManager {
     T: any;
     M: any;
     AircraftList: any;
+    SelectAircraft: any;
 
     awsIoTProviderOptions = {
         aws_pubsub_region: 'eu-west-1',
@@ -34,10 +36,16 @@ export default class MQTTManager {
     }
 
 
+    SelectionAircraft = (name: any) => {
+        this.SelectAircraft = name;
+    }
+
     initializeMQTT = () => {
         // Apply plugin with configuration
         Amplify.addPluggable(new AWSIoTProvider(this.awsIoTProviderOptions));
         this.AircraftSubscribe("dev1");
+        //this.SelectAircraft = "dev1";
+        this.AircraftSubscribe("dev2");
 
     }
 
@@ -371,15 +379,19 @@ export default class MQTTManager {
         return {aircraftList: this.AircraftList, aircraftId: this.aircraftData.id};
     }
 
+    AircraftUnSubscribe = () => {
+        this.T[this.SelectAircraft].unsubscribe();
+        this.M[this.SelectAircraft].unsubscribe();
+    }
     AircraftSubscribe = (aircraftSubName: any) => {
         console.log(aircraftSubName)
         if (this.aircraftData) {
-            this.T = PubSub.subscribe('UL/U/' + aircraftSubName + '/T').subscribe({
+            this.T[this.SelectAircraft] = PubSub.subscribe('UL/U/' + aircraftSubName + '/T').subscribe({
                 next: data => {
                     this.mapsWindow.window.dispatchEvent(new CustomEvent("planeChanged", {"detail": data.value}));
                     setTimeout(() => {
                         this.mapsWindow.window.dispatchEvent(new CustomEvent("planeChanged", {"detail": data.value}));
-                    }, 1000);
+                    }, 2000);
                     //console.log('Message received', data.value);
                     let values = preprocessTelemetry(data.value);
                     let setGaugeValues = this.gaugesWindow && (this.gaugesWindow as any).setValues;
@@ -391,7 +403,11 @@ export default class MQTTManager {
                     if (csharp) {
                         csharp.updateAircraft(values);
                         csharp.getWaypoint().then((value: any) => {
-                            if (value[data.value.wayPointIndex]) csharp.setCurrentWaypoint(value[data.value.wayPointIndex], data.value.commandSource);
+                            //console.log("Selected", this.SelectAircraft);
+                            if (value[data.value.wayPointIndex]) {
+                                //console.log(value[data.value.wayPointIndex]);
+                                csharp.setCurrentWaypoint(value[data.value.wayPointIndex], data.value.commandSource);
+                            }
                         })
                     }
                 },
@@ -400,7 +416,7 @@ export default class MQTTManager {
             });
 
 
-            this.M = PubSub.subscribe('UL/U/' + aircraftSubName + '/M').subscribe({
+            this.M[this.SelectAircraft] = PubSub.subscribe('UL/U/' + aircraftSubName + '/M').subscribe({
                 next: data => {
                     console.log('Mission received', data.value);
                     let csharp = this.getcsharp();
@@ -411,6 +427,7 @@ export default class MQTTManager {
                 error: error => console.error(error),
                 complete: () => console.log('Done'),
             });
+
 
             var requestId = 0;
             this.mapsWindow.addEventListener("CommandRequest", (e: any) => {

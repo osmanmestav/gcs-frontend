@@ -70,6 +70,7 @@ window.addEventListener('AircraftChanged', (e) => {
 });
 
 function selectAirplane(aircraftId) {
+    //console.log(aircraftId);
     needToGoToPlane = !window.selectedAircraftId;
     window.selectedAircraftId = aircraftId;
     window.plane = planes[aircraftId];

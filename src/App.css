@@ -12,3 +12,27 @@ td {
     vertical-align: baseline;
     padding: 0 5px !important;
 }
+
+.sidebar {
+    position: fixed;
+    right: -850px;
+    background: #fff;
+    min-height: 100vh !important;
+    z-index: 100;
+    box-shadow: inset -1px 0 0 rgb(0 0 0 / 10%);
+    min-width: 650px;
+    overflow: scroll;
+    height: 100vh;
+}
+
+.sidebar.open {
+    right: 0;
+}
+
+.openButton {
+    position: fixed;
+    width: 100px !important;
+    right: 5px;
+    top: 5px;
+    z-index: 999999;
+}
