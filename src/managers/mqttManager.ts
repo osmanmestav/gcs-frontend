@@ -46,7 +46,8 @@ export default class MQTTManager {
         this.AircraftSubscribe("dev1");
         //this.SelectAircraft = "dev1";
         this.AircraftSubscribe("dev2");
-
+        this.AircraftSubscribe("dev3");
+        this.AircraftSubscribe("dev4");
     }
 
 
@@ -463,6 +464,7 @@ export default class MQTTManager {
         });
     };
 
+    // obsolete - no more in use...
     publishTelemetry = (sampleTelemetryMessage: any) => {
         PubSub.publish('UL/U/dev1/T', sampleTelemetryMessage).then(() => {
         }).catch(err => {
