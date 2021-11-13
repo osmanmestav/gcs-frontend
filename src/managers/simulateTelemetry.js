@@ -1,5 +1,3 @@
-import GeoHelper from "../libs/geoHelper";
-
 var sampleTelemetryMessage = {
     "aircraftId": 123,
     "aircraftName": "CGT50-551-TEST",
@@ -173,7 +171,7 @@ function simulateTelemetry(unitsHelper, UnitType){
         sampleTelemetryMessage.groundCourse += deltaYaw;
     }
 
-    let p = GeoHelper.getDestination(sampleTelemetryMessage.latitude, sampleTelemetryMessage.longitude, sampleTelemetryMessage.groundCourse, sampleTelemetryMessage.groundSpeed * 0.1);
+    let p = window.GeoHelper.getDestination(sampleTelemetryMessage.latitude, sampleTelemetryMessage.longitude, sampleTelemetryMessage.groundCourse, sampleTelemetryMessage.groundSpeed * 0.1);
     sampleTelemetryMessage.latitude = p.latitude;
     sampleTelemetryMessage.longitude = p.longitude;
     sampleTelemetryMessage.latitudeSt = unitsHelper.convertToString(UnitType.LatLon, p.latitude);

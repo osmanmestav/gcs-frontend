@@ -47,5 +47,3 @@ var GeoHelper = {
 
 };
 window.GeoHelper=GeoHelper;
-
-export default GeoHelper;

@@ -40,7 +40,7 @@ var csharp = {
     async removeAircraft(aircraftId) {
         try {
             delete this.aircrafts[aircraftId];
-            if (this.selectedAircraft && this.selectedAircraft.aircraftId == aircraftId)
+            if (this.selectedAircraft && this.selectedAircraft.aircraftId === aircraftId)
                 this.selectedAircraft = null;
             window.dispatchEvent(new CustomEvent('AircraftRemoved', {detail: aircraftId}));
         } catch (err) {
@@ -85,14 +85,20 @@ var csharp = {
         try {
             this.selectedAircraft = this.aircrafts[aircraftId];
             window.dispatchEvent(new CustomEvent('AircraftSelectionChanged', {detail: aircraftId}));
-            window.dispatchEvent(new CustomEvent('SelectionAircraft', {detail: aircraftState}));
         } catch (err) {
             console.log(err);
         }
         ;
     },
 
+    // invoked by plane.js on dropdown box selection changed - no need to invoke AircraftSelectionChanged.
+    aircraftSelectionChanged(aircraftId) {
+        this.selectedAircraft = this.aircrafts[aircraftId];
+        this.downloadMission();
+    },
+
     async downloadMission() {
+        console.log("selected aircraft in download mission: ", this.selectedAircraft);
         return this.downloadMissionFromAircraft(this.selectedAircraft);
     },
 

@@ -35,7 +35,8 @@ function SidebarControlButtons(props:any) {
                     <Button style={{marginRight: '5px'}} variant="dark" size="sm" id="gaugesButton" onClick={props.openGauges}>Open Gauges</Button>
                 </Col>
                 <Col>
-                    <Button style={{marginRight: '5px'}} variant="dark" size="sm" id="simulateTelemetry" onClick={props.startTelemetrySimulation}>Simulate Telemetry</Button>
+                    <Button style={{marginRight: '5px'}} variant="dark" size="sm" id="simulateTelemetry" disabled={true}
+                        onClick={props.startTelemetrySimulation}>Simulate Telemetry</Button>
                 </Col>
             </Row>
             <Row style={{marginTop: '20px'}}>

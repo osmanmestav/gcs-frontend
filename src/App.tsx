@@ -25,17 +25,20 @@ function App() {
         setMapsWindow(gcsMap?.contentWindow);
 
         if (isLoggedIn && gcsMap != null && gcsMap.contentWindow != null) {
+            if(mqttManager != null){
+                mqttManager.finalizeMQTT();    
+            }
             const mqtt = new MQTTManager(gcsMap?.contentWindow);
+            mqtt.initializeMQTT();
             setMQTTManager(mqtt);
         } else {
+            if(mqttManager != null){
+                mqttManager.finalizeMQTT();    
+            }
             setMQTTManager(null);
         }
 
     }, [isLoggedIn]);
-
-    useEffect(() => {
-        mqttManager?.initializeMQTT();
-    }, [mqttManager]);
 
     useEffect(() => {
         Auth.currentAuthenticatedUser().then(u => {
@@ -43,33 +46,12 @@ function App() {
             console.log("Logged in.");
             console.log(user);
             setIsLoggedIn(true);
-            //initializeMQTT();
         }).catch(err => {
             console.log(err);
             // eslint-disable-next-line no-restricted-globals
             location.href = loginURL;
         });
     }, [])
-
-    useEffect(() => {
-        console.log(mapsWindow);
-        if (mapsWindow) {
-            mapsWindow.addEventListener("SelectionAircraft", (data: any) => {
-                console.log(data);
-                mqttManager?.AircraftSubscribe(data.detail.aircraftName);
-                mqttManager?.AircraftUnSubscribe();
-                setTimeout(() => {
-                    mqttManager?.SelectionAircraft(data.detail.aircraftName);
-                    mapsWindow?.csharp.downloadMission();
-                    mapsWindow?.goToPlane();
-                }, 2000);
-
-                console.log(mapsWindow);
-                console.log('Select Aircraft: ', data.detail.aircraftName)
-
-            });
-        }
-    }, [mapsWindow])
 
     const openGauges = () => {
         let newWindow: any = null;

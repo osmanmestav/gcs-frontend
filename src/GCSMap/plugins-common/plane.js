@@ -71,7 +71,7 @@ window.addEventListener('AircraftChanged', (e) => {
 
 function selectAirplane(aircraftId) {
     //console.log(aircraftId);
-    needToGoToPlane = !window.selectedAircraftId;
+    needToGoToPlane = window.selectedAircraftId !== aircraftId; // checkForInitial
     window.selectedAircraftId = aircraftId;
     window.plane = planes[aircraftId];
 }
@@ -169,8 +169,7 @@ airplaneSelect = {
         $('#left-toolbar').prepend(this.selectItem);
         this.selectItem.change(function (e) {
             selectAirplane(e.target.value * 1);
-            //IV: initial version --csharp.aircraftSelectionChanged(selectedAircraftId);--
-            csharp.selectAircraft(planes[e.target.value]);
+            csharp.aircraftSelectionChanged(selectedAircraftId);
         });
     },
     add: function (aircraftId, aircraftName) {
