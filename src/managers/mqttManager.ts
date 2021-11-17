@@ -4,7 +4,7 @@ import PubSub, {AWSIoTProvider} from "@aws-amplify/pubsub";
 import {preprocessTelemetry} from "../preprocessTelemetry";
 
 interface AircraftModel {
-    aircraftId: number, 
+    aircraftId: number,
     aircraftName: string,
     certificationName: string,
     isSubscribed: boolean,
@@ -62,38 +62,33 @@ export default class MQTTManager {
                     this.mapsWindow.window.dispatchEvent(new CustomEvent("planeChanged", {"detail": data.value}));
                 }, 2000);
                 //console.log('Message received', data.value);
-                
+
                 let values = preprocessTelemetry(data.value);
-                if(csharp){
+                if (csharp) {
                     csharp.updateAircraft(values);
-                    if(data.value.aircraftName === csharp.selectedAircraft.aircraftName){
+                    if (data.value.aircraftName === csharp.selectedAircraft.aircraftName) {
                         let setGaugeValues = this.gaugesWindow && (this.gaugesWindow as any).setValues;
                         if (setGaugeValues) {
                             setGaugeValues(values);
                         }
-
-                        csharp.getWaypoint().then((value: any) => {
-                            if (value[data.value.wayPointIndex]) {
-                                //console.log(value[data.value.wayPointIndex]);
-                                csharp.setCurrentWaypoint(value[data.value.wayPointIndex], data.value.commandSource);
-                            }
-                        })
+                        //Waypoint Current Command Expanded
+                        csharp.applyCurrentCommand(data.value);
                     }
                 }
             },
             error: error => console.error(error),
             complete: () => console.log('Done'),
         });
-        
+
         PubSub.subscribe('UL/U/' + aircraftCertificateName + '/M').subscribe({
             next: data => {
                 console.log('Mission received', data.value);
                 let csharp = this.getcsharp();
-                if(csharp && data.value.aircraftName === csharp.selectedAircraft.aircraftName){
+                if (csharp && data.value.aircraftName === csharp.selectedAircraft.aircraftName) {
                     setTimeout(() => {
                         csharp.receivedMission(data.value);
                     }, 1000);
-                }                
+                }
             },
             error: error => console.error(error),
             complete: () => console.log('Done'),

@@ -600,9 +600,12 @@ var csharp = {
         return this.mission.waypoints.length;
     },
 
-    async getCommandExpandedAt(index) {
-        return CommandExpanded.fromWaypoint(this.mission.waypoints[index]);
+    async applyCurrentCommand(data) {
+        let waypoint = new WayPoint(data.index, Command[data.command], data.latitude, data.longitude, data.altitude, data.param);
+        let commandData = CommandExpanded.fromWaypoint(waypoint)
+        this.setCurrentWaypoint(commandData.data, data.commandSource);
     },
+
 
     async clearSelection() {
         this.selectedWaypointIndices = [];
@@ -666,7 +669,7 @@ var csharp = {
             } catch (err) {
                 console.log(err);
             }
-            console.log(this.mission.waypoints)
+            //console.log(this.mission.waypoints)
         }
 
         if (index <= 0) {
@@ -808,6 +811,7 @@ var csharp = {
 
     async editWaypoint(index) {
         console.log("csharp.editWaypoint: Not implemented");
+        window.dispatchEvent(new CustomEvent('editWaypoint', {detail: this.mission.waypoints[index]}));
     },
 
     async deleteWaypoint(index) {

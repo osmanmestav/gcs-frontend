@@ -236,8 +236,6 @@ function refreshCurrentWayPoint(waypoint,commandSource)
 		currentWaypoint.marker.name = "currentWaypoint:"+currentWaypoint.index;
 		currentWaypoint.marker.allowPicking = false;
 		currentWaypoint.marker.billboard.image = new Cesium.ConstantProperty(pinBuilder.fromText("C",Cesium.Color.DARKRED, 58));
-		currentWaypoint.ellipse.zIndex = 99999;
-		currentWaypoint.polyline.zIndex = -1000;
 	}
 	else
 		currentWaypoint.marker.name = "currentWaypoint:"+currentWaypoint.index;

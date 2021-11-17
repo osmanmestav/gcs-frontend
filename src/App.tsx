@@ -26,14 +26,14 @@ function App() {
 
         if (isLoggedIn && gcsMap != null && gcsMap.contentWindow != null) {
             if(mqttManager != null){
-                mqttManager.finalizeMQTT();    
+                mqttManager.finalizeMQTT();
             }
             const mqtt = new MQTTManager(gcsMap?.contentWindow);
             mqtt.initializeMQTT();
             setMQTTManager(mqtt);
         } else {
             if(mqttManager != null){
-                mqttManager.finalizeMQTT();    
+                mqttManager.finalizeMQTT();
             }
             setMQTTManager(null);
         }
@@ -86,6 +86,7 @@ function App() {
 
     }
 
+//console.log(mapsWindow?.csharp.getCommandExpandedAt(0));
     return (
         <Container fluid style={{paddingLeft: '0'}}>
             {isLoggedIn &&
