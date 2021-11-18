@@ -10,11 +10,11 @@ function WaypointsTable(props: any) {
 
     let CommandListArray: any[];
 
-    const [Agl, setAgl] = useState(400);
+    const [defaultAgl, setDefaultAgl] = useState(400);
     const [isDraft, setIsDraft] = useState(false);
     const [CommandList, setCommandList] = useState<any>([]);
     const [wayPointCurrent, setwayPointCurrent] = useState<any>(null);
-    const [selectWaypoint, setselectWaypoint] = useState<any>([]);
+    const [selectedWaypointIndices, setSelectedWaypointIndices] = useState<number[]>([]);
     const [HomeLocation, setHomeLocation] = useState<any>({
         latitude: 0,
         longitude: 0,
@@ -29,7 +29,7 @@ function WaypointsTable(props: any) {
     // @ts-ignore
     const AddWaypoint = ({detail}) => {
         CommandListArray = [];
-        CommandListArray.push({...detail, agl: Agl,})
+        CommandListArray.push({...detail, agl: defaultAgl,})
         // @ts-ignore
         setCommandList([...CommandList, ...CommandListArray]);
         setIsDraft(true);
@@ -80,7 +80,7 @@ function WaypointsTable(props: any) {
         try {
             let newComandlistItem = [...CommandList];
             // @ts-ignore
-            newComandlistItem[e.detail.index] = {...e.detail, agl: Agl};
+            newComandlistItem[e.detail.index] = {...e.detail, agl: defaultAgl};
             setCommandList(newComandlistItem);
         } catch (e) {
             console.log(e)
@@ -89,7 +89,7 @@ function WaypointsTable(props: any) {
 
     // @ts-ignore
     const setwayPoint = (e) => {
-        console.log(e)
+        //console.log(e)
         if (e.detail.waypoint) {
             setwayPointCurrent({
                 ...e.detail.waypoint,
@@ -100,14 +100,17 @@ function WaypointsTable(props: any) {
 
     // @ts-ignore
     const WaypointSelectionChanged = (e) => {
-        //console.log(e.detail);
-        setselectWaypoint(e.detail);
+        // console.log("WaypointSelectionChanged: ", e.detail);
+        setSelectedWaypointIndices(e.detail);
     };
 
 
-    const WaypointSelectionEdit = (index: any) => {
-        //console.log(selectWaypoint?.indexOf(index));
-        //props.mapWindow.dispatchEvent(new CustomEvent('WaypointSelectionChanged', {detail: index}));
+    const onWaypointClick = (index: number) => {
+        if (index<0 || !CommandList[index]) return;
+            if (selectedWaypointIndices.indexOf(index)>=0)
+                props.mapWindow.csharp.deselectWaypoint(index);
+            else
+                props.mapWindow.csharp.selectWaypoint(index);
     };
 
     // @ts-ignore
@@ -342,22 +345,22 @@ function WaypointsTable(props: any) {
             <Tabs defaultActiveKey="waypoints" transition={false} id="noanim-tab-example" className="mb-3">
 
                 <Tab eventKey="waypoints" title="Waypoints">
-                    <WaypointsTab
-                        mapWindow={props.mapWindow}
+                    <WaypointsTab 
                         HomeLocation={HomeLocation}
                         wayPointCurrent={wayPointCurrent}
                         CommandList={CommandList}
-                        Agl={Agl}
-                        setsAgl={(e: any) => {
-                            setAgl(e.target.value);
-                        }}
+                        defaultAgl={defaultAgl}
+                        setDefaultAgl={setDefaultAgl}
                         WaypointEditAction={(e: any) => {
                             WaypointEditAction(e);
                         }}
-                        WaypointSelectionEdit={(e: any) => {
-                            WaypointSelectionEdit(e);
-                        }}
-                        selectWaypoint={selectWaypoint}
+                        onWaypointClick={onWaypointClick}
+                        selectedWaypointIndices={selectedWaypointIndices}
+                        jumpToWaypoint= {
+                            (index: number) => {
+                                props.mapWindow.csharp.jumpToWaypoint(index)
+                            }
+                        }
                     />
                 </Tab>
                 <Tab eventKey="Geofence" title="Geofence">

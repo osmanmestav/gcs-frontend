@@ -601,7 +601,7 @@ var csharp = {
     },
 
     async applyCurrentCommand(data) {
-        let waypoint = new WayPoint(data.index, Command[data.command], data.latitude, data.longitude, data.altitude, data.param);
+        let waypoint = new WayPoint(data.index, Command[data.command], data.waypointLatitude, data.waypointLongitude, data.waypointAltitude, data.param);
         let commandData = CommandExpanded.fromWaypoint(waypoint)
         this.setCurrentWaypoint(commandData.data, data.commandSource);
     },

@@ -1,12 +1,20 @@
 import React from 'react';
 import {Table, Button, ButtonGroup} from 'react-bootstrap'
+import GeoLocationModel from '../../models/geoLocationModel';
 
+type WaypointsTabProps = {
+    jumpToWaypoint: (index: number) => void;
+    HomeLocation: GeoLocationModel;
+    defaultAgl: number;
+    setDefaultAgl: (val: number) => void;
+    CommandList: any[];
+    wayPointCurrent: any;
+    selectedWaypointIndices: number[];
+    WaypointEditAction: any;
+    onWaypointClick: (index: number) => void;
+}
 
-function WaypointsTab(props: any) {
-    const jumpToWaypoint = (index: any) => {
-        props.mapWindow.csharp.jumpToWaypoint(index)
-    }
-
+function WaypointsTab(props: WaypointsTabProps) {
     // @ts-ignore
     return (
         <div>
@@ -24,7 +32,7 @@ function WaypointsTab(props: any) {
                     <td>{props.HomeLocation.latitude.toFixed(7)}</td>
                     <td>{props.HomeLocation.longitude.toFixed(7)}</td>
                     <td>{props.HomeLocation.altitude.toFixed(0)}</td>
-                    <td><input type="number" value={props.Agl} onChange={e => props.setsAgl(e)}/> m</td>
+                    <td><input type="number" value={props.defaultAgl} onChange={e => props.setDefaultAgl(parseInt(e.target.value))}/> m</td>
                 </tr>
                 </tbody>
             </Table>
@@ -47,9 +55,9 @@ function WaypointsTab(props: any) {
                                 return (
                                     <tr
                                         key={index}
-                                        className={(index == props.wayPointCurrent?.index ? 'select-red' : '') + (props.selectWaypoint?.indexOf(index) >= 0 ? ' select-grey' : '')}
+                                        className={(index === props.wayPointCurrent?.index ? 'select-red' : '') + (props.selectedWaypointIndices.indexOf(index) >= 0 ? ' select-grey' : '')}
                                         onClick={() => {
-                                            props.WaypointSelectionEdit(index)
+                                            props.onWaypointClick(index)
                                         }}>
                                         <td>{(index + 1)}</td>
                                         <td>{data.command}</td>
@@ -66,7 +74,7 @@ function WaypointsTab(props: any) {
                                                 </Button>
                                                 <Button style={{fontSize: "10px"}} variant="secondary"
                                                         onClick={() => {
-                                                            jumpToWaypoint(index)
+                                                            props.jumpToWaypoint(index)
                                                         }}>jump</Button>
                                             </ButtonGroup>
                                         </td>

@@ -82,7 +82,7 @@ window.addEventListener('airplaneRemoved', function () {
 		beaconApproacher.clearSolution();
 });
 
-window.addEventListener('currentWaypointChanged', function () {
+window.addEventListener('CurrentWaypointChanged', function () {
 	if (currentWaypoint.name!="LoiterUnlimited" || currentWaypoint.commandSource!="Instant" || beaconApproacher.status == "Inactive") return;
 	
 	if (beaconApproacher.status=="Started") {
