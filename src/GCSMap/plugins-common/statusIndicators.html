@@ -1,172 +1,176 @@
 <style>
 
-#aircraftStatusIndicators {
-    position: fixed;
-    left: 15px;
-    bottom: 15px;
-    z-index: 10000;
-}
+    #aircraftStatusIndicators {
+        position: fixed;
+        left: 15px;
+        bottom: 15px;
+        z-index: 10000;
+    }
 
-.aircraftStatusIndicator {
-    float: left;
-    padding: 5px;
-    visibility: visible;
-}
+    .aircraftStatusIndicator {
+        float: left;
+        padding: 5px;
+        visibility: visible;
+    }
 
 </style>
 <div id="aircraftStatusIndicators"></div>
 
 <script>
 
-var IndicatorStatus = { None: -1, Disabled: 0, Failed: 1, Unhealthy: 2, Healthy: 3};
+    var IndicatorStatus = {None: -1, Disabled: 0, Failed: 1, Unhealthy: 2, Healthy: 3};
 
-var statusColors = {
-	Disabled: "#5b4e45",
-	Failed: "#ff0000",
-	Unhealthy: "#ff8400",
-    Healthy: "#1c9f1c"
-};
+    var statusColors = {
+        Disabled: "#5b4e45",
+        Failed: "#ff0000",
+        Unhealthy: "#ff8400",
+        Healthy: "#1c9f1c"
+    };
 
-statusColors[IndicatorStatus.None] = statusColors.Disabled;
-statusColors[IndicatorStatus.Disabled] = statusColors.Disabled;
-statusColors[IndicatorStatus.Failed] = statusColors.Failed;
-statusColors[IndicatorStatus.Unhealthy] = statusColors.Unhealthy;
-statusColors[IndicatorStatus.Healthy] = statusColors.Healthy;
+    statusColors[IndicatorStatus.None] = statusColors.Disabled;
+    statusColors[IndicatorStatus.Disabled] = statusColors.Disabled;
+    statusColors[IndicatorStatus.Failed] = statusColors.Failed;
+    statusColors[IndicatorStatus.Unhealthy] = statusColors.Unhealthy;
+    statusColors[IndicatorStatus.Healthy] = statusColors.Healthy;
 
-var aircraftStatusIndicators = document.getElementById("aircraftStatusIndicators");
+    var aircraftStatusIndicators = document.getElementById("aircraftStatusIndicators");
 
-window.addEventListener("airplaneRemoved", ({ detail }) => {
-    var e = aircraftStatusIndicators[detail];
-    if (e) e.hide();
-});
+    window.addEventListener("airplaneRemoved", ({detail}) => {
+        var e = aircraftStatusIndicators[detail];
+        if (e) e.hide();
+    });
 
-window.addEventListener("planeChanged", ({ detail }) => {
-    let e = aircraftStatusIndicators[detail.aircraftId];
-    if (!e)
-        e = aircraftStatusIndicators[detail.aircraftId] = new AircraftStatusIndicator(detail.aircraftId);
-    e.update(detail);
-});
+    window.addEventListener("planeChanged", ({detail}) => {
+        let e = aircraftStatusIndicators[detail.aircraftId];
+        if (!e)
+            e = aircraftStatusIndicators[detail.aircraftId] = new AircraftStatusIndicator(detail.aircraftId);
+        e.update(detail);
+    });
 
-class AircraftStatusIndicator {
-    constructor(aircraftId) {
-        this.aircraftId = aircraftId;
-		this.divElement = document.createElement("div");
-		this.divElement.id="aircraftStatusIndicator"+aircraftId;
-		this.divElement.classList=["aircraftStatusIndicator"];
-		aircraftStatusIndicators.appendChild(this.divElement);
-	}
-	initSVGElements() {
-        this.svg = this.divElement.getElementsByTagName("svg")[0];
-        if (!this.svg) {
-            $(this.divElement).load("plugins-common/statusIndicator.svg");
-            return false;
+    class AircraftStatusIndicator {
+        constructor(aircraftId) {
+            this.aircraftId = aircraftId;
+            this.divElement = document.createElement("div");
+            this.divElement.id = "aircraftStatusIndicator" + aircraftId;
+            this.divElement.classList = ["aircraftStatusIndicator"];
+            aircraftStatusIndicators.appendChild(this.divElement);
         }
-        this.frame = this.svg.getElementById("frame");
-        this.aircraftName = this.svg.getElementById("aircraftName");
-        this.aircraftName.innerHTML = "(" + this.aircraftId + ")";
 
-        let linkRange = this.svg.getElementById("linkFullBarUp").getAttribute("height") * 1;
-        this.icons = [
-            {
-                indicator: this.svg.getElementById("hostStatus"),
-                statusProp: "hostStatus"
-            },
-            {
-                indicator: this.svg.getElementById("gpsStatus"),
-                statusProp: "gpsStatus"
-            },
-            {
-                indicator: this.svg.getElementById("airspeedSensorStatus"),
-                statusProp: "airspeedSensorStatus"
-            },
-            {
-                indicator: this.svg.getElementById("fuelLevelBar"),
-                statusProp: "fuelLevelStatus",
-                percentageProp: "fuelLevelPercentage",
-                range: this.svg.getElementById("fullFuelBar").getAttribute("height") * 1
-            },
-            {
-                indicator: this.svg.getElementById("powerLevelBar"),
-                statusProp: "powerLevelStatus",
-                percentageProp: "powerLevelPercentage",
-                range: this.svg.getElementById("fullPowerBar").getAttribute("height") * 1
-            },
-            {
-                indicator: this.svg.getElementById("linkRatioBarUp0"),
-                statusProp: "uplinkStatus0",
-                percentageProp: "uplinkPercent0",
-                range: linkRange
-            },
-            {
-                indicator: this.svg.getElementById("linkRatioBarDown0"),
-                statusProp: "downlinkStatus0",
-                percentageProp: "downlinkPercent0",
-                range: linkRange
-            },
-            {
-                indicator: this.svg.getElementById("linkRatioBarUp1"),
-                statusProp: "uplinkStatus1",
-                percentageProp: "uplinkPercent1",
-                range: linkRange
-            },
-            {
-                indicator: this.svg.getElementById("linkRatioBarDown1"),
-                statusProp: "downlinkStatus1",
-                percentageProp: "downlinkPercent1",
-                range: linkRange
+        initSVGElements() {
+            this.svg = this.divElement.getElementsByTagName("svg")[0];
+            if (!this.svg) {
+                $(this.divElement).load("plugins-common/statusIndicator.svg");
+                return false;
             }
-        ];
-        this.icons.forEach(i => {
-            i.bottom = i.indicator.getAttribute("y") * 1 + i.indicator.getAttribute("height") * 1;
-        });
-        this.isInitialized = true;
-        this.show();
-        return true;
-    }
-	show() {
-        if (this.isInitialized)
-		    this.divElement.style.visibility = "visible";
-	}
-    hide() {
-        if (this.isInitialized)
-		    this.divElement.style.visibility = "hidden";
-	}
-    update(aircraft) {
-        if (!aircraft) return;
-        if (!this.isInitialized && !this.initSVGElements()) return;
-        this.show();
+            this.frame = this.svg.getElementById("frame");
+            this.aircraftName = this.svg.getElementById("aircraftName");
+            this.aircraftName.innerHTML = "(" + this.aircraftId + ")";
 
-        this.aircraftName.innerHTML = aircraft.aircraftName;
-        let getStatus = (icon) => {
-            let st = aircraft[icon.statusProp];
-            if (icon.statusProp.indexOf("link") >= 0 && st == 2) st = 3; // Adapt LinkStatus to SensorStatus
-            return st;
+            let linkRange = this.svg.getElementById("linkFullBarUp").getAttribute("height") * 1;
+            this.icons = [
+                {
+                    indicator: this.svg.getElementById("hostStatus"),
+                    statusProp: "hostStatus"
+                },
+                {
+                    indicator: this.svg.getElementById("gpsStatus"),
+                    statusProp: "gpsStatus"
+                },
+                {
+                    indicator: this.svg.getElementById("airspeedSensorStatus"),
+                    statusProp: "airspeedSensorStatus"
+                },
+                {
+                    indicator: this.svg.getElementById("fuelLevelBar"),
+                    statusProp: "fuelLevelStatus",
+                    percentageProp: "fuelLevelPercentage",
+                    range: this.svg.getElementById("fullFuelBar").getAttribute("height") * 1
+                },
+                {
+                    indicator: this.svg.getElementById("powerLevelBar"),
+                    statusProp: "powerLevelStatus",
+                    percentageProp: "powerLevelPercentage",
+                    range: this.svg.getElementById("fullPowerBar").getAttribute("height") * 1
+                },
+                {
+                    indicator: this.svg.getElementById("linkRatioBarUp0"),
+                    statusProp: "uplinkStatus0",
+                    percentageProp: "uplinkPercent0",
+                    range: linkRange
+                },
+                {
+                    indicator: this.svg.getElementById("linkRatioBarDown0"),
+                    statusProp: "downlinkStatus0",
+                    percentageProp: "downlinkPercent0",
+                    range: linkRange
+                },
+                {
+                    indicator: this.svg.getElementById("linkRatioBarUp1"),
+                    statusProp: "uplinkStatus1",
+                    percentageProp: "uplinkPercent1",
+                    range: linkRange
+                },
+                {
+                    indicator: this.svg.getElementById("linkRatioBarDown1"),
+                    statusProp: "downlinkStatus1",
+                    percentageProp: "downlinkPercent1",
+                    range: linkRange
+                }
+            ];
+            this.icons.forEach(i => {
+                i.bottom = i.indicator.getAttribute("y") * 1 + i.indicator.getAttribute("height") * 1;
+            });
+            this.isInitialized = true;
+            this.show();
+            return true;
         }
 
-		// Update overall status
-        let status = this.icons
-            .map(getStatus)
-			.reduce((acc, cur) => (cur&&cur<acc)? cur:acc,IndicatorStatus.Healthy);
-		this.frame.style.stroke = statusColors[status];
+        show() {
+            if (this.isInitialized)
+                this.divElement.style.visibility = "visible";
+        }
 
-		// Update individual statuses
-		let updateIcon = (icon) => {
-			try {
-				if (icon.range) {
-					let st = getStatus(icon);
-					icon.indicator.style.fill = statusColors[st];
-					let height = icon.range*aircraft[icon.percentageProp]/100.0;
-					if (height < 0 || isNaN(height)) height=0;
-					if (height > icon.range) height = icon.range;
-					icon.indicator.setAttribute("y",icon.bottom-height);
-					icon.indicator.setAttribute("height",height);
-				}
-				else
-					icon.indicator.style.stroke = statusColors[aircraft[icon.statusProp]];
-			} catch(err) {}
-		}
-        this.icons.forEach(updateIcon);
-	}
-}
+        hide() {
+            if (this.isInitialized)
+                this.divElement.style.visibility = "hidden";
+        }
+
+        update(aircraft) {
+            if (!aircraft) return;
+            if (!this.isInitialized && !this.initSVGElements()) return;
+            this.show();
+
+            this.aircraftName.innerHTML = aircraft.aircraftName;
+            let getStatus = (icon) => {
+                let st = aircraft[icon.statusProp];
+                if (icon.statusProp.indexOf("link") >= 0 && st == 2) st = 3; // Adapt LinkStatus to SensorStatus
+                return st;
+            }
+
+            // Update overall status
+            let status = this.icons
+                .map(getStatus)
+                .reduce((acc, cur) => (cur && cur < acc) ? cur : acc, IndicatorStatus.Healthy);
+            this.frame.style.stroke = statusColors[status];
+
+            // Update individual statuses
+            let updateIcon = (icon) => {
+                try {
+                    if (icon.range) {
+                        let st = getStatus(icon);
+                        icon.indicator.style.fill = statusColors[st];
+                        let height = icon.range * aircraft[icon.percentageProp] / 100.0;
+                        if (height < 0 || isNaN(height)) height = 0;
+                        if (height > icon.range) height = icon.range;
+                        icon.indicator.setAttribute("y", icon.bottom - height);
+                        icon.indicator.setAttribute("height", height);
+                    } else
+                        icon.indicator.style.stroke = statusColors[aircraft[icon.statusProp]];
+                } catch (err) {
+                }
+            }
+            this.icons.forEach(updateIcon);
+        }
+    }
 
 </script>

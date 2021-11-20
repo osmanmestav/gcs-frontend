@@ -1,3 +1,10 @@
+let PredefinedAirspeedSetPoint = {
+    DefaultSpeed: 0,
+    LowSpeed: 1,
+    HighSpeed: 2,
+    Rush: 3,
+}
+
 let PackHelper = {
     PackBits(existingValue/*: number*/, bitValues/*: number*/, startBit/*: number*/, bitCount/*: number*/) {
         var ones = (65535 >> (16 - bitCount));
