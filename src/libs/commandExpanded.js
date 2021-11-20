@@ -13,6 +13,7 @@ let PackHelper = {
         existingValue |= bitValues << startBit; // Set bits
         return existingValue;
     },
+
     UnpackBits(value/*: number*/, startBit/*: number*/, bitCount/*: number*/) {
         var ones = (65535 >> (16 - bitCount));
         return (value >> startBit) & ones;
@@ -76,7 +77,7 @@ class NavigationCommandParam {
     }
 
     set byte0(value/*: number*/) {
-        PackHelper.PackBits(this.valueAsInt, 0, 8, value);
+        this.valueAsInt = PackHelper.PackBits(this.valueAsInt, value, 0, 8);
     }
 
     get byte1() {
@@ -84,7 +85,7 @@ class NavigationCommandParam {
     }
 
     set byte1(value/*: number*/) {
-        PackHelper.PackBits(this.valueAsInt, 8, 8, value);
+        this.valueAsInt = PackHelper.PackBits(this.valueAsInt, value, 8, 8);
     }
 
     get byte2() {
@@ -92,7 +93,7 @@ class NavigationCommandParam {
     }
 
     set byte2(value/*: number*/) {
-        PackHelper.PackBits(this.valueAsInt, 16, 8, value);
+        this.valueAsInt = PackHelper.PackBits(this.valueAsInt, value, 16, 8);
     }
 
     get byte3() {
@@ -100,7 +101,7 @@ class NavigationCommandParam {
     }
 
     set byte3(value/*: number*/) {
-        PackHelper.PackBits(this.valueAsInt, 24, 8, value);
+        this.valueAsInt = PackHelper.PackBits(this.valueAsInt, value, 24, 8);
     }
 
     get taxiThrottle() {
@@ -156,7 +157,7 @@ class NavigationCommandParam {
     }
 
     set loiterRadius(value/*:number*/) {
-        PackHelper.PackBits(this.valueAsInt, 0, 14, value);
+        this.valueAsInt = PackHelper.PackBits(this.valueAsInt, value, 0, 14);
     }
 
     get loiterTurns() {
