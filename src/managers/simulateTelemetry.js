@@ -1,6 +1,6 @@
 var sampleTelemetryMessage = {
-    "aircraftId": 123,
-    "aircraftName": "CGT50-551-TEST",
+    "aircraftId": 123456,
+    "aircraftName": "Telemetry-Simulation",
     "aileronStatus": "Healthy",
     "elevatorStatus": "Healthy",
     "thrustStatus": "Healthy",

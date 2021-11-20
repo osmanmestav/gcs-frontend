@@ -60,10 +60,10 @@ function App() {
         mqttManager?.setGaugesWindow(newWindow);
         setGaugesWindow(newWindow.contentWindow);
     }
-
+    const certificateNameForTelemetrySimulation = "Test";
     const startSimulation = () => {
         const message = simulateTelemetry(mapsWindow.unitsHelper, mapsWindow.UnitType);
-        mqttManager?.publishTelemetry(message);
+        mqttManager?.simulateTelemetryPublish(certificateNameForTelemetrySimulation, message);
         mapsWindow.window.dispatchEvent(new CustomEvent("planeChanged", {"detail": message}));
     }
 
@@ -72,8 +72,11 @@ function App() {
     }
 
     useEffect(() => {
-        if (simulationStarted)
+        
+        if(mqttManager != null && simulationStarted){
+            mqttManager?.AircraftSubscribe(certificateNameForTelemetrySimulation);
             setInterval(startSimulation, 100);
+        }
     }, [simulationStarted]);
 
 

@@ -128,9 +128,8 @@ export default class MQTTManager {
         });
     };
 
-    // obsolete - no more in use...
-    publishTelemetry = (sampleTelemetryMessage: any) => {
-        PubSub.publish('UL/U/dev1/T', sampleTelemetryMessage).then(() => {
+    simulateTelemetryPublish = (certificateNameForTelemetrySimulation: string, sampleTelemetryMessage: any) => {
+        PubSub.publish('UL/U/' + certificateNameForTelemetrySimulation + '/T', sampleTelemetryMessage).then(() => {
         }).catch(err => {
             console.log(err);
         });
