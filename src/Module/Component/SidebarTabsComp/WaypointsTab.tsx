@@ -59,15 +59,15 @@ function WaypointsTab(props: WaypointsTabProps) {
                     </thead>
                     <tbody>
                     {// @ts-ignore
-                        props.CommandList.map((data, index) => {
+                        props.CommandList.map((data, indexs) => {
                                 return (
                                     <tr
-                                        key={index}
-                                        className={(index === props.currentMissionIndex ? 'select-red' : '') + (props.selectedWaypointIndices.indexOf(index) >= 0 ? ' select-grey' : '')}
+                                        key={indexs}
+                                        className={(indexs == (props.currentMissionIndex as any).index ? 'select-red' : '') + (props.selectedWaypointIndices.indexOf(indexs) >= 0 ? ' select-grey' : '')}
                                         onClick={() => {
-                                            props.onWaypointClick(index)
+                                            props.onWaypointClick(indexs)
                                         }}>
-                                        <td>{(index + 1)}</td>
+                                        <td>{(indexs + 1)}</td>
                                         <td>{data.command}</td>
                                         <td>{data.latitude}</td>
                                         <td>{data.longitude}</td>
@@ -83,7 +83,7 @@ function WaypointsTab(props: WaypointsTabProps) {
                                                 </Button>
                                                 <Button style={{fontSize: "10px"}} variant="secondary"
                                                         onClick={() => {
-                                                            props.jumpToWaypoint(index)
+                                                            props.jumpToWaypoint(indexs)
                                                         }}>jump</Button>
                                             </ButtonGroup>
                                         </td>

@@ -59,6 +59,7 @@ function GeoFenceTab(props: any) {
                 <Table striped bordered hover>
                     <thead>
                     <tr>
+                        <th>Index</th>
                         <th>Latitude</th>
                         <th>Longitude</th>
                     </tr>
@@ -68,6 +69,7 @@ function GeoFenceTab(props: any) {
                         props.GeoFenceData.points.map((data, index) => {
                                 return (
                                     <tr key={index}>
+                                        <td>{(index + 1)}</td>
                                         <td>{data.latitude.toFixed(7)}</td>
                                         <td>{data.longitude.toFixed(7)}</td>
                                     </tr>

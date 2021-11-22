@@ -4,7 +4,8 @@ var csharp = {
     mission: {
         home: {},
         waypoints: [],
-        geoFence: null /*{ isActive, isVisible, minAltitude, maxAltitude, returnPoint: {}, points:[] }*/
+        geoFence: null, /*{ isActive, isVisible, minAltitude, maxAltitude, returnPoint: {}, points:[] }*/
+        failsafe: null
     },
     selectedWaypointIndices: [],
     showMessage(msg) {
@@ -143,6 +144,7 @@ var csharp = {
                     },
                     geoFence: this.mission.geoFence
                 }
+
             };
             window.dispatchEvent(new CustomEvent('CommandRequest', {detail: req}));
             FlightSummary.addToSummary(SummaryEntryType.Message, "Mission upload requested: " + aircraftName);
@@ -796,6 +798,16 @@ var csharp = {
             console.log(err);
         }
     },
+    async updateWaypoint(waypoint) {
+        try {
+            if (waypoint.index < 0 || waypoint.index >= this.mission.waypoints.length)
+                throw "Invalid index";
+            this.mission.waypoints[waypoint.index] = waypoint
+            window.dispatchEvent(new CustomEvent('WaypointChanged', {detail: waypoint}));
+        } catch (err) {
+            console.log(err);
+        }
+    },
 
     async changeWaypoint(index, latitude, longitude, altitude, parameter) {
         try {
@@ -845,7 +857,24 @@ var csharp = {
 
     async requestLook(latitude, longitude, mslAltitude) {
         console.log("csharp.requestLook: Not implemented");
-    }
+    },
+
+
+    async setFailsafe(data) {
+        try {
+            this.mission.failsafe = data;
+            console.log(data)
+        } catch (err) {
+            console.log(err);
+        }
+    },
+    async getFailsafe() {
+        try {
+            return this.mission.failsafe;
+        } catch (err) {
+            console.log(err);
+        }
+    },
 };
 
 window.csharp = csharp;

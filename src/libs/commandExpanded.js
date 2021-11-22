@@ -33,15 +33,15 @@ class NavigationCommandParam {
     }
 
     assign(value/*: number||object*/) {
-        switch (typeof (parameter)) {
+        switch (typeof (value)) {
             case "undefined":
                 this.valueAsInt = 0;
                 break;
             case "number":
-                this.valueAsInt = parameter;
+                this.valueAsInt = value;
                 break;
             case "object":
-                Object.keys(parameter).forEach((k) => this[k] = parameter[k]);
+                Object.keys(value).forEach((k) => this[k] = value[k]);
                 break;
         }
         return this;

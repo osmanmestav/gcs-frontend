@@ -5,6 +5,7 @@ import {Form, Table, Button, ButtonGroup, Tabs, Tab, Modal} from 'react-bootstra
 //Component Tab
 import WaypointsTab from "./SidebarTabsComp/WaypointsTab";
 import GeoFenceTab from "./SidebarTabsComp/GeoFenceTab";
+import Failsafe from "./SidebarTabsComp/Failsafe";
 
 function WaypointsTable(props: any) {
 
@@ -29,7 +30,7 @@ function WaypointsTable(props: any) {
     // @ts-ignore
     const AddWaypoint = ({detail}) => {
         CommandListArray = [];
-        CommandListArray.push({...detail, agl: defaultAgl,})
+        CommandListArray.push({...detail, agl: defaultAgl})
         // @ts-ignore
         setCommandList([...CommandList, ...CommandListArray]);
         setIsDraft(true);
@@ -154,6 +155,7 @@ function WaypointsTable(props: any) {
 
 
     // @ts-ignore
+    // @ts-ignore
     return (
 
         <div>
@@ -223,18 +225,14 @@ function WaypointsTable(props: any) {
 
                         <Form.Group className="mb-3" controlId="formBasicEmail">
                             <Form.Label>Speed</Form.Label>
-                            <Form.Select aria-label="Default select example" onChange={(e: any) => {
-                                var newAirspeedWaypoint = waypointEditModalData;
-                                newAirspeedWaypoint.parameter.airspeedSetPoint = (parseInt(e.target.value));
-                                setwaypointEditModalData(newAirspeedWaypoint);
-                                /*props.mapWindow.csharp.setWaypoint(waypointEditModalData.index, waypointEditModalData.command, waypointEditModalData.latitude, waypointEditModalData.longitude, waypointEditModalData.altitude, {
-                                    ...waypointEditModalData.parameter,
-                                    airspeedSetPoint: parseInt(e.target.value),
-                                });*/
-                                //waypointEditModalData.parameter.airspeedSetPoint=3;
-                                console.log(CommandList)
-                            }}>
-                                <option>Default</option>
+                            <Form.Select aria-label="Default select example"
+                                         value={waypointEditModalData.parameter.airspeedSetPoint}
+                                         onChange={(e: any) => {
+                                             var newAirspeedWaypoint = waypointEditModalData;
+                                             newAirspeedWaypoint.parameter.airspeedSetPoint = (parseInt(e.target.value));
+                                             setwaypointEditModalData(newAirspeedWaypoint);
+                                         }}>
+                                <option value="0">Default</option>
                                 <option value="1">Low</option>
                                 <option value="2">High</option>
                                 <option value="3">Rush</option>
@@ -245,6 +243,7 @@ function WaypointsTable(props: any) {
                             <Form.Check
                                 type="checkbox"
                                 id={"default-1"}
+                                checked={(waypointEditModalData.parameter.followTrack)}
                                 label={"Follow Track"}
                                 onChange={(e: any) => {
                                     var newAirspeedWaypoint = waypointEditModalData;
@@ -273,6 +272,7 @@ function WaypointsTable(props: any) {
                                 name="command"
                                 type="radio"
                                 id={"inline2"}
+                                style={{width: "200px", float: "left"}}
                                 checked={(waypointEditModalData.command == 'LoiterTurns' ? true : false)}
                                 onChange={() => {
                                     var newAirspeedWaypoint = waypointEditModalData;
@@ -280,7 +280,24 @@ function WaypointsTable(props: any) {
                                     setwaypointEditModalData(newAirspeedWaypoint);
                                 }}
                             />
+
+                            <Form.Group style={{width: "200px", float: "left"}} className="mb-3"
+                                        controlId="loiterTurns">
+                                <Form.Control size="sm" type="text" placeholder="Index"
+                                              disabled={(waypointEditModalData.command == 'LoiterTurns' ? false : true)}
+                                              onChange={(e) => {
+                                                  console.log(e.target.value)
+                                                  var newAirspeedWaypoint = waypointEditModalData;
+                                                  newAirspeedWaypoint.parameter.loiterTurns = (parseInt(e.target.value));
+                                                  setwaypointEditModalData(newAirspeedWaypoint);
+                                              }} value={waypointEditModalData.parameter.loiterTurns}/>
+                            </Form.Group>
+
+                            <br/>
+                            <br/>
+
                             <Form.Check
+                                style={{width: "200px", float: "left"}}
                                 label="For Minutes"
                                 name="command"
                                 type="radio"
@@ -292,6 +309,22 @@ function WaypointsTable(props: any) {
                                     setwaypointEditModalData(newAirspeedWaypoint);
                                 }}
                             />
+
+                            <Form.Group style={{width: "200px", float: "left"}} className="mb-3"
+                                        controlId="loiterMinutes">
+                                <Form.Control size="sm" type="text" placeholder="Index"
+                                              disabled={(waypointEditModalData.command == 'LoiterTime' ? false : true)}
+                                              onChange={(e) => {
+                                                  console.log(e.target.value)
+                                                  var newAirspeedWaypoint = waypointEditModalData;
+                                                  newAirspeedWaypoint.parameter.loiterMinutes = (parseInt(e.target.value));
+                                                  setwaypointEditModalData(newAirspeedWaypoint);
+                                              }} value={waypointEditModalData.parameter.loiterMinutes}/>
+                            </Form.Group>
+
+                            <br/>
+                            <br/>
+
 
                             <Form.Check
                                 label="Until Altitude"
@@ -328,17 +361,17 @@ function WaypointsTable(props: any) {
 
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant={"success"} onClick={() => {
-                        //props.mapWindow.dispatchEvent(new CustomEvent('WaypointChanged', {detail: waypointEditModalData}));
-                        console.log(waypointEditModalData)
-                    }}>Test</Button>
 
                     <Button variant={"success"} onClick={() => {
-                        //props.mapWindow.dispatchEvent(new CustomEvent('WaypointChanged', {detail: waypointEditModalData}));
+                        console.log(waypointEditModalData)
+                    }}>Parameter</Button>
+
+                    <Button variant={"success"} onClick={() => {
                         console.log(waypointEditModalData)
                         setwayPoint({detail: waypointEditModalData});
-                        //aglAltitude eklenecek
                         props.mapWindow.csharp.setWaypoint(waypointEditModalData.index, waypointEditModalData.command, waypointEditModalData.latitude, waypointEditModalData.longitude, waypointEditModalData.altitude, waypointEditModalData.parameter);
+                        props.mapWindow.csharp.updateWaypoint(waypointEditModalData);
+                        //console.log(waypointEditModalData)
                         setwaypointEditModal(false)
                     }}>Ok</Button>
                     <Button onClick={() => {
@@ -416,7 +449,26 @@ function WaypointsTable(props: any) {
                     ></GeoFenceTab>
                 </Tab>
                 <Tab eventKey="Failsafe" title="Failsafe">
-                    Failsafe
+                    <Failsafe
+                        currentMissionIndex={wayPointCurrent}
+                        CommandList={CommandList}
+                        defaultAgl={defaultAgl}
+                        setDefaultAgl={setDefaultAgl}
+                        WaypointEditAction={(e: any) => {
+                            WaypointEditAction(e);
+                        }}
+                        onWaypointClick={onWaypointClick}
+                        selectedWaypointIndices={selectedWaypointIndices}
+                        jumpToWaypoint={
+                            (index: number) => {
+                                props.mapWindow.csharp.jumpToWaypoint(index)
+                            }
+                        }
+                        clearWaypoints={() => {
+                            props.mapWindow.csharp.clearWaypoints()
+                        }
+                        }
+                    />
                 </Tab>
                 <Tab eventKey="RcCommands" title="Rc Commands">
                     Rc Commands
