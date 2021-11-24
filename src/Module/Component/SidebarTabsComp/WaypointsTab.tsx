@@ -63,7 +63,7 @@ function WaypointsTab(props: WaypointsTabProps) {
                                 return (
                                     <tr
                                         key={indexs}
-                                        className={(indexs == (props.currentMissionIndex as any).index ? 'select-red' : '') + (props.selectedWaypointIndices.indexOf(indexs) >= 0 ? ' select-grey' : '')}
+                                        className={(indexs == (props.currentMissionIndex as any)?.index ? 'select-red' : '' ? 'select-red' : '') + (props.selectedWaypointIndices.indexOf(indexs) >= 0 ? ' select-grey' : '')}
                                         onClick={() => {
                                             props.onWaypointClick(indexs)
                                         }}>
