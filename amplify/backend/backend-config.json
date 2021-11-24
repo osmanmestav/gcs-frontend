@@ -1,1 +1,11 @@
-{}
+{
+  "auth": {
+    "gcsfrontendsrc5655f313": {
+      "service": "Cognito",
+      "serviceType": "imported",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "customAuth": false
+    }
+  }
+}
