@@ -450,24 +450,7 @@ function WaypointsTable(props: any) {
                 </Tab>
                 <Tab eventKey="Failsafe" title="Failsafe">
                     <Failsafe
-                        currentMissionIndex={wayPointCurrent}
-                        CommandList={CommandList}
-                        defaultAgl={defaultAgl}
-                        setDefaultAgl={setDefaultAgl}
-                        WaypointEditAction={(e: any) => {
-                            WaypointEditAction(e);
-                        }}
-                        onWaypointClick={onWaypointClick}
-                        selectedWaypointIndices={selectedWaypointIndices}
-                        jumpToWaypoint={
-                            (index: number) => {
-                                props.mapWindow.csharp.jumpToWaypoint(index)
-                            }
-                        }
-                        clearWaypoints={() => {
-                            props.mapWindow.csharp.clearWaypoints()
-                        }
-                        }
+                        csharp={props.mapWindow.csharp}
                     />
                 </Tab>
                 <Tab eventKey="RcCommands" title="Rc Commands">

@@ -1,8 +1,9 @@
-import React, {useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect} from 'react';
 import {
     Row,
     Col,
     Button,
+    Form,
 } from 'react-bootstrap'
 
 function SidebarControlButtons(props: any) {
@@ -41,6 +42,22 @@ function SidebarControlButtons(props: any) {
         a.remove()
     }
 
+    let loadMissionFile = useRef() as any;
+    const loadMission = () => {
+        console.log(props.mapWindow.csharp.mission)
+        // @ts-ignore
+        loadMissionFile.current.click();
+    }
+    const handleFileUpload = (e: any) => {
+        const fileReader = new FileReader();
+        fileReader.readAsText(e.target.files[0], "UTF-8");
+        fileReader.onload = event => {
+            props.mapWindow.csharp.setMisssion(event.target?.result)
+            console.log("Load Data", event.target?.result);
+        };
+    };
+
+    // @ts-ignore
     return (
         <div style={{height: '100%', minHeight: '200px', marginTop: '20px'}}>
             <Row>
@@ -99,10 +116,15 @@ function SidebarControlButtons(props: any) {
                             onClick={() => Download()}><i className="fas fa-cloud-download-alt"></i> Download</Button>
                     <Button style={{width: '24%', marginRight: '5px'}} variant="dark" size="sm"
                             onClick={() => Upload()}><i className="fas fa-cloud-upload-alt"></i> Upload</Button>
-                    <Button disabled style={{width: '24%', marginRight: '5px'}} variant="dark" size="sm"><i
-                        className="fas fa-spinner"></i> Load</Button>
+                    <Button style={{width: '24%', marginRight: '5px'}} variant="dark" size="sm"
+                            onClick={() => loadMission()}>
+                        <i className="fas fa-spinner"></i> Load
+                    </Button>
+                    <input type="file" ref={loadMissionFile} className="form-control form-control-sm"
+                           style={{display: "none"}} accept={".json"} onChange={handleFileUpload}/>
                     <Button style={{width: '25%'}} variant="dark" size="sm" onClick={() => saveMission()}>
                         <i className="fas fa-file-export"></i> Save</Button>
+
                 </Col>
             </Row>
         </div>

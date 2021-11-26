@@ -5,7 +5,19 @@ var csharp = {
         home: {},
         waypoints: [],
         geoFence: null, /*{ isActive, isVisible, minAltitude, maxAltitude, returnPoint: {}, points:[] }*/
-        failsafe: null
+        failsafe: {
+            longAction: 0, // 0 Return To Launch, 1 short, 2 short&long
+            rescueOnLossOfControl: false,
+            blockRCCommandSwitch: false,
+            lossOfRCACtionChoice: 0, // 2 Enable long action, 1 Enable short action, 0 Disable
+            lossOfGCSActionChoice: 0, // // 2 Enable long action, 1 Enable short action, 0 Disable
+            climbRateToleranceForRescue: 10,
+            timeShortActionRC: 1, //Seconds
+            timeShortActionGPS: 2, //Seconds
+            timeShortActionGCS: 10, //Seconds
+            timeLongAction: 300, //Seconds
+
+        }
     },
     selectedWaypointIndices: [],
     showMessage(msg) {
@@ -860,21 +872,15 @@ var csharp = {
     },
 
 
-    async setFailsafe(data) {
-        try {
-            this.mission.failsafe = data;
-            console.log(data)
-        } catch (err) {
-            console.log(err);
-        }
+    setFailsafe(data) {
+        this.mission.failsafe = data;
     },
-    async getFailsafe() {
-        try {
-            return this.mission.failsafe;
-        } catch (err) {
-            console.log(err);
-        }
+    getFailsafe() {
+        return this.mission.failsafe;
     },
+    setMisssion(data){
+        this.mission = data;
+    }
 };
 
 window.csharp = csharp;
