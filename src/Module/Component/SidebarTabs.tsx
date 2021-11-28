@@ -6,14 +6,20 @@ import {Form, Table, Button, ButtonGroup, Tabs, Tab, Modal} from 'react-bootstra
 import WaypointsTab from "./SidebarTabsComp/WaypointsTab";
 import GeoFenceTab from "./SidebarTabsComp/GeoFenceTab";
 import Failsafe from "./SidebarTabsComp/Failsafe";
+import {missionDataType} from "../models/missionTypes";
 
 function WaypointsTable(props: any) {
 
-    let CommandListArray: any[];
+    let waypointsListArray: any[];
 
     const [defaultAgl, setDefaultAgl] = useState<number>(400);
     const [isDraft, setIsDraft] = useState(false);
-    const [CommandList, setCommandList] = useState<any>([]);
+    const [missionData, setMission] = useState<object>({}); //Mission
+    const [missionDraft, setMissionDraft] = useState<object>({}); //MissionDraft
+
+
+    const [waypointsList, setwaypointsList] = useState<any>([]); //CommandList
+    const [Draft, setDraft] = useState<any>([]); //CommandList
     const [wayPointCurrent, setwayPointCurrent] = useState<any>(null);
     const [selectedWaypointIndices, setSelectedWaypointIndices] = useState<number[]>([]);
     const [HomeLocation, setHomeLocation] = useState<any>({
@@ -26,16 +32,6 @@ function WaypointsTable(props: any) {
 
     const [GeoFenceData, setGeoFenceData] = useState<any>([]);
 
-
-    // @ts-ignore
-    const AddWaypoint = ({detail}) => {
-        CommandListArray = [];
-        CommandListArray.push({...detail, agl: defaultAgl})
-        // @ts-ignore
-        setCommandList([...CommandList, ...CommandListArray]);
-        setIsDraft(true);
-
-    };
 
     const CommandSourceType: any = {
         0: "NONE",
@@ -53,36 +49,65 @@ function WaypointsTable(props: any) {
         12: "FAILSAFERCLOSS",
     }
 
+    // @ts-ignore
+    const AddWaypoint = ({detail}) => {
+
+        if (detail.isFromDownload == undefined) {
+            try {
+                debugger
+                var a = (missionDraft as any);
+                a.waypoints.push({...detail, agl: defaultAgl})
+                console.log(a)
+                // @ts-ignore
+                setMissionDraft(a);
+
+            } catch (e) {
+                console.log(e)
+            }
+            setIsDraft(true);
+        }
+    };
+
+
+    // @ts-ignore
+    const DownloadMission = ({detail}) => {
+        debugger
+        setMission(detail);
+        setMissionDraft(detail);
+
+    }
+
     function ClearWaypoint() {
-        setCommandList([]);
+        const newMissionDraft = missionDraft;
+        (newMissionDraft as any).waypoints = [];
+        setMission(newMissionDraft);
         setIsDraft(true);
     }
 
     const RemoveWaypoint = (e: { detail: any; }) => {
         // @ts-ignore
-        const filteredData = CommandList.filter(({index: index}) => index !== e.detail);
+        const filteredData = missionDraft.waypoints.filter(({index: index}) => index !== e.detail);
         for (let i = 0; i < filteredData.length; i++) {
             // @ts-ignore
             filteredData[i].index = i;
         }
-        setCommandList(filteredData);
+
+        var newMissionDraft = missionDraft;
+        (newMissionDraft as any).waypoints = filteredData;
+        setMission(newMissionDraft);
+        //setwaypointsList(filteredData);
         setIsDraft(true);
     };
 
-    // @ts-ignore
-    const SetMapHome = ({detail: {altitude: altitude, latitude: latitude, longitude: longitude}}) => {
-        setHomeLocation({latitude: latitude, altitude: altitude, longitude: longitude});
-        setIsDraft(true);
-    };
 
     // @ts-ignore
     const ChangedWaypoint = (e) => {
         setIsDraft(true);
         try {
-            let newComandlistItem = [...CommandList];
+            let newComandlistItem = [...waypointsList];
             // @ts-ignore
             newComandlistItem[e.detail.index] = {...e.detail, agl: defaultAgl};
-            setCommandList(newComandlistItem);
+            setwaypointsList(newComandlistItem);
         } catch (e) {
             console.log(e)
         }
@@ -106,7 +131,7 @@ function WaypointsTable(props: any) {
 
 
     const onWaypointClick = (index: number) => {
-        if (index < 0 || !CommandList[index]) return;
+        if (index < 0 || !waypointsList[index]) return;
         if (selectedWaypointIndices.indexOf(index) >= 0)
             props.mapWindow.csharp.deselectWaypoint(index);
         else
@@ -115,7 +140,7 @@ function WaypointsTable(props: any) {
 
     // @ts-ignore
     const GeoFenceChanged = (data) => {
-        console.log(data.detail)
+        //console.log(data.detail)
         setGeoFenceData(data.detail);
     }
 
@@ -124,21 +149,23 @@ function WaypointsTable(props: any) {
         props.mapWindow.addEventListener("WaypointChanged", ChangedWaypoint);
         props.mapWindow.addEventListener("WaypointsCleared", ClearWaypoint);
         props.mapWindow.addEventListener("WaypointRemoved", RemoveWaypoint);
-        props.mapWindow.addEventListener("HomeChanged", SetMapHome);
+
         props.mapWindow.addEventListener("CurrentWaypointChanged", setwayPoint);
         props.mapWindow.addEventListener("WaypointSelectionChanged", WaypointSelectionChanged);
         props.mapWindow.addEventListener("editWaypoint", WaypointEditAction);
         props.mapWindow.addEventListener("GeoFenceChanged", GeoFenceChanged);
+        props.mapWindow.addEventListener("DownloadMission", DownloadMission);
         return () => {
             props.mapWindow.removeEventListener("WaypointAdded", AddWaypoint);
             props.mapWindow.removeEventListener("WaypointChanged", ChangedWaypoint);
             props.mapWindow.removeEventListener("WaypointsCleared", ClearWaypoint);
             props.mapWindow.removeEventListener("WaypointRemoved", RemoveWaypoint);
-            props.mapWindow.removeEventListener("HomeChanged", SetMapHome);
+
             props.mapWindow.removeEventListener("CurrentWaypointChanged", setwayPoint);
             props.mapWindow.removeEventListener("WaypointSelectionChanged", WaypointSelectionChanged);
             props.mapWindow.removeEventListener("editWaypoint", WaypointEditAction);
             props.mapWindow.removeEventListener("GeoFenceChanged", GeoFenceChanged);
+            props.mapWindow.removeEventListener("DownloadMission", DownloadMission);
         };
     });
 
@@ -148,14 +175,12 @@ function WaypointsTable(props: any) {
         if (!data.detail) setwaypointEditModalData(data);
 
         if (data.detail) {
-            data.detail.agl = CommandList[data.detail.index].agl;
+            data.detail.agl = waypointsList[data.detail.index].agl;
             setwaypointEditModalData(data.detail);
         }
     }
 
 
-    // @ts-ignore
-    // @ts-ignore
     return (
 
         <div>
@@ -210,10 +235,10 @@ function WaypointsTable(props: any) {
                         <Form.Label>Agl</Form.Label>
                         <Form.Control size="sm" type="text" placeholder="Index" onChange={(e) => {
                             setwaypointEditModalData({...waypointEditModalData, agl: parseInt(e.target.value)});
-                            /*var data = CommandList;
+                            /*var data = waypointsList;
                             data[waypointEditModalData.index].agl = parseInt(e.target.value);
-                            setCommandList(data)*/
-                            console.log(CommandList[waypointEditModalData.index])
+                            setwaypointsList(data)*/
+                            console.log(waypointsList[waypointEditModalData.index])
                         }} value={waypointEditModalData.agl}/>
                     </Form.Group>
 
@@ -381,7 +406,7 @@ function WaypointsTable(props: any) {
             </Modal>}
 
 
-            {CommandList &&
+            {(missionData as any).waypoints &&
             <Table striped bordered hover>
                 <thead>
                 <tr>
@@ -392,6 +417,14 @@ function WaypointsTable(props: any) {
                     <th style={{width: "150px"}}>Longitude</th>
                     <th>Altitude</th>
                     <th>Parameter</th>
+                    <th>
+                        <button onClick={() => {
+                            // @ts-ignore
+                            //console.log(missionData.waypoints)
+                            console.log(missionDraft)
+                        }}>Draft Data
+                        </button>
+                    </th>
                 </tr>
                 </thead>
                 <tbody>
@@ -412,9 +445,9 @@ function WaypointsTable(props: any) {
 
                 <Tab eventKey="waypoints" title="Waypoints">
                     <WaypointsTab
+                        missionData={missionData as missionDataType}
                         homeLocation={HomeLocation}
                         currentMissionIndex={wayPointCurrent}
-                        CommandList={CommandList}
                         defaultAgl={defaultAgl}
                         setDefaultAgl={setDefaultAgl}
                         WaypointEditAction={(e: any) => {

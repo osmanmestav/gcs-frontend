@@ -6,7 +6,13 @@ var csharp = {
         waypoints: [],
         geoFence: null, /*{ isActive, isVisible, minAltitude, maxAltitude, returnPoint: {}, points:[] }*/
         failsafe: {
-            longAction: 0, // 0 Return To Launch, 1 short, 2 short&long
+             /**
+             {"type":1,"wayPointIndex":2}
+             Type
+             1=Return To Launch
+             2=Jump
+             */
+            longAction: {"type": 1, "wayPointIndex": 2},
             rescueOnLossOfControl: false,
             blockRCCommandSwitch: false,
             lossOfRCACtionChoice: 0, // 2 Enable long action, 1 Enable short action, 0 Disable
@@ -51,7 +57,7 @@ var csharp = {
             altitude: aircraftState.altitude,
             latitude: aircraftState.latitude,
             longitude: aircraftState.longitude,
-            isSittingOnGround: aircraftState.travelStatus === 0, 
+            isSittingOnGround: aircraftState.travelStatus === 0,
         };
     },
 
@@ -169,7 +175,8 @@ var csharp = {
                             parameter: w.parameter.valueAsInt
                         }))
                     },
-                    geoFence: this.mission.geoFence
+                    geoFence: this.mission.geoFence,
+                    failsafe: this.mission.failsafe
                 }
 
             };
@@ -179,18 +186,25 @@ var csharp = {
         }
     },
 
-    async receivedMission(mission) {
+    async receivedMission(mission, isFromDownload = false) {
         await this.clearWaypoints();
         for (var i = 0; i < mission.mission.waypoints.length; i++) {
             let w = mission.mission.waypoints[i];
             let wp = new WayPoint(i, Command[w.command], w.latitude, w.longitude, w.altitude, w.parameter);
             this.mission.waypoints.push(wp);
+            wp.isFromDownload = isFromDownload;
+            //isFromDownload
             window.dispatchEvent(new CustomEvent('WaypointAdded', {detail: wp}));
         }
+
         this.mission.home = mission.mission.home;
+        this.mission.home.isFromDownload = isFromDownload;
         this.mission.geoFence = mission.geoFence;
+        this.mission.geoFence.isFromDownload = isFromDownload;
         window.dispatchEvent(new CustomEvent('HomeChanged', {detail: this.mission.home}));
         window.dispatchEvent(new CustomEvent('GeoFenceChanged', {detail: this.mission.geoFence}));
+
+        window.dispatchEvent(new CustomEvent('DownloadMission', {detail: this.mission}));
 
     },
 
@@ -886,13 +900,14 @@ var csharp = {
         console.log("csharp.requestLook: Not implemented");
     },
 
+
     setFailsafe(data) {
         this.mission.failsafe = data;
     },
     getFailsafe() {
         return this.mission.failsafe;
     },
-    setMission(data){
+    setMisssion(data){
         this.mission = data;
     },
 
