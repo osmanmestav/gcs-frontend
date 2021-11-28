@@ -19,6 +19,7 @@ var csharp = {
 
         }
     },
+    telemetrySummaries: {},
     selectedWaypointIndices: [],
     showMessage(msg) {
         alert(msg);
@@ -43,9 +44,21 @@ var csharp = {
         this.mapReady = true;
         window.dispatchEvent(new CustomEvent('mapReady'));
     },
+
+    prepareTelemetrySummary(aircraftState) {
+        return {
+            aircraftId: aircraftState.aircraftId,
+            altitude: aircraftState.altitude,
+            latitude: aircraftState.latitude,
+            longitude: aircraftState.longitude,
+            isSittingOnGround: aircraftState.travelStatus === 0, 
+        };
+    },
+
     async addAircraft(aircraftState) {
         let aircraftId = aircraftState.aircraftId;
         this.aircrafts[aircraftId] = {aircraftId};
+        this.telemetrySummaries[aircraftState.aircraftId] = Object.assign({}, this.prepareTelemetrySummary(aircraftState));
         window.dispatchEvent(new CustomEvent('AircraftAdded', {detail: aircraftId}));
         if (!this.selectedAircraft || !this.selectedAircraft.aircraftId)
             this.selectAircraft(aircraftState);
@@ -53,6 +66,7 @@ var csharp = {
     async removeAircraft(aircraftId) {
         try {
             delete this.aircrafts[aircraftId];
+            delete this.telemetrySummaries[aircraftId];
             if (this.selectedAircraft && this.selectedAircraft.aircraftId === aircraftId)
                 this.selectedAircraft = null;
             window.dispatchEvent(new CustomEvent('AircraftRemoved', {detail: aircraftId}));
@@ -69,6 +83,7 @@ var csharp = {
                 this.addAircraft(aircraftState);
                 aircraft = this.aircrafts[aircraftState.aircraftId];
             }
+            this.telemetrySummaries[aircraftState.aircraftId] = Object.assign({}, this.prepareTelemetrySummary(aircraftState));
             Object.assign(aircraft, aircraftState);
             window.dispatchEvent(new CustomEvent('AircraftChanged', {detail: aircraft}));
         } catch (err) {
@@ -871,15 +886,22 @@ var csharp = {
         console.log("csharp.requestLook: Not implemented");
     },
 
-
     setFailsafe(data) {
         this.mission.failsafe = data;
     },
     getFailsafe() {
         return this.mission.failsafe;
     },
-    setMisssion(data){
+    setMission(data){
         this.mission = data;
+    },
+
+    getMission(){
+        return this.mission;
+    },
+
+    getCurrentTelemetrySummary(){
+        return this.telemetrySummaries[this.selectedAircraft.aircraftId];
     }
 };
 

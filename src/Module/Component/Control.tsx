@@ -5,6 +5,7 @@ import {
     Button,
     Form,
 } from 'react-bootstrap'
+import MissionManager from '../../managers/missionManager';
 
 function SidebarControlButtons(props: any) {
     const Download = () => {
@@ -14,6 +15,9 @@ function SidebarControlButtons(props: any) {
         props.mapWindow.csharp.downloadMission();
     }
     const Upload = () => {
+        const missionManager = new MissionManager(props.mapWindow.csharp.getMission(), props.mapWindow.csharp.getCurrentTelemetrySummary()); 
+        let res = missionManager.check();
+        console.log("check result: ", res);
         props.mapWindow.csharp.uploadMission();
     }
     const startMission = () => {
@@ -52,7 +56,7 @@ function SidebarControlButtons(props: any) {
         const fileReader = new FileReader();
         fileReader.readAsText(e.target.files[0], "UTF-8");
         fileReader.onload = event => {
-            props.mapWindow.csharp.setMisssion(event.target?.result)
+            props.mapWindow.csharp.setMission(event.target?.result)
             console.log("Load Data", event.target?.result);
         };
     };
