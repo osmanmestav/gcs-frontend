@@ -15,6 +15,7 @@ type WaypointsTabProps = {
     WaypointEditAction: any;
     onWaypointClick: (index: number) => void;
     clearWaypoints: any;
+    isDraft: boolean;
 }
 
 function WaypointsTab(props: WaypointsTabProps) {
@@ -83,10 +84,10 @@ function WaypointsTab(props: WaypointsTabProps) {
                                             }}>
                                                 <i className="fa fa-pencil-alt"></i>
                                             </Button>
-                                            <Button style={{fontSize: "10px"}} variant="secondary"
-                                                    onClick={() => {
-                                                        props.jumpToWaypoint(indexs)
-                                                    }}>jump</Button>
+                                            <Button style={{fontSize: "10px"}} variant="warning"
+                                                    disabled={(props.isDraft)} onClick={() => {
+                                                props.jumpToWaypoint(indexs)
+                                            }}>jump</Button>
                                         </ButtonGroup>
                                     </td>
                                 </tr>

@@ -6,7 +6,7 @@ var csharp = {
         waypoints: [],
         geoFence: null, /*{ isActive, isVisible, minAltitude, maxAltitude, returnPoint: {}, points:[] }*/
         failsafe: {
-             /**
+            /**
              {"type":1,"wayPointIndex":2}
              Type
              1=Return To Launch
@@ -24,6 +24,21 @@ var csharp = {
             timeLongAction: 300, //Seconds
 
         }
+    },
+    CommandSourceType: {
+        0: "NONE",
+        1: "INITIAL",
+        2: "MISSION",
+        3: "IDLE",
+        4: "RC",
+        5: "INSTANT",
+        6: "GEOFENCE",
+        7: "FAILSAFE",
+        8: "FAILSAFEFLIGHTCMDONGROUND",
+        9: "FAILSAFERESCUE",
+        10: "FAILSAFEGPSLOSS",
+        11: "FAILSAFEGCSLOSS",
+        12: "FAILSAFERCLOSS",
     },
     telemetrySummaries: {},
     selectedWaypointIndices: [],
@@ -907,15 +922,15 @@ var csharp = {
     getFailsafe() {
         return this.mission.failsafe;
     },
-    setMisssion(data){
+    setMisssion(data) {
         this.mission = data;
     },
 
-    getMission(){
+    getMission() {
         return this.mission;
     },
 
-    getCurrentTelemetrySummary(){
+    getCurrentTelemetrySummary() {
         return this.telemetrySummaries[this.selectedAircraft.aircraftId];
     }
 };
