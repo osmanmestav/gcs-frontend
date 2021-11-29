@@ -29,14 +29,14 @@ const waypointModal = (props: any) => {
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                     <Form.Label>Index</Form.Label>
                     <Form.Control size="sm" type="number" disabled placeholder="Index"
-                                  value={props.setwaypointModalData?.index}/>
+                                  value={props.waypointModalData?.index}/>
                 </Form.Group>
 
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                     <Form.Label>Latitude</Form.Label>
                     <Form.Control size="sm" type="text" placeholder="Latitude" onChange={(e) => {
-                        props.setwaypointModalData({...props.setwaypointModalData, latitude: e.target.value});
-                    }} value={props.setwaypointModalData?.latitude}/>
+                        props.setwaypointModalData({...props.waypointModalData, latitude: e.target.value});
+                    }} value={props.waypointModalData?.latitude}/>
                 </Form.Group>
 
                 <Form.Group className="mb-3" controlId="formBasicEmail">
@@ -44,32 +44,32 @@ const waypointModal = (props: any) => {
                     <Form.Control size="sm" type="text" placeholder="Longitude"
                                   onChange={(e) => {
                                       props.setwaypointModalData({
-                                          ...props.setwaypointModalData,
+                                          ...props.waypointModalData,
                                           longitude: e.target.value
                                       });
                                   }}
-                                  value={props.setwaypointModalData?.longitude}/>
+                                  value={props.waypointModalData?.longitude}/>
                 </Form.Group>
 
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                     <Form.Label>Altitude</Form.Label>
                     <Form.Control size="sm" type="text" placeholder="Index" onChange={(e) => {
                         props.setwaypointModalData({
-                            ...props.setwaypointModalData,
+                            ...props.waypointModalData,
                             altitude: parseInt(e.target.value)
                         });
-                    }} value={props.setwaypointModalData?.altitude}/>
+                    }} value={props.waypointModalData?.altitude}/>
                 </Form.Group>
 
                 <Form.Group className="mb-3" controlId="formBasicEmail">
                     <Form.Label>Agl</Form.Label>
                     <Form.Control size="sm" type="text" placeholder="Index" onChange={(e) => {
-                        props.setwaypointModalData({...props.setwaypointModalData, agl: parseInt(e.target.value)});
+                        props.setwaypointModalData({...props.waypointModalData, agl: parseInt(e.target.value)});
                         var data = props.missionDraft;
                         /*data[props.setwaypointModalData.index].agl = parseInt(e.target.value);
                         props.setwaypointsList(data)
                         console.log(props.missionDraft[props.setwaypointModalData?.index])*/
-                    }} value={props.setwaypointModalData?.agl}/>
+                    }} value={props.waypointModalData?.agl}/>
                 </Form.Group>
 
                 <hr/>
@@ -81,9 +81,9 @@ const waypointModal = (props: any) => {
                     <Form.Group className="mb-3" controlId="formBasicEmail">
                         <Form.Label>Speed</Form.Label>
                         <Form.Select aria-label="Default select example"
-                                     value={props.setwaypointModalData?.parameter?.airspeedSetPoint}
+                                     value={props.waypointModalData?.parameter?.airspeedSetPoint}
                                      onChange={(e: any) => {
-                                         var newAirspeedWaypoint = props.setwaypointModalData;
+                                         var newAirspeedWaypoint = props.waypointModalData;
                                          newAirspeedWaypoint.parameter.airspeedSetPoint = (parseInt(e.target.value));
                                          props.setwaypointModalData(newAirspeedWaypoint);
                                      }}>
@@ -98,10 +98,10 @@ const waypointModal = (props: any) => {
                         <Form.Check
                             type="checkbox"
                             id={"default-1"}
-                            checked={(props.setwaypointModalData?.parameter?.followTrack)}
+                            checked={(props.waypointModalData?.parameter?.followTrack)}
                             label={"Follow Track"}
                             onChange={(e: any) => {
-                                var newAirspeedWaypoint = props.setwaypointModalData;
+                                var newAirspeedWaypoint = props.waypointModalData;
                                 newAirspeedWaypoint.parameter.followTrack = (e.target.checked);
                                 props.setwaypointModalData(newAirspeedWaypoint);
                             }}
@@ -115,9 +115,9 @@ const waypointModal = (props: any) => {
                             name="command"
                             type="radio"
                             id={"inline1"}
-                            checked={(props.setwaypointModalData?.command == 'WayPoint' ? true : false)}
+                            checked={(props.waypointModalData?.command == 'WayPoint' ? true : false)}
                             onChange={() => {
-                                var newAirspeedWaypoint = props.setwaypointModalData;
+                                var newAirspeedWaypoint = props.waypointModalData;
                                 newAirspeedWaypoint.command = 'WayPoint';
                                 props.setwaypointModalData(newAirspeedWaypoint);
                             }}
@@ -128,9 +128,9 @@ const waypointModal = (props: any) => {
                             type="radio"
                             id={"inline2"}
                             style={{width: "200px", float: "left"}}
-                            checked={(props.setwaypointModalData?.command == 'LoiterTurns' ? true : false)}
+                            checked={(props.waypointModalData?.command == 'LoiterTurns' ? true : false)}
                             onChange={() => {
-                                var newAirspeedWaypoint = props.setwaypointModalData;
+                                var newAirspeedWaypoint = props.waypointModalData;
                                 newAirspeedWaypoint.command = 'LoiterTurns'
                                 props.setwaypointModalData(newAirspeedWaypoint);
                             }}
@@ -139,13 +139,13 @@ const waypointModal = (props: any) => {
                         <Form.Group style={{width: "200px", float: "left"}} className="mb-3"
                                     controlId="loiterTurns">
                             <Form.Control size="sm" type="text" placeholder="Index"
-                                          disabled={(props.setwaypointModalData?.command == 'LoiterTurns' ? false : true)}
+                                          disabled={(props.waypointModalData?.command == 'LoiterTurns' ? false : true)}
                                           onChange={(e) => {
                                               console.log(e.target.value)
-                                              var newAirspeedWaypoint = props.setwaypointModalData;
+                                              var newAirspeedWaypoint = props.waypointModalData;
                                               newAirspeedWaypoint.parameter.loiterTurns = (parseInt(e.target.value));
                                               props.setwaypointModalData(newAirspeedWaypoint);
-                                          }} value={props.setwaypointModalData?.parameter.loiterTurns}/>
+                                          }} value={props.waypointModalData?.parameter.loiterTurns}/>
                         </Form.Group>
 
                         <br/>
@@ -157,9 +157,9 @@ const waypointModal = (props: any) => {
                             name="command"
                             type="radio"
                             id={"inline2"}
-                            checked={(props.setwaypointModalData?.command == 'LoiterTime' ? true : false)}
+                            checked={(props.waypointModalData?.command == 'LoiterTime' ? true : false)}
                             onChange={() => {
-                                var newAirspeedWaypoint = props.setwaypointModalData;
+                                var newAirspeedWaypoint = props.waypointModalData;
                                 newAirspeedWaypoint.command = 'LoiterTime'
                                 props.setwaypointModalData(newAirspeedWaypoint);
                             }}
@@ -168,13 +168,13 @@ const waypointModal = (props: any) => {
                         <Form.Group style={{width: "200px", float: "left"}} className="mb-3"
                                     controlId="loiterMinutes">
                             <Form.Control size="sm" type="text" placeholder="Index"
-                                          disabled={(props.setwaypointModalData?.command == 'LoiterTime' ? false : true)}
+                                          disabled={(props.waypointModalData?.command == 'LoiterTime' ? false : true)}
                                           onChange={(e) => {
                                               console.log(e.target.value)
-                                              var newAirspeedWaypoint = props.setwaypointModalData;
+                                              var newAirspeedWaypoint = props.waypointModalData;
                                               newAirspeedWaypoint.parameter.loiterMinutes = (parseInt(e.target.value));
                                               props.setwaypointModalData(newAirspeedWaypoint);
-                                          }} value={props.setwaypointModalData?.parameter.loiterMinutes}/>
+                                          }} value={props.waypointModalData?.parameter.loiterMinutes}/>
                         </Form.Group>
 
                         <br/>
@@ -186,9 +186,9 @@ const waypointModal = (props: any) => {
                             name="command"
                             type="radio"
                             id={"inline2"}
-                            checked={(props.setwaypointModalData?.command == 'LoiterAltitude' ? true : false)}
+                            checked={(props.waypointModalData?.command == 'LoiterAltitude' ? true : false)}
                             onChange={() => {
-                                var newAirspeedWaypoint = props.setwaypointModalData;
+                                var newAirspeedWaypoint = props.waypointModalData;
                                 newAirspeedWaypoint.command = 'LoiterAltitude'
                                 props.setwaypointModalData(newAirspeedWaypoint);
                             }}
@@ -199,9 +199,9 @@ const waypointModal = (props: any) => {
                             name="command"
                             type="radio"
                             id={"inline2"}
-                            checked={(props.setwaypointModalData?.command == 'LoiterUnlimited' ? true : false)}
+                            checked={(props.waypointModalData?.command == 'LoiterUnlimited' ? true : false)}
                             onChange={() => {
-                                var newAirspeedWaypoint = props.setwaypointModalData;
+                                var newAirspeedWaypoint = props.waypointModalData;
                                 newAirspeedWaypoint.command = 'LoiterUnlimited';
                                 props.setwaypointModalData(newAirspeedWaypoint);
                             }}
@@ -218,14 +218,14 @@ const waypointModal = (props: any) => {
             <Modal.Footer>
 
                 <Button variant={"success"} onClick={() => {
-                    console.log(props.setwaypointModalData)
+                    console.log(props.waypointModalData)
                 }}>Parameter</Button>
 
                 <Button variant={"success"} onClick={() => {
-                    console.log(props.setwaypointModalData)
+                    console.log(props.waypointModalData)
                     //props.setwayPoint({detail: props.setwaypointModalData});
-                    props.mapWindow.csharp.setWaypoint(props.setwaypointModalData.index, props.setwaypointModalData.command, props.setwaypointModalData.latitude, props.setwaypointModalData.longitude, props.setwaypointModalData.altitude, props.setwaypointModalData.parameter);
-                    props.mapWindow.csharp.updateWaypoint(props.setwaypointModalData);
+                    props.mapWindow.csharp.setWaypoint(props.waypointModalData.index, props.waypointModalData.command, props.waypointModalData.latitude, props.waypointModalData.longitude, props.waypointModalData.altitude, props.waypointModalData.parameter);
+                    props.mapWindow.csharp.updateWaypoint(props.waypointModalData);
                     //console.log(setwaypointModalData)
                     props.setwaypointModalStatus(false)
                 }}>Ok</Button>
