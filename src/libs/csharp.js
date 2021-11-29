@@ -202,6 +202,7 @@ var csharp = {
     },
 
     async receivedMission(mission, isFromDownload = false) {
+        console.log(isFromDownload)
         await this.clearWaypoints();
         for (var i = 0; i < mission.mission.waypoints.length; i++) {
             let w = mission.mission.waypoints[i];
@@ -219,7 +220,7 @@ var csharp = {
         window.dispatchEvent(new CustomEvent('HomeChanged', {detail: this.mission.home}));
         window.dispatchEvent(new CustomEvent('GeoFenceChanged', {detail: this.mission.geoFence}));
 
-        window.dispatchEvent(new CustomEvent('DownloadMission', {detail: this.mission}));
+        if (isFromDownload == true) window.dispatchEvent(new CustomEvent('DownloadMission', {detail: this.mission}));
 
     },
 

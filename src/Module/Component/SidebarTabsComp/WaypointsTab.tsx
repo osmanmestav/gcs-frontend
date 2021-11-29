@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {Table, Button, ButtonGroup} from 'react-bootstrap'
 import GeoLocationModel from '../../models/geoLocationModel';
 import {missionDataType} from '../../models/missionTypes';
@@ -6,6 +6,7 @@ import {missionDataType} from '../../models/missionTypes';
 
 type WaypointsTabProps = {
     missionData: missionDataType;
+    missionDraft: missionDataType;
     jumpToWaypoint: (index: number) => void;
     homeLocation: GeoLocationModel;
     defaultAgl: number;
@@ -18,7 +19,18 @@ type WaypointsTabProps = {
     isDraft: boolean;
 }
 
+
 function WaypointsTab(props: WaypointsTabProps) {
+    const [waypointsTabData, setWaypointsData] = useState<any>(null);
+
+    useEffect(() => {
+        if (props.isDraft) {
+            setWaypointsData(props.missionDraft);
+        } else {
+            setWaypointsData(props.missionData);
+        }
+    }, [props.isDraft])
+
     // @ts-ignore
     return (
         <div>
@@ -34,9 +46,9 @@ function WaypointsTab(props: WaypointsTabProps) {
                 </thead>
                 <tbody>
                 <tr>
-                    <td>{(props.missionData as any).home?.latitude.toFixed(7)}</td>
-                    <td>{(props.missionData as any).home?.longitude.toFixed(7)}</td>
-                    <td>{(props.missionData as any).home?.altitude.toFixed(0)}</td>
+                    <td>{props.missionData?.home?.latitude.toFixed(7)}</td>
+                    <td>{props.missionData?.home?.longitude.toFixed(7)}</td>
+                    <td>{props.missionData?.home?.altitude.toFixed(0)}</td>
                     <td><input type="number" value={props.defaultAgl}
                                onChange={e => props.setDefaultAgl(parseInt(e.target.value))}/> m
                     </td>
@@ -62,7 +74,7 @@ function WaypointsTab(props: WaypointsTabProps) {
                     </thead>
                     <tbody>
                     {// @ts-ignore
-                        props.missionData.waypoints?.map((data, indexs) => {
+                        waypointsTabData?.waypoints?.map((data, indexs) => {
                             return (
                                 <tr
                                     key={indexs}

@@ -7,17 +7,17 @@ import WaypointsTab from "./SidebarTabsComp/WaypointsTab";
 import GeoFenceTab from "./SidebarTabsComp/GeoFenceTab";
 import Failsafe from "./SidebarTabsComp/Failsafe";
 import ModalsWaypoint from "./waypointModal";
-import {missionDataType} from "../models/missionTypes";
+import {geoFenceType, missionDataType} from "../models/missionTypes";
 import {debug} from "webpack";
 
-function WaypointsTable(props: any) {
+function SidebarTabs(props: any) {
 
     let waypointsListArray: any[];
 
     const [defaultAgl, setDefaultAgl] = useState<number>(400);
     const [isDraft, setIsDraft] = useState<boolean>(false);
-    const [missionData, setMission] = useState<object>({}); //Mission
-    const [missionDraft, setMissionDraft] = useState<object>({}); //MissionDraft
+    const [missionData, setMission] = useState<missionDataType>(); //Mission
+    const [missionDraft, setMissionDraft] = useState<missionDataType>(); //MissionDraft
 
 
     const [waypointsList, setwaypointsList] = useState<any>([]); //CommandList
@@ -29,77 +29,79 @@ function WaypointsTable(props: any) {
         longitude: 0,
         altitude: 0,
     });
-    const [waypointEditModal, setwaypointEditModal] = useState(false);
-    const [waypointEditModalData, setwaypointEditModalData] = useState<any>();
+    const [waypointModalStatus, setwaypointModalStatus] = useState<boolean>(false);
+    const [waypointModalData, setwaypointModalData] = useState<any>();
 
     const [GeoFenceData, setGeoFenceData] = useState<any>([]);
 
 
+    /*
+     * Waypoint Operation Start
+     */
+
     // @ts-ignore
-    const AddWaypoint = ({detail}) => {
-        console.log(detail)
-        debugger
+    const addWaypoint = ({detail}) => {
         if (detail.isFromDownload == undefined) {
             try {
-
                 var a = (missionDraft as any);
                 a.waypoints.push({...detail, agl: defaultAgl})
-                console.log(a)
-                // @ts-ignore
                 setMissionDraft(a);
-
             } catch (e) {
                 console.log(e)
             }
-            setIsDraft(true);
-            console.log(12312)
+            //setIsDraft(true);
         }
+        //console.log(isDraft)
     };
 
-
-    // @ts-ignore
-    const DownloadMission = ({detail}) => {
-        setMission(detail);
-        setMissionDraft(detail);
-        setIsDraft(false);
-    }
-
-    const ClearWaypoint = () => {
-        const newMissionDraft = missionDraft;
-        (newMissionDraft as any).waypoints = [];
-        setMission(newMissionDraft);
-        setIsDraft(true);
-    }
-
-    const RemoveWaypoint = (e: { detail: any; }) => {
-        // @ts-ignore
-        const filteredData = missionDraft.waypoints.filter(({index: index}) => index !== e.detail);
-        for (let i = 0; i < filteredData.length; i++) {
-            // @ts-ignore
-            filteredData[i].index = i;
-        }
-
-        var newMissionDraft = missionDraft;
-        (newMissionDraft as any).waypoints = filteredData;
-        setMission(newMissionDraft);
-        //setwaypointsList(filteredData);
-        setIsDraft(true);
-    };
-
-
-    // @ts-ignore
-    const ChangedWaypoint = (e) => {
-        setIsDraft(true);
+    const changedWaypoint = (e: { detail: any; }) => {
         try {
-            let newComandlistItem = [...waypointsList];
-            debugger
-            // @ts-ignore
-            newComandlistItem[e.detail.index] = {...e.detail, agl: defaultAgl};
-            setwaypointsList(newComandlistItem);
+            const draftMissionChangedData = missionDraft;
+            draftMissionChangedData!.waypoints[e.detail.index] = {...e.detail, agl: defaultAgl};
+            setMissionDraft(draftMissionChangedData)
         } catch (e) {
             console.log(e)
         }
-    };
+        //setIsDraft(true);
+        console.log(isDraft)
+    }
+
+
+    const removeWaypoint = (e: { detail: any; }) => {
+        try {// @ts-ignore
+            const filteredDrafDataMission = missionDraft!.waypoints.filter(({index: index}) => index !== e.detail);
+            for (let i = 0; i < filteredDrafDataMission.length; i++) {
+                // @ts-ignore
+                filteredDrafDataMission[i].index = i;
+            }
+            var newMissionDraft = missionDraft;
+            newMissionDraft!.waypoints = filteredDrafDataMission;
+            setMissionDraft(newMissionDraft);
+            //setIsDraft(true);
+        } catch (e) {
+            console.log(e)
+        }
+        console.log(isDraft)
+    }
+
+
+    const clearWaypoints = () => {
+        try {
+            if (missionDraft) {
+                const draftMissionClearData = missionDraft;
+                draftMissionClearData!.waypoints = [];
+                setMissionDraft(draftMissionClearData);
+            }
+            //setIsDraft(true);
+        } catch (e) {
+            console.log(e)
+        }
+        console.log(isDraft)
+    }
+    /*
+    * Waypoint Operation End
+    */
+
 
     // @ts-ignore
     const setwayPoint = (e) => {
@@ -120,24 +122,41 @@ function WaypointsTable(props: any) {
 
 
     const onWaypointClick = (index: number) => {
-        if (index < 0 || !waypointsList[index]) return;
+        if (index < 0 || !missionDraft!.waypoints[index]) return;
         if (selectedWaypointIndices.indexOf(index) >= 0)
             props.mapWindow.csharp.deselectWaypoint(index);
         else
             props.mapWindow.csharp.selectWaypoint(index);
     };
 
-    // @ts-ignore
-    const GeoFenceChanged = (data) => {
-        //console.log(data.detail)
-        setGeoFenceData(data.detail);
+
+    const GeoFenceChanged = (data: any) => {
+        try {
+            if (data.detail && missionDraft) {
+                const draftMissionGeofenceChanged = missionDraft;
+                draftMissionGeofenceChanged!.geoFence = data.detail;
+                setMissionDraft(draftMissionGeofenceChanged)
+            }
+        } catch (e) {
+            console.log(e)
+        }
+        //setIsDraft(true);
     }
 
+
+    // @ts-ignore
+    const DownloadMission = ({detail}) => {
+        setMission(detail);
+        setMissionDraft(detail);
+        setIsDraft(true);
+    }
+
+
     useEffect(() => {
-        props.mapWindow.addEventListener("WaypointAdded", AddWaypoint);
-        props.mapWindow.addEventListener("WaypointChanged", ChangedWaypoint);
-        props.mapWindow.addEventListener("WaypointsCleared", ClearWaypoint);
-        props.mapWindow.addEventListener("WaypointRemoved", RemoveWaypoint);
+        props.mapWindow.addEventListener("WaypointAdded", addWaypoint);
+        props.mapWindow.addEventListener("WaypointChanged", changedWaypoint);
+        props.mapWindow.addEventListener("WaypointRemoved", removeWaypoint);
+        props.mapWindow.addEventListener("WaypointsCleared", clearWaypoints);
 
         props.mapWindow.addEventListener("CurrentWaypointChanged", setwayPoint);
         props.mapWindow.addEventListener("WaypointSelectionChanged", WaypointSelectionChanged);
@@ -145,10 +164,10 @@ function WaypointsTable(props: any) {
         props.mapWindow.addEventListener("GeoFenceChanged", GeoFenceChanged);
         props.mapWindow.addEventListener("DownloadMission", DownloadMission);
         return () => {
-            props.mapWindow.removeEventListener("WaypointAdded", AddWaypoint);
-            props.mapWindow.removeEventListener("WaypointChanged", ChangedWaypoint);
-            props.mapWindow.removeEventListener("WaypointsCleared", ClearWaypoint);
-            props.mapWindow.removeEventListener("WaypointRemoved", RemoveWaypoint);
+            props.mapWindow.removeEventListener("WaypointAdded", addWaypoint);
+            props.mapWindow.removeEventListener("WaypointChanged", changedWaypoint);
+            props.mapWindow.removeEventListener("WaypointRemoved", removeWaypoint);
+            props.mapWindow.removeEventListener("WaypointsCleared", clearWaypoints);
 
             props.mapWindow.removeEventListener("CurrentWaypointChanged", setwayPoint);
             props.mapWindow.removeEventListener("WaypointSelectionChanged", WaypointSelectionChanged);
@@ -160,36 +179,60 @@ function WaypointsTable(props: any) {
 
 
     const WaypointEditAction = (data: any) => {
-        setwaypointEditModal(true);
-        if (!data.detail) setwaypointEditModalData(data);
+        setwaypointModalStatus(true);
+        if (!data.detail) setwaypointModalData(data);
 
         if (data.detail) {
             data.detail.agl = waypointsList[data.detail.index].agl;
-            setwaypointEditModalData(data.detail);
+            setwaypointModalData(data.detail);
         }
     }
 
+
+    const setDraftMode = (e: boolean) => {
+        console.log(e)
+        if (e == true) {
+            props.mapWindow.csharp.receivedMission({
+                mission: {
+                    waypoints: missionDraft?.waypoints,
+                    home: missionDraft?.home,
+                },
+                geoFence: missionDraft?.geoFence,
+                failsafe: missionDraft?.failsafe,
+            }, false);
+        }
+        if (e == false) {
+            props.mapWindow.csharp.receivedMission({
+                mission: {
+                    waypoints: missionData?.waypoints,
+                    home: missionData?.home
+                },
+                geoFence: missionData?.geoFence,
+                failsafe: missionData?.failsafe,
+            }, false);
+        }
+        setIsDraft(e)
+    }
 
     // @ts-ignore
     return (
 
         <div>
 
-            {waypointEditModalData &&
+            {waypointModalData &&
             <ModalsWaypoint
-                waypointEditModal={waypointEditModal}
-                waypointEditModalData={waypointEditModalData}
-                setwaypointEditModalData={setwaypointEditModalData}
-                waypointsList={waypointsList}
-                setwayPoint={setwayPoint}
-                setwaypointEditModal={(e: any) => {
-                    setwaypointEditModal(e)
+                waypointModalStatus={waypointModalStatus}
+                waypointModalData={waypointModalData}
+                setwaypointModalData={setwaypointModalData}
+                missionDraft={missionDraft as missionDataType}
+                setwaypointModalStatus={(e: any) => {
+                    setwaypointModalStatus(e)
                 }}
                 mapWindow={props.mapWindow}
             />}
 
 
-            {(missionData as any).waypoints &&
+            {missionData?.waypoints &&
             <Table striped bordered hover>
                 <thead>
                 <tr>
@@ -213,8 +256,8 @@ function WaypointsTable(props: any) {
                     <td>{wayPointCurrent?.altitude.toFixed(0)}</td>
                     <td>{wayPointCurrent?.parameter.toString()}</td>
                     <td><Switch onChange={(e) => {
-                        console.log(e)
                         setIsDraft(e)
+                        setDraftMode(e);
                     }} checked={isDraft} height={15} width={40} className="react-switch"/></td>
                 </tr>
                 <tr>
@@ -240,6 +283,7 @@ function WaypointsTable(props: any) {
                 <Tab eventKey="waypoints" title="Waypoints">
                     <WaypointsTab
                         missionData={missionData as missionDataType}
+                        missionDraft={missionDraft as missionDataType}
                         homeLocation={HomeLocation}
                         isDraft={isDraft}
                         currentMissionIndex={1}
@@ -263,12 +307,14 @@ function WaypointsTable(props: any) {
                 </Tab>
                 <Tab eventKey="Geofence" title="Geofence">
                     <GeoFenceTab
-                        GeoFenceData={GeoFenceData}
+                        missionDraft={(missionDraft?.geoFence as geoFenceType)}
+                        missionData={(missionData?.geoFence as geoFenceType)}
                         setGeoFenceActive={(e: any) => {
                             var newGeofence = GeoFenceData;
                             newGeofence.isActive = e.target.checked;
                             setGeoFenceData(newGeofence);
                         }}
+                        isDraft={isDraft}
                         setGeoFenceVisible={(e: any) => {
                             var newGeofence = GeoFenceData;
                             newGeofence.isVisible = e.target.checked;
@@ -277,9 +323,7 @@ function WaypointsTable(props: any) {
                     ></GeoFenceTab>
                 </Tab>
                 <Tab eventKey="Failsafe" title="Failsafe">
-                    <Failsafe
-                        csharp={props.mapWindow.csharp}
-                    />
+                    <Failsafe csharp={props.mapWindow.csharp}/>
                 </Tab>
                 <Tab eventKey="RcCommands" title="Rc Commands">
                     Rc Commands
@@ -292,4 +336,4 @@ function WaypointsTable(props: any) {
 }
 
 
-export default WaypointsTable;
+export default SidebarTabs;

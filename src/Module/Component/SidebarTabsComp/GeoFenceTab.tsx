@@ -1,8 +1,27 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {Table, Button, Form} from 'react-bootstrap'
+import {geoFenceType, missionDataType} from "../../models/missionTypes";
+
+type GeoFenceTabType = {
+    missionDraft: geoFenceType;
+    missionData: geoFenceType;
+    setGeoFenceActive: (val: any) => void;
+    setGeoFenceVisible: (val: any) => void;
+    isDraft: boolean;
+}
+
+function GeoFenceTab(props: GeoFenceTabType) {
+    const [geoFenceData, setGeoFenceData] = useState<geoFenceType>();
 
 
-function GeoFenceTab(props: any) {
+    useEffect(() => {
+        if (props.isDraft) {
+            setGeoFenceData(props.missionDraft);
+        } else {
+            setGeoFenceData(props.missionData);
+        }
+    }, [props.isDraft])
+
     // @ts-ignore
     return (
         <div>
@@ -21,10 +40,10 @@ function GeoFenceTab(props: any) {
                 </thead>
                 <tbody>
                 <tr>
-                    <td>{props.GeoFenceData?.returnPoint?.latitude.toFixed(7)}</td>
-                    <td>{props.GeoFenceData?.returnPoint?.longitude.toFixed(7)}</td>
-                    <td>{props.GeoFenceData?.maxAltitude?.toFixed(7)}</td>
-                    <td>{props.GeoFenceData?.minAltitude?.toFixed(7)}</td>
+                    <td>{geoFenceData?.returnPoint?.latitude?.toFixed(7)}</td>
+                    <td>{geoFenceData?.returnPoint?.longitude?.toFixed(7)}</td>
+                    <td>{geoFenceData?.maxAltitude?.toFixed(7)}</td>
+                    <td>{geoFenceData?.minAltitude?.toFixed(7)}</td>
                     <td>
                         <Form.Check
                             label="Active"
@@ -32,7 +51,7 @@ function GeoFenceTab(props: any) {
                             inline
                             type="checkbox"
                             id={"inline2"}
-                            checked={(props.GeoFenceData.isActive)}
+                            checked={(geoFenceData?.isActive)}
                             onChange={(e) => {
                                 props.setGeoFenceActive(e)
                             }}
@@ -44,7 +63,7 @@ function GeoFenceTab(props: any) {
                             name="command"
                             type="checkbox"
                             id={"inline2"}
-                            checked={(props.GeoFenceData.isVisible)}
+                            checked={(geoFenceData?.isVisible)}
                             onChange={(e) => {
                                 props.setGeoFenceVisible(e)
                             }}
@@ -54,7 +73,7 @@ function GeoFenceTab(props: any) {
                 </tr>
                 </tbody>
             </Table>
-            {props.GeoFenceData != "" &&
+            {geoFenceData &&
             <div style={{height: '260px', overflow: 'scroll'}}>
                 <Table striped bordered hover>
                     <thead>
@@ -66,12 +85,12 @@ function GeoFenceTab(props: any) {
                     </thead>
                     <tbody>
                     {// @ts-ignore
-                        props.GeoFenceData.points.map((data, index) => {
+                        geoFenceData.points.map((data, index) => {
                                 return (
                                     <tr key={index}>
                                         <td>{(index + 1)}</td>
-                                        <td>{data.latitude.toFixed(7)}</td>
-                                        <td>{data.longitude.toFixed(7)}</td>
+                                        <td>{(data as any)?.latitude.toFixed(7)}</td>
+                                        <td>{(data as any)?.longitude.toFixed(7)}</td>
                                     </tr>
                                 );
                             }
