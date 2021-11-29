@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {Form, Table, Button, ButtonGroup, Tabs, Tab, Modal} from 'react-bootstrap'
+import Switch from "react-switch";
 
 
 import WaypointsTab from "./SidebarTabsComp/WaypointsTab";
@@ -7,6 +8,7 @@ import GeoFenceTab from "./SidebarTabsComp/GeoFenceTab";
 import Failsafe from "./SidebarTabsComp/Failsafe";
 import ModalsWaypoint from "./waypointModal";
 import {missionDataType} from "../models/missionTypes";
+import {debug} from "webpack";
 
 function WaypointsTable(props: any) {
 
@@ -35,9 +37,11 @@ function WaypointsTable(props: any) {
 
     // @ts-ignore
     const AddWaypoint = ({detail}) => {
+        console.log(detail)
+        debugger
         if (detail.isFromDownload == undefined) {
             try {
-                debugger
+
                 var a = (missionDraft as any);
                 a.waypoints.push({...detail, agl: defaultAgl})
                 console.log(a)
@@ -48,6 +52,7 @@ function WaypointsTable(props: any) {
                 console.log(e)
             }
             setIsDraft(true);
+            console.log(12312)
         }
     };
 
@@ -59,7 +64,7 @@ function WaypointsTable(props: any) {
         setIsDraft(false);
     }
 
-    function ClearWaypoint() {
+    const ClearWaypoint = () => {
         const newMissionDraft = missionDraft;
         (newMissionDraft as any).waypoints = [];
         setMission(newMissionDraft);
@@ -87,6 +92,7 @@ function WaypointsTable(props: any) {
         setIsDraft(true);
         try {
             let newComandlistItem = [...waypointsList];
+            debugger
             // @ts-ignore
             newComandlistItem[e.detail.index] = {...e.detail, agl: defaultAgl};
             setwaypointsList(newComandlistItem);
@@ -97,6 +103,7 @@ function WaypointsTable(props: any) {
 
     // @ts-ignore
     const setwayPoint = (e) => {
+        //debugger
         if (e.detail.waypoint) {
             setwayPointCurrent({
                 ...e.detail.waypoint,
@@ -127,7 +134,7 @@ function WaypointsTable(props: any) {
     }
 
     useEffect(() => {
-        //props.mapWindow.addEventListener("WaypointAdded", AddWaypoint);
+        props.mapWindow.addEventListener("WaypointAdded", AddWaypoint);
         props.mapWindow.addEventListener("WaypointChanged", ChangedWaypoint);
         props.mapWindow.addEventListener("WaypointsCleared", ClearWaypoint);
         props.mapWindow.addEventListener("WaypointRemoved", RemoveWaypoint);
@@ -193,14 +200,7 @@ function WaypointsTable(props: any) {
                     <th style={{width: "150px"}}>Longitude</th>
                     <th>Altitude</th>
                     <th>Parameter</th>
-                    <th>
-                        <button onClick={() => {
-                            // @ts-ignore
-                            //console.log(missionData.waypoints)
-                            console.log(missionDraft)
-                        }}>Draft Data
-                        </button>
-                    </th>
+                    <th>Draf Mode</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -212,6 +212,24 @@ function WaypointsTable(props: any) {
                     <td>{wayPointCurrent?.longitude.toFixed(7)}</td>
                     <td>{wayPointCurrent?.altitude.toFixed(0)}</td>
                     <td>{wayPointCurrent?.parameter.toString()}</td>
+                    <td><Switch onChange={(e) => {
+                        console.log(e)
+                        setIsDraft(e)
+                    }} checked={isDraft} height={15} width={40} className="react-switch"/></td>
+                </tr>
+                <tr>
+                    <td colSpan={2}>
+                        <Button onClick={() => {
+                            console.log(missionData)
+                        }} variant={"dark"} size="sm">Data</Button>
+                    </td>
+
+                    <td colSpan={2}><Button onClick={() => {
+                        // @ts-ignore
+                        //console.log(missionData.waypoints)
+                        console.log(missionDraft)
+                    }} variant={"warning"} size="sm">Draft Data
+                    </Button></td>
                 </tr>
                 </tbody>
             </Table>}
@@ -224,7 +242,7 @@ function WaypointsTable(props: any) {
                         missionData={missionData as missionDataType}
                         homeLocation={HomeLocation}
                         isDraft={isDraft}
-                        currentMissionIndex={wayPointCurrent}
+                        currentMissionIndex={1}
                         defaultAgl={defaultAgl}
                         setDefaultAgl={setDefaultAgl}
                         WaypointEditAction={(e: any) => {

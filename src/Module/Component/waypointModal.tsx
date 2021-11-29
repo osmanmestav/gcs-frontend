@@ -56,9 +56,9 @@ const waypointModal = (props: any) => {
                     <Form.Label>Agl</Form.Label>
                     <Form.Control size="sm" type="text" placeholder="Index" onChange={(e) => {
                         props.setwaypointEditModalData({...props.waypointEditModalData, agl: parseInt(e.target.value)});
-                        /*var data = waypointsList;
-                        data[waypointEditModalData.index].agl = parseInt(e.target.value);
-                        setwaypointsList(data)*/
+                        var data = props.waypointsList;
+                        data[props.waypointEditModalData.index].agl = parseInt(e.target.value);
+                        props.setwaypointsList(data)
                         console.log(props.waypointsList[props.waypointEditModalData?.index])
                     }} value={props.waypointEditModalData?.agl}/>
                 </Form.Group>
@@ -75,7 +75,7 @@ const waypointModal = (props: any) => {
                                      value={props.waypointEditModalData?.parameter?.airspeedSetPoint}
                                      onChange={(e: any) => {
                                          var newAirspeedWaypoint = props.waypointEditModalData;
-                                         //newAirspeedWaypoint?.parameter?.airspeedSetPoint = (parseInt(e.target.value));
+                                         newAirspeedWaypoint.parameter.airspeedSetPoint = (parseInt(e.target.value));
                                          props.setwaypointEditModalData(newAirspeedWaypoint);
                                      }}>
                             <option value="0">Default</option>
@@ -93,7 +93,7 @@ const waypointModal = (props: any) => {
                             label={"Follow Track"}
                             onChange={(e: any) => {
                                 var newAirspeedWaypoint = props.waypointEditModalData;
-                                //newAirspeedWaypoint?.parameter?.followTrack = (e.target.checked);
+                                newAirspeedWaypoint.parameter.followTrack = (e.target.checked);
                                 props.setwaypointEditModalData(newAirspeedWaypoint);
                             }}
                         />
@@ -180,7 +180,7 @@ const waypointModal = (props: any) => {
                             checked={(props.waypointEditModalData?.command == 'LoiterAltitude' ? true : false)}
                             onChange={() => {
                                 var newAirspeedWaypoint = props.waypointEditModalData;
-                                //newAirspeedWaypoint?.command = 'LoiterAltitude'
+                                newAirspeedWaypoint.command = 'LoiterAltitude'
                                 props.setwaypointEditModalData(newAirspeedWaypoint);
                             }}
                         />
@@ -193,7 +193,7 @@ const waypointModal = (props: any) => {
                             checked={(props.waypointEditModalData?.command == 'LoiterUnlimited' ? true : false)}
                             onChange={() => {
                                 var newAirspeedWaypoint = props.waypointEditModalData;
-                                //newAirspeedWaypoint?.command = 'LoiterUnlimited';
+                                newAirspeedWaypoint.command = 'LoiterUnlimited';
                                 props.setwaypointEditModalData(newAirspeedWaypoint);
                             }}
                         />
