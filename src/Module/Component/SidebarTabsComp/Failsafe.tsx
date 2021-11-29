@@ -2,16 +2,18 @@ import React, {useState, useEffect} from 'react';
 import {Row, Col, Form} from 'react-bootstrap'
 
 
-interface FailSafe {
-    rescueOnLossOfControl: any;
-    blockRCCommandSwitch: any;
-    lossOfRCACtionChoice: any;
-    lossOfGCSActionChoice: any;
-    climbRateToleranceForRescue: any;
-    timeShortActionRC: any;
-    timeShortActionGPS: any;
-    timeShortActionGCS: any;
-    timeLongAction: any;
+type failSafeType = {
+    blockRCCommandSwitch: boolean
+    climbRateToleranceForRescue: number
+    longAction: { type: number, wayPointIndex: number }
+    lossOfGCSActionChoice: number
+    lossOfRCACtionChoice: number
+    rescueOnLossOfControl: boolean
+    timeLongAction: number
+    timeShortActionGCS: number
+    timeShortActionGPS: number
+    timeShortActionRC: number
+    csharp: any
 }
 
 function failSafeTab(props: any) {

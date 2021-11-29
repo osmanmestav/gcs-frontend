@@ -86,7 +86,7 @@ export default class MQTTManager {
                 let csharp = this.getcsharp();
                 if (csharp && data.value.aircraftName === csharp.selectedAircraft.aircraftName) {
                     setTimeout(() => {
-                        csharp.receivedMission(data.value);
+                        csharp.receivedMission(data.value, true);
                     }, 1000);
                 }
             },

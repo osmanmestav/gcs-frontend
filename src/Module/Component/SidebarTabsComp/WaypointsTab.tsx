@@ -1,21 +1,36 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {Table, Button, ButtonGroup} from 'react-bootstrap'
 import GeoLocationModel from '../../models/geoLocationModel';
+import {missionDataType} from '../../models/missionTypes';
+
 
 type WaypointsTabProps = {
+    missionData: missionDataType;
+    missionDraft: missionDataType;
     jumpToWaypoint: (index: number) => void;
     homeLocation: GeoLocationModel;
     defaultAgl: number;
     setDefaultAgl: (val: number) => void;
-    CommandList: any[];
     currentMissionIndex: number;
     selectedWaypointIndices: number[];
     WaypointEditAction: any;
     onWaypointClick: (index: number) => void;
     clearWaypoints: any;
+    isDraft: boolean;
 }
 
+
 function WaypointsTab(props: WaypointsTabProps) {
+    const [waypointsTabData, setWaypointsData] = useState<any>(null);
+
+    useEffect(() => {
+        if (props.isDraft) {
+            setWaypointsData(props.missionDraft);
+        } else {
+            setWaypointsData(props.missionData);
+        }
+    }, [props.isDraft])
+
     // @ts-ignore
     return (
         <div>
@@ -31,9 +46,9 @@ function WaypointsTab(props: WaypointsTabProps) {
                 </thead>
                 <tbody>
                 <tr>
-                    <td>{props.homeLocation.latitude.toFixed(7)}</td>
-                    <td>{props.homeLocation.longitude.toFixed(7)}</td>
-                    <td>{props.homeLocation.altitude.toFixed(0)}</td>
+                    <td>{props.missionData?.home?.latitude.toFixed(7)}</td>
+                    <td>{props.missionData?.home?.longitude.toFixed(7)}</td>
+                    <td>{props.missionData?.home?.altitude.toFixed(0)}</td>
                     <td><input type="number" value={props.defaultAgl}
                                onChange={e => props.setDefaultAgl(parseInt(e.target.value))}/> m
                     </td>
@@ -59,38 +74,38 @@ function WaypointsTab(props: WaypointsTabProps) {
                     </thead>
                     <tbody>
                     {// @ts-ignore
-                        props.CommandList.map((data, indexs) => {
-                                return (
-                                    <tr
-                                        key={indexs}
-                                        className={(indexs == (props.currentMissionIndex as any)?.index ? 'select-red' : '' ? 'select-red' : '') + (props.selectedWaypointIndices.indexOf(indexs) >= 0 ? ' select-grey' : '')}
-                                        onClick={() => {
-                                            props.onWaypointClick(indexs)
-                                        }}>
-                                        <td>{(indexs + 1)}</td>
-                                        <td>{data.command}</td>
-                                        <td>{data.latitude}</td>
-                                        <td>{data.longitude}</td>
-                                        <td>{data.altitude} m</td>
-                                        <td>{data.agl} m</td>
-                                        <td>{data.parameter.toString()}</td>
-                                        <td>
-                                            <ButtonGroup aria-label="Basic example" size="sm">
-                                                <Button style={{fontSize: "10px"}} variant="dark" onClick={() => {
-                                                    props.WaypointEditAction(data);
-                                                }}>
-                                                    <i className="fa fa-pencil-alt"></i>
-                                                </Button>
-                                                <Button style={{fontSize: "10px"}} variant="secondary"
-                                                        onClick={() => {
-                                                            props.jumpToWaypoint(indexs)
-                                                        }}>jump</Button>
-                                            </ButtonGroup>
-                                        </td>
-                                    </tr>
-                                );
-                            }
-                        )}
+                        waypointsTabData?.waypoints?.map((data, indexs) => {
+                            return (
+                                <tr
+                                    key={indexs}
+                                    className={(indexs == props.currentMissionIndex ? 'select-red' : '' ? 'select-red' : '') + (props.selectedWaypointIndices.indexOf(indexs) >= 0 ? ' select-grey' : '')}
+                                    onClick={() => {
+                                        props.onWaypointClick(indexs)
+                                    }}>
+                                    <td>{(indexs + 1)}</td>
+                                    <td>{data.command}</td>
+                                    <td>{data.latitude}</td>
+                                    <td>{data.longitude}</td>
+                                    <td style={{width: "100px"}}>{data.altitude.toFixed(0)} m</td>
+                                    <td>{data.agl} m</td>
+                                    <td>{data.parameter.toString()}</td>
+                                    <td>
+                                        <ButtonGroup aria-label="Basic example" size="sm">
+                                            <Button style={{fontSize: "10px"}} variant="dark" onClick={() => {
+                                                props.WaypointEditAction(data);
+                                            }}>
+                                                <i className="fa fa-pencil-alt"></i>
+                                            </Button>
+                                            <Button style={{fontSize: "10px"}} variant="warning"
+                                                    disabled={(props.isDraft)} onClick={() => {
+                                                props.jumpToWaypoint(indexs)
+                                            }}>jump</Button>
+                                        </ButtonGroup>
+                                    </td>
+                                </tr>
+                            );
+                        })
+                    }
                     </tbody>
                 </Table>
             </div>
