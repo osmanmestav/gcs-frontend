@@ -9,6 +9,7 @@ import {Container, Row, Col, Button} from 'react-bootstrap'
 import {Auth} from 'aws-amplify';
 import MQTTManager from './managers/mqttManager';
 import simulateTelemetry from './managers/simulateTelemetry';
+import { MessageBoxProvider } from './hooks/messageBox';
 
 const loginURL = "/login/signin.html";
 
@@ -91,27 +92,30 @@ function App() {
 
 //console.log(mapsWindow?.csharp.getCommandExpandedAt(0));
     return (
-        <Container fluid style={{paddingLeft: '0'}}>
-            {isLoggedIn &&
-            <Row>
-                <Col lg="12" className="mr-0 p-0">
-                    <iframe id="gcsMap" src="GCSMap/GCSMap.html" style={{
-                        width: '100%',
-                        height: '99.80vh',
-                        border: '0px',
-                        padding: '0px',
-                        margin: '0px'
-                    }}></iframe>
-                </Col>
-                <Button size="sm" variant="dark" className="openButton" onClick={sidebarOpenClose}><i className="fas fa-align-justify"></i></Button>
-                <Col lg="4" className={"sidebar " + sidebarStatus}>
-                    {mapsWindow &&
-                    <Sidebar mapWindow={mapsWindow} openGauges={openGauges}
-                             startTelemetrySimulation={startTelemetrySimulation}/>}
-                </Col>
-            </Row>
-            }
-        </Container>
+        <MessageBoxProvider>
+            <Container fluid style={{paddingLeft: '0'}}>
+                {isLoggedIn &&
+                <Row>
+                    <Col lg="12" className="mr-0 p-0">
+                        <iframe id="gcsMap" src="GCSMap/GCSMap.html" style={{
+                            width: '100%',
+                            height: '99.80vh',
+                            border: '0px',
+                            padding: '0px',
+                            margin: '0px'
+                        }}></iframe>
+                    </Col>
+                    <Button size="sm" variant="dark" className="openButton" onClick={sidebarOpenClose}><i className="fas fa-align-justify"></i></Button>
+                    <Col lg="4" className={"sidebar " + sidebarStatus}>
+                        {mapsWindow &&
+                        <Sidebar mapWindow={mapsWindow} openGauges={openGauges}
+                                startTelemetrySimulation={startTelemetrySimulation}/>}
+                    </Col>
+                </Row>
+                }
+            </Container>
+        </MessageBoxProvider>
+        
     );
 }
 

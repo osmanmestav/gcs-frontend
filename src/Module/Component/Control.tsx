@@ -5,20 +5,31 @@ import {
     Button,
     Form,
 } from 'react-bootstrap'
+import { useMessageBox } from '../../hooks/messageBox';
 import MissionManager from '../../managers/missionManager';
 
 function SidebarControlButtons(props: any) {
+    const { askConfirmation } = useMessageBox();
     const Download = () => {
         props.mapWindow.csharp.clearWaypoints();
         props.mapWindow.csharp.clearWaypoints();
         props.mapWindow.csharp.clearWaypoints();
         props.mapWindow.csharp.downloadMission();
     }
-    const Upload = () => {
+    const Upload = async () => {
         const missionManager = new MissionManager(props.mapWindow.csharp.getMission(), props.mapWindow.csharp.getCurrentTelemetrySummary()); 
-        let res = missionManager.check();
-        console.log("check result: ", res);
-        props.mapWindow.csharp.uploadMission();
+        let sanityCheckResults = missionManager.check();
+        let uploadPossible = sanityCheckResults === "";
+        if(!uploadPossible){
+            const confirmed = await askConfirmation({
+                title: "Warning!",
+                message: "We found the following issues in your mission:\n" + sanityCheckResults + "\r\n\r\nDo you want to upload anyway?",
+            });
+            uploadPossible = confirmed;
+        }
+        if(uploadPossible === true){
+            props.mapWindow.csharp.uploadMission();
+        }
     }
     const startMission = () => {
         props.mapWindow.csharp.startMission();
