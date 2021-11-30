@@ -6,7 +6,6 @@ export type missionDataType = {
 };
 
 export type failsafeType = {
-    isFromDownload: boolean,
     blockRCCommandSwitch: boolean,
     climbRateToleranceForRescue: number,
     longAction: { type: number, wayPointIndex: number },
@@ -20,7 +19,6 @@ export type failsafeType = {
 }
 
 export type geoFenceType = {
-    isFromDownload: boolean,
     maxAltitude: number,
     minAltitude: number,
     points: [],
@@ -30,7 +28,6 @@ export type geoFenceType = {
 }
 
 export type waypointDataType = {
-    isFromDownload: boolean,
     home: string,
     lat: number,
     command: number,
@@ -43,7 +40,6 @@ export type waypointDataType = {
 
 
 export type homeType = {
-    isFromDownload: boolean,
     altitude: number,
     latitude: number,
     longitude: number,

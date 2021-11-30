@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
-import {Form, Table, Button, ButtonGroup, Tabs, Tab, Modal} from 'react-bootstrap'
-import Switch from "react-switch";
+import {Table, Button, Tabs, Tab} from 'react-bootstrap'
+import Switch from 'react-switch';
+import clone from 'clone';
 
 
 import WaypointsTab from "./SidebarTabsComp/WaypointsTab";
@@ -8,27 +9,16 @@ import GeoFenceTab from "./SidebarTabsComp/GeoFenceTab";
 import Failsafe from "./SidebarTabsComp/Failsafe";
 import ModalsWaypoint from "./waypointModal";
 import {geoFenceType, missionDataType} from "../models/missionTypes";
-import {debug} from "webpack";
 
 function SidebarTabs(props: any) {
-
-    let waypointsListArray: any[];
-
+    const useDraftLogic : boolean = false;
     const [defaultAgl, setDefaultAgl] = useState<number>(400);
     const [isDraft, setIsDraft] = useState<boolean>(false);
-    const [missionData, setMission] = useState<missionDataType>(); //Mission
+    const [missionData, setMissionData] = useState<missionDataType>(); //Mission
     const [missionDraft, setMissionDraft] = useState<missionDataType>(); //MissionDraft
 
-
-    const [waypointsList, setwaypointsList] = useState<any>([]); //CommandList
-    const [Draft, setDraft] = useState<any>([]); //CommandList
     const [wayPointCurrent, setwayPointCurrent] = useState<any>(null);
     const [selectedWaypointIndices, setSelectedWaypointIndices] = useState<number[]>([]);
-    const [HomeLocation, setHomeLocation] = useState<any>({
-        latitude: 0,
-        longitude: 0,
-        altitude: 0,
-    });
     const [waypointModalStatus, setwaypointModalStatus] = useState<boolean>(false);
     const [waypointModalData, setwaypointModalData] = useState<any>();
 
@@ -39,33 +29,35 @@ function SidebarTabs(props: any) {
      * Waypoint Operation Start
      */
 
-    // @ts-ignore
-    const addWaypoint = ({detail}) => {
-        if (detail.isFromDownload == undefined) {
+    
+    const addWaypoint = (input: any) => {
+        const detail = input.detail;
+        if (detail.missionUpdateOrigin == null || detail.missionUpdateOrigin !== 'draft-toggle') {
             try {
-                var a = (missionDraft as any);
-                a.waypoints.push({...detail, agl: defaultAgl})
-                setMissionDraft(a);
+                if(missionDraft){
+                    missionDraft.waypoints.push({...detail, agl: defaultAgl})
+                    setMissionDraft(missionDraft);
+                    if(!isDraft && useDraftLogic)
+                        setIsDraft(true);
+                }
             } catch (e) {
                 console.log(e)
             }
-            //setIsDraft(true);
         }
-        //console.log(isDraft)
     };
 
     const changedWaypoint = (e: { detail: any; }) => {
         try {
-            const draftMissionChangedData = missionDraft;
-            draftMissionChangedData!.waypoints[e.detail.index] = {...e.detail, agl: defaultAgl};
-            setMissionDraft(draftMissionChangedData)
+            let ss = missionDraft!; 
+            ss.waypoints[e.detail.index] = {...e.detail, agl: defaultAgl};
+            setMissionDraft(ss);
+            if(!isDraft && useDraftLogic)
+                setIsDraft(true);
         } catch (e) {
             console.log(e)
         }
-        //setIsDraft(true);
         console.log(isDraft)
     }
-
 
     const removeWaypoint = (e: { detail: any; }) => {
         try {// @ts-ignore
@@ -77,26 +69,26 @@ function SidebarTabs(props: any) {
             var newMissionDraft = missionDraft;
             newMissionDraft!.waypoints = filteredDrafDataMission;
             setMissionDraft(newMissionDraft);
-            //setIsDraft(true);
+            if(!isDraft && useDraftLogic)
+                setIsDraft(true);
         } catch (e) {
             console.log(e)
         }
-        console.log(isDraft)
     }
-
-
-    const clearWaypoints = () => {
-        try {
-            if (missionDraft) {
-                const draftMissionClearData = missionDraft;
-                draftMissionClearData!.waypoints = [];
-                setMissionDraft(draftMissionClearData);
+    
+    const clearWaypoints = (e: { detail: any; }) => {
+        if (e.detail == null || e.detail !== 'draft-toggle') {
+            try {
+                if(missionDraft){
+                    missionDraft!.waypoints = [];
+                    setMissionDraft(missionDraft);
+                    if(!isDraft && useDraftLogic)
+                        setIsDraft(true);
+                }
+            } catch (e) {
+                console.log(e)
             }
-            //setIsDraft(true);
-        } catch (e) {
-            console.log(e)
         }
-        console.log(isDraft)
     }
     /*
     * Waypoint Operation End
@@ -140,17 +132,14 @@ function SidebarTabs(props: any) {
         } catch (e) {
             console.log(e)
         }
-        //setIsDraft(true);
     }
-
 
     // @ts-ignore
     const DownloadMission = ({detail}) => {
-        setMission(detail);
-        setMissionDraft(detail);
-        setIsDraft(true);
+        setMissionData(clone(detail));
+        setMissionDraft(clone(detail));
+        setIsDraft(false);
     }
-
 
     useEffect(() => {
         props.mapWindow.addEventListener("WaypointAdded", addWaypoint);
@@ -177,61 +166,31 @@ function SidebarTabs(props: any) {
         };
     });
 
-
     const WaypointEditAction = (data: any) => {
         setwaypointModalStatus(true);
         if (!data.detail) setwaypointModalData(data);
 
+        // todo: what are we doing in here?
         if (data.detail) {
-            data.detail.agl = waypointsList[data.detail.index].agl;
+            data.detail.agl = 100; // todo: what is the correct value?
             setwaypointModalData(data.detail);
         }
     }
 
-
-    const setDraftMode = (e: boolean) => {
-        console.log(e)
-        if (e == true) {
-            props.mapWindow.csharp.receivedMission({
-                mission: {
-                    waypoints: missionDraft?.waypoints,
-                    home: missionDraft?.home,
-                },
-                geoFence: missionDraft?.geoFence,
-                failsafe: missionDraft?.failsafe,
-            }, false);
-        }
-        if (e == false) {
-            props.mapWindow.csharp.receivedMission({
-                mission: {
-                    waypoints: missionData?.waypoints,
-                    home: missionData?.home
-                },
-                geoFence: missionData?.geoFence,
-                failsafe: missionData?.failsafe,
-            }, false);
-        }
-        setIsDraft(e)
+    const sendMission = (mission: missionDataType) => {
+        props.mapWindow.csharp.receivedMission({
+            mission: {
+                waypoints: mission?.waypoints,
+                home: mission?.home,
+            },
+            geoFence: mission?.geoFence,
+            failsafe: mission?.failsafe,
+        }, 'draft-toggle');
     }
 
     // @ts-ignore
     return (
-
         <div>
-
-            {waypointModalData &&
-            <ModalsWaypoint
-                waypointModalStatus={waypointModalStatus}
-                waypointModalData={waypointModalData}
-                setwaypointModalData={setwaypointModalData}
-                missionDraft={missionDraft as missionDataType}
-                setwaypointModalStatus={(e: any) => {
-                    setwaypointModalStatus(e)
-                }}
-                mapWindow={props.mapWindow}
-            />}
-
-
             {missionData?.waypoints &&
             <Table striped bordered hover>
                 <thead>
@@ -243,7 +202,9 @@ function SidebarTabs(props: any) {
                     <th style={{width: "150px"}}>Longitude</th>
                     <th>Altitude</th>
                     <th>Parameter</th>
-                    <th>Draf Mode</th>
+                    <th style={{display: useDraftLogic ? "block" : "none" }}>
+                        Draft Mode
+                    </th>
                 </tr>
                 </thead>
                 <tbody>
@@ -255,10 +216,16 @@ function SidebarTabs(props: any) {
                     <td>{wayPointCurrent?.longitude.toFixed(7)}</td>
                     <td>{wayPointCurrent?.altitude.toFixed(0)}</td>
                     <td>{wayPointCurrent?.parameter.toString()}</td>
-                    <td><Switch onChange={(e) => {
-                        setIsDraft(e)
-                        setDraftMode(e);
-                    }} checked={isDraft} height={15} width={40} className="react-switch"/></td>
+                    <td style={{display: useDraftLogic ? "block" : "none" }}>
+                        <Switch checked={isDraft} height={15} width={40} className="react-switch"
+                            onChange={(isDraftValue: boolean) => {
+                                if(useDraftLogic){
+                                    setIsDraft(isDraftValue);
+                                    let mission = isDraftValue ? clone(missionDraft) : clone(missionData);
+                                    sendMission(mission!);
+                                }
+                        }} />
+                    </td>
                 </tr>
                 <tr>
                     <td colSpan={2}>
@@ -277,14 +244,10 @@ function SidebarTabs(props: any) {
                 </tbody>
             </Table>}
 
-
             <Tabs defaultActiveKey="waypoints" transition={false} id="noanim-tab-example" className="mb-3">
-
                 <Tab eventKey="waypoints" title="Waypoints">
                     <WaypointsTab
-                        missionData={missionData as missionDataType}
-                        missionDraft={missionDraft as missionDataType}
-                        homeLocation={HomeLocation}
+                        missionWaypoints={isDraft || !useDraftLogic ? missionDraft! : missionData!}
                         isDraft={isDraft}
                         currentMissionIndex={1}
                         defaultAgl={defaultAgl}
@@ -307,8 +270,7 @@ function SidebarTabs(props: any) {
                 </Tab>
                 <Tab eventKey="Geofence" title="Geofence">
                     <GeoFenceTab
-                        missionDraft={(missionDraft?.geoFence as geoFenceType)}
-                        missionData={(missionData?.geoFence as geoFenceType)}
+                        missionGeofence= {isDraft || !useDraftLogic ? missionDraft?.geoFence! : missionData?.geoFence!}  
                         setGeoFenceActive={(e: any) => {
                             var newGeofence = GeoFenceData;
                             newGeofence.isActive = e.target.checked;
@@ -329,9 +291,20 @@ function SidebarTabs(props: any) {
                     Rc Commands
                 </Tab>
             </Tabs>
+
+            { waypointModalData &&
+                <ModalsWaypoint
+                    waypointModalStatus={waypointModalStatus}
+                    waypointModalData={waypointModalData}
+                    setwaypointModalData={setwaypointModalData}
+                    missionDraft={missionDraft as missionDataType}
+                    setwaypointModalStatus={(e: any) => {
+                        setwaypointModalStatus(e)
+                    }}
+                    mapWindow={props.mapWindow}
+                />
+            }
         </div>
-
-
     );
 }
 

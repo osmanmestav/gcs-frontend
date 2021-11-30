@@ -1,14 +1,11 @@
 import React, {useState, useEffect} from 'react';
 import {Table, Button, ButtonGroup} from 'react-bootstrap'
-import GeoLocationModel from '../../models/geoLocationModel';
 import {missionDataType} from '../../models/missionTypes';
 
 
 type WaypointsTabProps = {
-    missionData: missionDataType;
-    missionDraft: missionDataType;
+    missionWaypoints: missionDataType;
     jumpToWaypoint: (index: number) => void;
-    homeLocation: GeoLocationModel;
     defaultAgl: number;
     setDefaultAgl: (val: number) => void;
     currentMissionIndex: number;
@@ -16,7 +13,7 @@ type WaypointsTabProps = {
     WaypointEditAction: any;
     onWaypointClick: (index: number) => void;
     clearWaypoints: any;
-    isDraft: boolean;
+    isDraft: boolean
 }
 
 
@@ -24,12 +21,8 @@ function WaypointsTab(props: WaypointsTabProps) {
     const [waypointsTabData, setWaypointsData] = useState<any>(null);
 
     useEffect(() => {
-        if (props.isDraft) {
-            setWaypointsData(props.missionDraft);
-        } else {
-            setWaypointsData(props.missionData);
-        }
-    }, [props.isDraft])
+        setWaypointsData(props.missionWaypoints);
+    }, [props.missionWaypoints])
 
     // @ts-ignore
     return (
@@ -46,9 +39,9 @@ function WaypointsTab(props: WaypointsTabProps) {
                 </thead>
                 <tbody>
                 <tr>
-                    <td>{props.missionData?.home?.latitude.toFixed(7)}</td>
-                    <td>{props.missionData?.home?.longitude.toFixed(7)}</td>
-                    <td>{props.missionData?.home?.altitude.toFixed(0)}</td>
+                    <td>{waypointsTabData?.home?.latitude.toFixed(7)}</td>
+                    <td>{waypointsTabData?.home?.longitude.toFixed(7)}</td>
+                    <td>{waypointsTabData?.home?.altitude.toFixed(0)}</td>
                     <td><input type="number" value={props.defaultAgl}
                                onChange={e => props.setDefaultAgl(parseInt(e.target.value))}/> m
                     </td>
@@ -78,17 +71,17 @@ function WaypointsTab(props: WaypointsTabProps) {
                             return (
                                 <tr
                                     key={indexs}
-                                    className={(indexs == props.currentMissionIndex ? 'select-red' : '' ? 'select-red' : '') + (props.selectedWaypointIndices.indexOf(indexs) >= 0 ? ' select-grey' : '')}
+                                    className={(indexs === props.currentMissionIndex ? 'select-red' : '' ? 'select-red' : '') + (props.selectedWaypointIndices.indexOf(indexs) >= 0 ? ' select-grey' : '')}
                                     onClick={() => {
                                         props.onWaypointClick(indexs)
                                     }}>
                                     <td>{(indexs + 1)}</td>
                                     <td>{data.command}</td>
-                                    <td>{data.latitude}</td>
-                                    <td>{data.longitude}</td>
-                                    <td style={{width: "100px"}}>{data.altitude.toFixed(0)} m</td>
+                                    <td>{data.latitude?.toFixed(7)}</td>
+                                    <td>{data.longitude?.toFixed(7)}</td>
+                                    <td style={{width: "100px"}}>{data.altitude?.toFixed(0)} m</td>
                                     <td>{data.agl} m</td>
-                                    <td>{data.parameter.toString()}</td>
+                                    <td>{data.parameter?.toString()}</td>
                                     <td>
                                         <ButtonGroup aria-label="Basic example" size="sm">
                                             <Button style={{fontSize: "10px"}} variant="dark" onClick={() => {

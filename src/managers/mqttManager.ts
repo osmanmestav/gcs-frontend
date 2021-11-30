@@ -62,8 +62,7 @@ export default class MQTTManager {
                     this.mapsWindow.window.dispatchEvent(new CustomEvent("planeChanged", {"detail": data.value}));
                 }, 2000);
                 //console.log('Message received', data.value);
-
-                let values = preprocessTelemetry(data.value);
+                let values =  preprocessTelemetry(data.value);
                 if (csharp) {
                     csharp.updateAircraft(values);
                     if (data.value.aircraftName === csharp.selectedAircraft.aircraftName) {
@@ -86,7 +85,7 @@ export default class MQTTManager {
                 let csharp = this.getcsharp();
                 if (csharp && data.value.aircraftName === csharp.selectedAircraft.aircraftName) {
                     setTimeout(() => {
-                        csharp.receivedMission(data.value, true);
+                        csharp.receivedMission(data.value, 'mission-download');
                     }, 1000);
                 }
             },

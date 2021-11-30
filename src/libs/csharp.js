@@ -12,7 +12,7 @@ var csharp = {
              1=Return To Launch
              2=Jump
              */
-            longAction: {"type": 1, "wayPointIndex": 2},
+            longAction: 0, // {"type": 1, "wayPointIndex": 2},
             rescueOnLossOfControl: false,
             blockRCCommandSwitch: false,
             lossOfRCACtionChoice: 0, // 2 Enable long action, 1 Enable short action, 0 Disable
@@ -201,26 +201,31 @@ var csharp = {
         }
     },
 
-    async receivedMission(mission, isFromDownload = false) {
-        console.log(isFromDownload)
-        await this.clearWaypoints();
+    async receivedMission(mission, missionUpdateOrigin = 'not-set') {
+        // console.log(isFromDownload)
+        
+        await this.clearWaypoints(missionUpdateOrigin);
+        if(mission.mission.waypoints == null){
+            return;
+        }
         for (var i = 0; i < mission.mission.waypoints.length; i++) {
             let w = mission.mission.waypoints[i];
             let wp = new WayPoint(i, Command[w.command], w.latitude, w.longitude, w.altitude, w.parameter);
             this.mission.waypoints.push(wp);
-            wp.isFromDownload = isFromDownload;
-            //isFromDownload
+            wp.missionUpdateOrigin = missionUpdateOrigin;
+            
             window.dispatchEvent(new CustomEvent('WaypointAdded', {detail: wp}));
         }
 
         this.mission.home = mission.mission.home;
-        this.mission.home.isFromDownload = isFromDownload;
+        this.mission.home.missionUpdateOrigin = missionUpdateOrigin;
         this.mission.geoFence = mission.geoFence;
-        this.mission.geoFence.isFromDownload = isFromDownload;
+        this.mission.geoFence.missionUpdateOrigin = missionUpdateOrigin;
         window.dispatchEvent(new CustomEvent('HomeChanged', {detail: this.mission.home}));
         window.dispatchEvent(new CustomEvent('GeoFenceChanged', {detail: this.mission.geoFence}));
 
-        if (isFromDownload == true) window.dispatchEvent(new CustomEvent('DownloadMission', {detail: this.mission}));
+        if (missionUpdateOrigin === 'mission-download') 
+            window.dispatchEvent(new CustomEvent('DownloadMission', {detail: this.mission}));
 
     },
 
@@ -704,10 +709,11 @@ var csharp = {
         this.clearSelection();
     },
 
-    async clearWaypoints() {
+    async clearWaypoints(missionUpdateOrigin) {
         this.selectedWaypointIndices = [];
         this.mission.waypoints = [];
-        window.dispatchEvent(new CustomEvent('WaypointsCleared'));
+        window.dispatchEvent(new CustomEvent('WaypointsCleared', {detail: missionUpdateOrigin}));
+        
     },
 
     getCommandIndex(command) {

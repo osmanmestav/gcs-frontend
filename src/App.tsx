@@ -107,7 +107,7 @@ function App() {
                     </Col>
                     <Button size="sm" variant="dark" className="openButton" onClick={sidebarOpenClose}><i className="fas fa-align-justify"></i></Button>
                     <Col lg="4" className={"sidebar " + sidebarStatus}>
-                        {mapsWindow &&
+                        {mapsWindow && mapsWindow.csharp &&
                         <Sidebar mapWindow={mapsWindow} openGauges={openGauges}
                                 startTelemetrySimulation={startTelemetrySimulation}/>}
                     </Col>

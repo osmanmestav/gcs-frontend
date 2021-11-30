@@ -11,9 +11,6 @@ import MissionManager from '../../managers/missionManager';
 function SidebarControlButtons(props: any) {
     const { askConfirmation } = useMessageBox();
     const Download = () => {
-        props.mapWindow.csharp.clearWaypoints();
-        props.mapWindow.csharp.clearWaypoints();
-        props.mapWindow.csharp.clearWaypoints();
         props.mapWindow.csharp.downloadMission();
     }
     const Upload = async () => {
@@ -74,7 +71,7 @@ function SidebarControlButtons(props: any) {
 
     // @ts-ignore
     return (
-        <div style={{height: '100%', minHeight: '200px', marginTop: '20px'}}>
+        <div style={{height: '100%', minHeight: '40px', marginTop: '20px'}}>
             <Row>
                 <Col>
                     <Button style={{marginRight: '5px'}} variant="dark" size="sm" id="gaugesButton"
@@ -82,26 +79,28 @@ function SidebarControlButtons(props: any) {
                 </Col>
                 <Col>
                     <Button style={{marginRight: '5px'}} variant="dark" size="sm" id="simulateTelemetry"
-                            disabled={false}
+                            disabled={false} 
                             onClick={props.startTelemetrySimulation}>Simulate Telemetry</Button>
                 </Col>
+                <Button className="mb-2" style={{width: '100%', height: '28%', marginTop: '10px'}} variant="dark" size="sm"
+                            onClick={() => startMission()}><i className="fas fa-play"></i> Start Mission</Button>
             </Row>
             <Row style={{marginTop: '20px'}}>
-                <Col lg="2" className="p-1">
+                <Col lg="2" className="p-1" style={{display: "none"}}>
                     <Button style={{width: '100%', height: '100%'}} variant="dark" size="sm"
                             onClick={() => setLaunch()}>Return To Launch</Button>
                 </Col>
-                <Col lg="2" className="p-1">
+                <Col lg="2" className="p-1" style={{display: "none"}}>
                     <Button style={{width: '100%', height: '100%'}} variant="dark" size="sm"
                             onClick={() => setTakeoff()}>Take Off</Button>
                 </Col>
-                <Col lg="2" className="p-1">
+                <Col lg="2" className="p-1" style={{display: "none"}}>
                     <Button disabled className="mb-2" style={{width: '100%', height: '47%'}} variant="dark" size="sm">Vtol
                         Speed Hold</Button>
                     <Button disabled variant="dark" style={{width: '100%', height: '47%'}} size="sm">Deploy
                         Parachute</Button>
                 </Col>
-                <Col lg="2" className="p-1">
+                <Col lg="2" className="p-1" style={{display: "none"}}>
                     <Button disabled className="mb-2" style={{width: '100%'}} variant="dark" size="sm">Fly by Wire
                         A</Button>
                     <Button disabled className="mb-2" style={{width: '100%'}} variant="dark" size="sm">Fly by Wire
@@ -109,7 +108,7 @@ function SidebarControlButtons(props: any) {
                     <Button disabled className="mb-2" style={{width: '100%', height: '23%'}} variant="dark"
                             size="sm">Sit</Button>
                 </Col>
-                <Col lg="2">
+                <Col lg="2" style={{display: "none"}}>
                     <Button disabled className="mb-2" style={{width: '100%', height: '45px'}} variant="dark"
                             size="sm">Manuel</Button>
                     <Button disabled className="mb-2" style={{width: '100%', height: '45px'}} variant="dark"
@@ -117,7 +116,7 @@ function SidebarControlButtons(props: any) {
                     <Button disabled className="mb-2" style={{width: '100%', height: '45px'}} variant="dark"
                             size="sm">Loiter</Button>
                 </Col>
-                <Col lg="2">
+                <Col lg="2" style={{display: "none"}}>
                     <Button className="mb-2" style={{width: '100%', height: '28%'}} variant="dark" size="sm"
                             onClick={() => startMission()}><i className="fas fa-play"></i> Start Mission</Button>
                     <Button className="mb-2" style={{width: '100%', height: '28%'}} variant="dark" size="sm"

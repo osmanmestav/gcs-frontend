@@ -3,8 +3,7 @@ import {Table, Button, Form} from 'react-bootstrap'
 import {geoFenceType, missionDataType} from "../../models/missionTypes";
 
 type GeoFenceTabType = {
-    missionDraft: geoFenceType;
-    missionData: geoFenceType;
+    missionGeofence: geoFenceType;
     setGeoFenceActive: (val: any) => void;
     setGeoFenceVisible: (val: any) => void;
     isDraft: boolean;
@@ -15,11 +14,7 @@ function GeoFenceTab(props: GeoFenceTabType) {
 
 
     useEffect(() => {
-        if (props.isDraft) {
-            setGeoFenceData(props.missionDraft);
-        } else {
-            setGeoFenceData(props.missionData);
-        }
+        setGeoFenceData(props.missionGeofence);
     }, [props.isDraft])
 
     // @ts-ignore
