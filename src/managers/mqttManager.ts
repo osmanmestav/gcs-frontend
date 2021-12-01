@@ -62,7 +62,7 @@ export default class MQTTManager {
                     this.mapsWindow.window.dispatchEvent(new CustomEvent("planeChanged", {"detail": data.value}));
                 }, 2000);
                 //console.log('Message received', data.value);
-                let values =  preprocessTelemetry(data.value);
+                let values = preprocessTelemetry(data.value);
                 if (csharp) {
                     csharp.updateAircraft(values);
                     if (data.value.aircraftName === csharp.selectedAircraft.aircraftName) {
@@ -96,9 +96,12 @@ export default class MQTTManager {
         // this is no good but harmless for now. All aircrafts listen to the same event - but fortunately adapter drops if name and/or id does not match
         var requestId = 0;
         this.mapsWindow.addEventListener("CommandRequest", (e: any) => {
-            requestId++;
-            e.detail.requestId = requestId;
-            PubSub.publish('UL/U/' + aircraftCertificateName + '/C', e.detail);
+            let csharp = this.getcsharp();
+            if (csharp && aircraftCertificateName === csharp.selectedAircraft.aircraftCertificateName) {
+                requestId++;
+                e.detail.requestId = requestId;
+                PubSub.publish('UL/U/' + aircraftCertificateName + '/C', e.detail);
+            }
         });
 
 

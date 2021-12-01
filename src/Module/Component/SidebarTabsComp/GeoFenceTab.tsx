@@ -9,13 +9,12 @@ type GeoFenceTabType = {
     isDraft: boolean;
 }
 
-function GeoFenceTab(props: GeoFenceTabType) {
+function GeoFenceTab(props: any) {
     const [geoFenceData, setGeoFenceData] = useState<geoFenceType>();
-
 
     useEffect(() => {
         setGeoFenceData(props.missionGeofence);
-    }, [props.isDraft])
+    }, [props.missionGeofence])
 
     // @ts-ignore
     return (
