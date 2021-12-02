@@ -6,7 +6,9 @@ type GeoFenceTabType = {
     missionGeofence: geoFenceType;
     setGeoFenceActive: (val: any) => void;
     setGeoFenceVisible: (val: any) => void;
+    clearGeoFence: (val: any) => void;
     isDraft: boolean;
+    csharp: any;
 }
 
 function GeoFenceTab(props: any) {
@@ -15,6 +17,14 @@ function GeoFenceTab(props: any) {
     useEffect(() => {
         setGeoFenceData(props.missionGeofence);
     }, [props.missionGeofence])
+
+    const clearGeoFenceClick = () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+        props.csharp.clearGeoFence();
+        var geofence = geoFenceData;
+        geofence!.points = [];
+        setGeoFenceData(geofence)
+    }
 
     // @ts-ignore
     return (
@@ -28,7 +38,10 @@ function GeoFenceTab(props: any) {
                     <th>MinAlt</th>
                     <th>MaxAlt</th>
                     <th>
-                        <Button style={{fontSize: "10px"}} size="sm" variant="secondary">Clear</Button>
+                        <Button style={{fontSize: "10px"}} size="sm" variant="secondary"
+                                onClick={() => {
+                                    clearGeoFenceClick()
+                                }}>Clear</Button>
                     </th>
                 </tr>
                 </thead>
@@ -45,6 +58,7 @@ function GeoFenceTab(props: any) {
                             inline
                             type="checkbox"
                             id={"inline2"}
+                            disabled={props.isDraft}
                             checked={(geoFenceData?.isActive)}
                             onChange={(e) => {
                                 props.setGeoFenceActive(e)

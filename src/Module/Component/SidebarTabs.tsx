@@ -128,7 +128,7 @@ function SidebarTabs(props: any) {
                 const draftMissionGeofenceChanged = missionDraft;
                 draftMissionGeofenceChanged!.geoFence = data.detail;
                 setMissionDraft(draftMissionGeofenceChanged)
-                if (useDraftLogic == false) {
+                if (!useDraftLogic) {
                     const MissionGeofenceChangeData = missionData;
                     MissionGeofenceChangeData!.geoFence = data.detail;
                     setMissionDraft(MissionGeofenceChangeData)
@@ -255,7 +255,7 @@ function SidebarTabs(props: any) {
                     <WaypointsTab
                         missionWaypoints={isDraft || !useDraftLogic ? missionDraft! : missionData!}
                         isDraft={isDraft}
-                        currentMissionIndex={1}
+                        currentMissionIndex={wayPointCurrent?.index}
                         defaultAgl={defaultAgl}
                         setDefaultAgl={setDefaultAgl}
                         WaypointEditAction={(e: any) => {
@@ -291,7 +291,6 @@ function SidebarTabs(props: any) {
                         }}
                         isDraft={isDraft}
                         setGeoFenceVisible={(e: any) => {
-
                             var newGeofence = null;
                             if (isDraft || !useDraftLogic) {
                                 newGeofence = missionDraft;
@@ -303,10 +302,13 @@ function SidebarTabs(props: any) {
                                 setMissionData(newGeofence);
                             }
                         }}
+                        csharp={props.mapWindow.csharp}
                     ></GeoFenceTab>
                 </Tab>
                 <Tab eventKey="Failsafe" title="Failsafe">
-                    <Failsafe csharp={props.mapWindow.csharp}/>
+                    <Failsafe
+                        missionFailsafe={isDraft || !useDraftLogic ? missionDraft : missionData}
+                        csharp={props.mapWindow.csharp}/>
                 </Tab>
                 <Tab eventKey="RcCommands" title="Rc Commands">
                     Rc Commands
@@ -315,10 +317,10 @@ function SidebarTabs(props: any) {
 
             {waypointModalData &&
             <ModalsWaypoint
+                missionWaypoints={isDraft || !useDraftLogic ? missionDraft! : missionData!}
                 waypointModalStatus={waypointModalStatus}
                 waypointModalData={waypointModalData}
                 setwaypointModalData={setwaypointModalData}
-                missionDraft={missionDraft as missionDataType}
                 setwaypointModalStatus={(e: any) => {
                     setwaypointModalStatus(e)
                 }}

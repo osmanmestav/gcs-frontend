@@ -1,8 +1,10 @@
 import React, {useState, useEffect} from 'react';
 import {Row, Col, Form} from 'react-bootstrap'
+import {failsafeType} from "../../models/missionTypes";
 
 
-type failSafeType = {
+type failSafeTypes = {
+    missionFailsafe: failsafeType
     blockRCCommandSwitch: boolean
     climbRateToleranceForRescue: number
     longAction: { type: number, wayPointIndex: number }
@@ -17,14 +19,14 @@ type failSafeType = {
 }
 
 function failSafeTab(props: any) {
-
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [failSafe, setfailSafe] = useState<any>({});
+    const [failSafe, setfailSafe] = useState<any>();
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
-        setfailSafe(props.csharp?.getFailsafe());
-    });
+        setfailSafe(props.missionFailsafe?.failsafe);
+    }, [props.missionFailsafe?.failsafe])
+
 
     // @ts-ignore
     const setFailSafe = (data) => {
@@ -89,17 +91,26 @@ function failSafeTab(props: any) {
                     <Form.Group className="mb-3" controlId="formBasicEmail">
                         <Form.Label>Long Action</Form.Label>
                         <Form.Select size="sm" aria-label="Default select example"
-                                     value={failSafe?.longAction}
+                                     value={(failSafe?.longAction.type == 1 ? 'return' : failSafe?.longAction.wayPointIndex)}
                                      onChange={(e: any) => {
                                          var newfailSafe = failSafe;
-                                         newfailSafe.longAction = parseInt(e.target.value);
+                                         if (e.target.value == 'return') {
+                                             newfailSafe.longAction = {type: 1}
+                                         } else {
+                                             newfailSafe.longAction = {type: 2, wayPointIndex: parseInt(e.target.value)}
+                                         }
                                          setFailSafe(newfailSafe);
                                          props.csharp?.setFailsafe(newfailSafe)
                                      }}
                         >
-                            <option value="0">ReturnToLaunch</option>
-                            <option value="1">Short</option>
-                            <option value="2">Shot&Long</option>
+                            <option value="return">ReturnToLaunch</option>
+
+                            {
+                                props.missionFailsafe?.waypoints.map((option: any, index: number) => {
+                                    return (<option key={index} value={option.index}>Jump
+                                        To {index + "-" + option.command + " " + option.parameter?.toString()}</option>)
+                                })
+                            }
                         </Form.Select>
                     </Form.Group>
                 </Col>
@@ -115,7 +126,6 @@ function failSafeTab(props: any) {
                         id={"inline2"}
                         value={failSafe?.rescueOnLossOfControl}
                         onChange={(e) => {
-                            console.log(e)
                             var newfailSafe = failSafe;
                             newfailSafe.rescueOnLossOfControl = e.target.checked;
                             setFailSafe(newfailSafe);
@@ -136,7 +146,6 @@ function failSafeTab(props: any) {
                         id={"inline2"}
                         value={failSafe?.blockRCCommandSwitch}
                         onChange={(e) => {
-                            console.log(e)
                             var newfailSafe = failSafe;
                             newfailSafe.blockRCCommandSwitch = e.target.checked;
                             setFailSafe(newfailSafe);
@@ -156,9 +165,10 @@ function failSafeTab(props: any) {
                                       value={failSafe?.climbRateToleranceForRescue}
                                       onChange={(e) => {
                                           var newfailSafe = failSafe;
-                                          newfailSafe.climbRateToleranceForRescue = e.target.value;
+                                          newfailSafe.climbRateToleranceForRescue = parseInt(e.target.value);
                                           setFailSafe(newfailSafe);
                                           props.csharp?.setFailsafe(newfailSafe)
+                                          console.log(props.csharp?.getFailsafe())
                                       }}
 
                         />
@@ -178,7 +188,7 @@ function failSafeTab(props: any) {
                                       value={failSafe?.timeShortActionRC}
                                       onChange={(e) => {
                                           var newfailSafe = failSafe;
-                                          newfailSafe.timeShortActionRC = e.target.value;
+                                          newfailSafe.timeShortActionRC = parseInt(e.target.value);
                                           setFailSafe(newfailSafe);
                                           props.csharp?.setFailsafe(newfailSafe)
                                       }}
@@ -199,7 +209,7 @@ function failSafeTab(props: any) {
                                       value={failSafe?.timeShortActionGPS}
                                       onChange={(e) => {
                                           var newfailSafe = failSafe;
-                                          newfailSafe.timeShortActionGPS = e.target.value;
+                                          newfailSafe.timeShortActionGPS = parseInt(e.target.value);
                                           setFailSafe(newfailSafe);
                                           props.csharp?.setFailsafe(newfailSafe)
                                       }}
@@ -219,7 +229,7 @@ function failSafeTab(props: any) {
                                       value={failSafe?.timeShortActionGCS}
                                       onChange={(e) => {
                                           var newfailSafe = failSafe;
-                                          newfailSafe.timeShortActionGCS = e.target.value;
+                                          newfailSafe.timeShortActionGCS = parseInt(e.target.value);
                                           setFailSafe(newfailSafe);
                                           props.csharp?.setFailsafe(newfailSafe)
                                       }}
@@ -237,7 +247,7 @@ function failSafeTab(props: any) {
                         <Form.Control size="sm" type="number" placeholder="Index" value={failSafe?.timeLongAction}
                                       onChange={(e) => {
                                           var newfailSafe = failSafe;
-                                          newfailSafe.timeLongAction = e.target.value;
+                                          newfailSafe.timeLongAction = parseInt(e.target.value);
                                           setFailSafe(newfailSafe);
                                           props.csharp?.setFailsafe(newfailSafe)
                                       }}
