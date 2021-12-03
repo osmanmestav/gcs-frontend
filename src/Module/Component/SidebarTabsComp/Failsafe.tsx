@@ -94,21 +94,28 @@ function failSafeTab(props: any) {
                                      value={(failSafe?.longAction.type == 1 ? 'return' : failSafe?.longAction.wayPointIndex)}
                                      onChange={(e: any) => {
                                          var newfailSafe = failSafe;
-                                         if (e.target.value == 'return') {
-                                             newfailSafe.longAction = {type: 1}
-                                         } else {
-                                             newfailSafe.longAction = {type: 2, wayPointIndex: parseInt(e.target.value)}
+                                         if (newfailSafe) {
+                                             if (e.target.value == 'return') {
+                                                 newfailSafe.longAction = {type: 1}
+                                             } else {
+                                                 newfailSafe!.longAction = {
+                                                     type: 2,
+                                                     wayPointIndex: parseInt(e.target.value)
+                                                 }
+                                             }
+                                             setFailSafe(newfailSafe);
+                                             props.csharp?.setFailsafe(newfailSafe)
                                          }
-                                         setFailSafe(newfailSafe);
-                                         props.csharp?.setFailsafe(newfailSafe)
                                      }}
                         >
                             <option value="return">ReturnToLaunch</option>
 
                             {
                                 props.missionFailsafe?.waypoints.map((option: any, index: number) => {
-                                    return (<option key={index} value={option.index}>Jump
-                                        To {index + "-" + option.command + " " + option.parameter?.toString()}</option>)
+                                    if (option.command != 'VtolHoverTime' && option.command != 'TaxiToPoint' && option.command != 'ChuteLand') {
+                                        return (<option key={index} value={option.index}>Jump
+                                            To {(index + 1) + "-" + option.command + " " + option.parameter?.toString()}</option>)
+                                    }
                                 })
                             }
                         </Form.Select>

@@ -221,6 +221,7 @@ var csharp = {
         this.mission.home.missionUpdateOrigin = missionUpdateOrigin;
         this.mission.geoFence = mission.geoFence;
         this.mission.geoFence.missionUpdateOrigin = missionUpdateOrigin;
+        this.mission.failsafe = mission.failsafe;
         window.dispatchEvent(new CustomEvent('HomeChanged', {detail: this.mission.home}));
         window.dispatchEvent(new CustomEvent('GeoFenceChanged', {detail: this.mission.geoFence}));
 
@@ -951,6 +952,15 @@ var csharp = {
             window.dispatchEvent(new CustomEvent('GeoFenceChanged', {detail: this.mission.geoFence}));
         }
     },
+    geoFenceActive(isActivated) {
+        let req = {
+            aircraftId: this.selectedAircraft.aircraftId,
+            aircraftName: this.selectedAircraft.aircraftName,
+            command: "Mission_Geofence_Update",
+            message: {isActivated: isActivated}
+        }
+        window.dispatchEvent(new CustomEvent('CommandRequest', {detail: req}));
+    }
 };
 
 window.csharp = csharp;

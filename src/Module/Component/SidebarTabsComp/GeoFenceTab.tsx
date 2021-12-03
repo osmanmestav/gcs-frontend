@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Table, Button, Form} from 'react-bootstrap'
 import {geoFenceType, missionDataType} from "../../models/missionTypes";
+import Switch from 'react-switch';
 
 type GeoFenceTabType = {
     missionGeofence: geoFenceType;
@@ -42,6 +43,10 @@ function GeoFenceTab(props: any) {
                                 onClick={() => {
                                     clearGeoFenceClick()
                                 }}>Clear</Button>
+                        <Switch disabled={props.isDraft} checked={(geoFenceData?.isActive as any)} height={15} width={40} className="switch-geofence"
+                                onChange={(activeValue: boolean) => {
+                                     props.setGeoFenceActive(activeValue)
+                                }}/>
                     </th>
                 </tr>
                 </thead>
@@ -52,18 +57,6 @@ function GeoFenceTab(props: any) {
                     <td>{geoFenceData?.maxAltitude?.toFixed(7)}</td>
                     <td>{geoFenceData?.minAltitude?.toFixed(7)}</td>
                     <td>
-                        <Form.Check
-                            label="Active"
-                            name="command"
-                            inline
-                            type="checkbox"
-                            id={"inline2"}
-                            disabled={props.isDraft}
-                            checked={(geoFenceData?.isActive)}
-                            onChange={(e) => {
-                                props.setGeoFenceActive(e)
-                            }}
-                        />
 
                         <Form.Check
                             label="Visible"

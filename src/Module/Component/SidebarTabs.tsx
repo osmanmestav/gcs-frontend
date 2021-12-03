@@ -233,20 +233,7 @@ function SidebarTabs(props: any) {
                                 }}/>
                     </td>
                 </tr>
-                <tr>
-                    <td colSpan={2}>
-                        <Button onClick={() => {
-                            console.log(missionData)
-                        }} variant={"dark"} size="sm">Data</Button>
-                    </td>
 
-                    <td colSpan={2}><Button onClick={() => {
-                        // @ts-ignore
-                        //console.log(missionData.waypoints)
-                        console.log(missionDraft)
-                    }} variant={"warning"} size="sm">Draft Data
-                    </Button></td>
-                </tr>
                 </tbody>
             </Table>}
 
@@ -281,13 +268,14 @@ function SidebarTabs(props: any) {
                             var newGeofence = null;
                             if (isDraft || !useDraftLogic) {
                                 newGeofence = missionDraft;
-                                newGeofence!.geoFence.isActive = e.target.checked;
+                                newGeofence!.geoFence.isActive = e;
                                 setMissionDraft(newGeofence);
                             } else {
                                 newGeofence = missionData!;
-                                newGeofence.geoFence.isActive = e.target.checked;
+                                newGeofence.geoFence.isActive = e;
                                 setMissionData(newGeofence);
                             }
+                            props.mapWindow.csharp.geoFenceActive(e);
                         }}
                         isDraft={isDraft}
                         setGeoFenceVisible={(e: any) => {
