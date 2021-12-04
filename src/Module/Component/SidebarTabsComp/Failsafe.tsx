@@ -51,7 +51,7 @@ function failSafeTab(props: any) {
                 <Col>
                     <Form.Group className="mb-3" controlId="formBasicEmail">
                         <Form.Label>Lost RC Action</Form.Label>
-                        <Form.Select size="sm" aria-label="Default select example"
+                        <Form.Select size="sm" aria-label="Default select example" disabled
                                      value={failSafe?.lossOfRCACtionChoice}
                                      onChange={(e: any) => {
                                          var newfailSafe = failSafe;
