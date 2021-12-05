@@ -18,7 +18,7 @@ type WaypointsTabProps = {
 
 
 function WaypointsTab(props: WaypointsTabProps) {
-    const [waypointsTabData, setWaypointsData] = useState<any>(null);
+    const [waypointsTabData, setWaypointsData] = useState<missionDataType | null>(null);
 
     useEffect(() => {
         setWaypointsData(props.missionWaypoints);

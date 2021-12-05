@@ -1,6 +1,10 @@
 import React from "react";
 import { Button, Modal } from "react-bootstrap";
 
+// inspired from: https://dev.to/metamodal/control-a-dialog-box-asynchronously-using-react-hooks-4ik7
+// its code in here: https://codesandbox.io/s/github/metamodal/blog/tree/master/control-a-dialog-box-asynchronously-using-react-hooks/example/final
+// this is a good example for provider usage...
+
 type MessageBoxProps =
 {
     open: boolean,

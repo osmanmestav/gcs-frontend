@@ -30,7 +30,7 @@ export type geoFenceType = {
 export type waypointDataType = {
     home: string,
     lat: number,
-    command: number,
+    command: string,
     latitude: number,
     longitude: number,
     altitude: number,
@@ -43,4 +43,12 @@ export type homeType = {
     altitude: number,
     latitude: number,
     longitude: number,
+}
+
+export type TelemetrySummaryModel = {
+    aircraftId: string,
+    altitude: number,
+    latitude: number,
+    longitude: number,
+    isSittingOnGround: boolean,
 }

@@ -53,6 +53,10 @@ let Length = {
     },
     toKilometers: function () {
         return value / 1000;
+    },
+    fromMetersToKilometers: (v) => {
+        Length.fromMeters(v);
+        return Length.toKilometers();
     }
 };
 
@@ -124,7 +128,7 @@ let UnitsHelper = {
                     case UnitType.ShortDistance:
                         return Math.round(value, 1).toFixed(1) + " m";
                     case UnitType.LongDistance:
-                        return Math.round(Length.fromMeters(value).toKilometers(), 1) + " km";
+                        return Math.round(Length.fromMetersToKilometers(value), 1) + " km";
                     case UnitType.HorizontalSpeed:
                         return Math.round(value, 1).toFixed(1) + " m/s";
                     case UnitType.VerticalSpeed:
