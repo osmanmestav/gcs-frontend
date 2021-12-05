@@ -27,32 +27,32 @@ Object.values(UnitType).forEach(k => unitDictionary[k] = UnitSystem.SI);
 let Length = {
     value: 0,
     fromMeters: (v) => {
-        value = v;
+        Length.value = v;
         return this;
     },
     fromFeet: (v) => {
-        value = v * 0.3048;
+        Length.value = v * 0.3048;
         return this;
     },
     fromNauticalMiles: (v) => {
-        value = v * 1852;
+        Length.value = v * 1852;
         return this;
     },
     fromKilometers: (v) => {
-        value * 1000;
+        Length.value = v * 1000;
         return this;
     },
     toMeters: function () {
-        return value;
+        return Length.value;
     },
     toFeet: function () {
-        return value / 0.3048;
+        return Length.value / 0.3048;
     },
     toNauticalMiles: function () {
-        return value / 1852;
+        return Length.value / 1852;
     },
     toKilometers: function () {
-        return value / 1000;
+        return Length.value / 1000;
     },
     fromMetersToKilometers: (v) => {
         Length.fromMeters(v);
@@ -63,32 +63,32 @@ let Length = {
 let Speed = {
     value: 0,
     fromMetersPerSecond: function (v) {
-        value = v;
+        Speed.value = v;
         return this;
     },
     fromFeetPerSecond: function (v) {
-        value = v * 0.3048;
+        Speed.value = v * 0.3048;
         return this;
     },
     fromKnots: function (v) {
-        value = v * 0.514444;
+        Speed.value = v * 0.514444;
         return this;
     },
     fromKilometersPerHour: function (v) {
-        value = v / 3.6;
+        Speed.value = v / 3.6;
         return this;
     },
     toMetersPerSecond: function () {
-        return value;
+        return Speed.value;
     },
     toFeetPerSecond: function () {
-        return value / 0.3048;
+        return Speed.value / 0.3048;
     },
     toKnots: function () {
-        return value / 0.514444;
+        return Speed.value / 0.514444;
     },
     toKilometersPerHour: function () {
-        return value * 3.6;
+        return Speed.value * 3.6;
     }
 };
 

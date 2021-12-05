@@ -35,7 +35,7 @@ export type waypointDataType = {
     longitude: number,
     altitude: number,
     agl: number,
-    parameter: object,
+    parameter: any,
 };
 
 

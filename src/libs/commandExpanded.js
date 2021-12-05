@@ -1,3 +1,12 @@
+// // eslint-disable-next-line import/no-webpack-loader-syntax
+// import { UnitsHelper } from "exports-loader?exports=UnitsHelper!./unitsHelper";
+// // eslint-disable-next-line import/no-webpack-loader-syntax
+// import { UnitType } from "exports-loader?exports=UnitType!./unitsHelper";
+// // eslint-disable-next-line import/no-webpack-loader-syntax
+// import { Command } from "exports-loader?exports=Command!./types";
+// // eslint-disable-next-line import/no-webpack-loader-syntax
+// import { ConfigInfo } from "exports-loader?exports=ConfigInfo!./configInfo";
+
 let PredefinedAirspeedSetPoint = {
     DefaultSpeed: 0,
     LowSpeed: 1,
@@ -242,10 +251,13 @@ class NavigationCommandParam {
         switch (this.waypoint.command) {
             case Command.Jump:
                 return (
-                    this.jumpWaypointIndex >= 0 &&
-                    this.waypoint.mission.waypointCount &&
-                    this.jumpWaypointIndex < this.waypoint.mission.waypointCount
-                ) ? (this.jumpWaypointIndex + 1) + "-" + Command[this.waypoint.mission.waypoints[this.jumpWaypointIndex].command] : "-";
+                    this.jumpWaypointIndex >= 0 
+                                    // && this.waypoint.mission.waypointCount 
+                                    // && this.jumpWaypointIndex < this.waypoint.mission.waypointCount
+                                    ) 
+                        // eslint-disable-next-line no-useless-concat
+                        ? (this.jumpWaypointIndex + 1) + "-" + "Command" //Command[this.waypoint.mission.waypoints[this.jumpWaypointIndex].command] 
+                        : "-";
             //case Command.Jump: return (this.jumpWaypointIndex + 1).toFixed(0);
             case Command.WayPoint:
                 return navSt;
