@@ -197,10 +197,10 @@ var connectButton = $("<button></button>", {style: "float:left;"})
         if (isConnected) csharp.disconnect();
         else csharp.connect();
         connectButton.attr("disabled", true);
-        setTimeout(() => connectButton.attr("disabled", false), 3000);
+        // setTimeout(() => connectButton.attr("disabled", false), 3000);
     });
 $('#left-toolbar').prepend(connectButton);
-
+connectButton.attr("disabled", true);
 // Called from C#
 function setConnectionStatus(status) {
     connectButton.attr("disabled", false);

@@ -25,6 +25,8 @@ function SidebarControlButtons(props: any) {
             uploadPossible = confirmed;
         }
         if(uploadPossible === true){
+            if (sanityCheckResults === "") sanityCheckResults = "No problems were found.";
+            props.mapWindow.FlightSummary.addToSummary("Message", "Sanity check results: \r\n" + sanityCheckResults);
             props.mapWindow.csharp.uploadMission();
         }
     }
@@ -78,7 +80,7 @@ function SidebarControlButtons(props: any) {
                             onClick={props.openGauges}>Open Gauges</Button>
                 </Col>
                 <Col>
-                    <Button style={{marginRight: '5px'}} variant="dark" size="sm" id="simulateTelemetry"
+                    <Button style={{marginRight: '5px', display: "none"}} variant="dark" size="sm" id="simulateTelemetry"
                             disabled={false} 
                             onClick={props.startTelemetrySimulation}>Simulate Telemetry</Button>
                 </Col>

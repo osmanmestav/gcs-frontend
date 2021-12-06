@@ -37,7 +37,7 @@ function SidebarConsole(props: any) {
                     <ListGroup.Item key={index} style={{backgroundColor: '#000'}} as="li" action>
                         <b style={{color: '#fff'}}>{history}:</b>
                         <span
-                            style={{color: (category == 'Error' ? 'rgb(219 0 0)' : (category == 'Warning' ? '#ffc107' : '#fff'))}}> {msg}</span>
+                            style={{color: (category === 'Error' ? 'rgb(219 0 0)' : (category === 'Warning' ? '#ffc107' : '#fff'))}}> {msg}</span>
                     </ListGroup.Item>
                 )}
             </ListGroup>

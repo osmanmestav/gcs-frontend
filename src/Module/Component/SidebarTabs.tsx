@@ -150,15 +150,15 @@ function SidebarTabs(props: any) {
     // @ts-ignore
     function SetMapHome(e) {
         if (e.detail) {
-            var newGeofence = null;
-            if (isDraft || !useDraftLogic) {
-                newGeofence = missionDraft!;
-                newGeofence.home = e.detail;
-                setMissionDraft(newGeofence);
-            } else {
-                newGeofence = missionData!;
-                newGeofence.home = e.detail;
-                setMissionData(newGeofence);
+            try {
+                if (missionDraft) {
+                    missionDraft.home = e.detail;
+                    setMissionDraft(missionDraft);
+                    if (!isDraft && useDraftLogic)
+                        setIsDraft(true);
+                }
+            } catch (e) {
+                console.log(e)
             }
         }
     }
