@@ -28,7 +28,7 @@ export type geoFenceType = {
 }
 
 export type waypointDataType = {
-    home: string,
+    index: number,
     lat: number,
     command: string,
     latitude: number,

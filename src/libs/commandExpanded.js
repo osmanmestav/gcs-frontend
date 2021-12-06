@@ -70,7 +70,7 @@ class NavigationCommandParam {
     }
 
     set ushort0(value/*: number*/) {
-        PackHelper.PackBits(this.valueAsInt, 0, 16, value);
+        this.valueAsInt = PackHelper.PackBits(this.valueAsInt, value, 0, 16);
     }
 
     get ushort1() {
@@ -78,7 +78,7 @@ class NavigationCommandParam {
     }
 
     set ushort1(value/*: number*/) {
-        PackHelper.PackBits(this.valueAsInt, 16, 16, value);
+        this.valueAsInt = PackHelper.PackBits(this.valueAsInt, value, 16, 16);
     }
 
     get byte0() {
@@ -206,8 +206,7 @@ class NavigationCommandParam {
     }
 
     set jumpWaypointIndex(value/*:number*/) {
-        //this.ushort0 = value;
-        this.valueAsInt = PackHelper.PackBits(this.valueAsInt, 0, 16, value);
+        this.ushort0 = value;
     }
 
     get vtolHoverTime() {

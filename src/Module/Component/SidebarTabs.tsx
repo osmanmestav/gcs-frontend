@@ -8,7 +8,7 @@ import WaypointsTab from "./SidebarTabsComp/WaypointsTab";
 import GeoFenceTab from "./SidebarTabsComp/GeoFenceTab";
 import Failsafe from "./SidebarTabsComp/Failsafe";
 import ModalsWaypoint from "./waypointModal";
-import {geoFenceType, missionDataType} from "../models/missionTypes";
+import {missionDataType, waypointDataType} from "../models/missionTypes";
 
 function SidebarTabs(props: any) {
     const useDraftLogic: boolean = false;
@@ -19,11 +19,7 @@ function SidebarTabs(props: any) {
 
     const [wayPointCurrent, setwayPointCurrent] = useState<any>(null);
     const [selectedWaypointIndices, setSelectedWaypointIndices] = useState<number[]>([]);
-    const [waypointModalStatus, setwaypointModalStatus] = useState<boolean>(false);
-    const [waypointModalData, setwaypointModalData] = useState<any>();
-
-    const [GeoFenceData, setGeoFenceData] = useState<any>([]);
-
+    const [modalIndex, setModalIndex] = useState<number>(-1);
 
     /*
      * Waypoint Operation Start
@@ -189,14 +185,8 @@ function SidebarTabs(props: any) {
     });
 
     const WaypointEditAction = (data: any) => {
-        setwaypointModalStatus(true);
-        if (!data.detail) setwaypointModalData(data);
-
-        // todo: what are we doing in here?
-        if (data.detail) {
-            data.detail.agl = 100; // todo: what is the correct value?
-            setwaypointModalData(data.detail);
-        }
+        if (data.detail) 
+            setModalIndex(data.detail.index);
     }
 
     const sendMission = (mission: missionDataType) => {
@@ -208,6 +198,15 @@ function SidebarTabs(props: any) {
             geoFence: mission?.geoFence,
             failsafe: mission?.failsafe,
         }, 'draft-toggle');
+    }
+
+    const onCloseModal = (saveChanges: boolean, editedWaypoints: waypointDataType[] | null) => {
+        if(saveChanges && editedWaypoints != null){
+            editedWaypoints.forEach(w => {
+                props.mapWindow.csharp.updateWaypoint(w);  
+            })
+        }
+        setModalIndex(-1);
     }
 
     // @ts-ignore
@@ -319,17 +318,15 @@ function SidebarTabs(props: any) {
                 </Tab>
             </Tabs>
 
-            {waypointModalData &&
+            {
+            modalIndex !== -1 ?
             <ModalsWaypoint
-                missionWaypoints={isDraft || !useDraftLogic ? missionDraft! : missionData!}
-                waypointModalStatus={waypointModalStatus}
-                waypointModalData={waypointModalData}
-                setwaypointModalData={setwaypointModalData}
-                setwaypointModalStatus={(e: any) => {
-                    setwaypointModalStatus(e)
-                }}
-                mapWindow={props.mapWindow}
+                missionWaypoints={isDraft || !useDraftLogic ? missionDraft!.waypoints : missionData!.waypoints}
+                show={modalIndex !== -1}
+                editIndex={modalIndex}
+                onCloseModal={onCloseModal}
             />
+            : null
             }
         </div>
     );

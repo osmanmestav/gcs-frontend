@@ -72,7 +72,8 @@ function WaypointsTab(props: WaypointsTabProps) {
                                 <tr
                                     key={indexs}
                                     className={(indexs === props.currentMissionIndex ? 'select-red' : '' ? 'select-red' : '') + (props.selectedWaypointIndices.indexOf(indexs) >= 0 ? ' select-grey' : '')}
-                                    onClick={() => {
+                                    onClick={(e) => {
+                                        console.log("tr click", e);
                                         props.onWaypointClick(indexs)
                                     }}>
                                     <td>{(indexs + 1)}</td>
@@ -85,13 +86,14 @@ function WaypointsTab(props: WaypointsTabProps) {
                                     <td>
                                         <ButtonGroup aria-label="Basic example" size="sm">
                                             <Button style={{fontSize: "10px"}} variant="dark" onClick={() => {
-                                                props.WaypointEditAction(data);
+                                                props.WaypointEditAction({detail: data});
                                             }}>
                                                 <i className="fa fa-pencil-alt"></i>
                                             </Button>
                                             <Button style={{fontSize: "10px"}} variant="warning"
-                                                    disabled={(props.isDraft)} onClick={() => {
-                                                props.jumpToWaypoint(indexs)
+                                                    disabled={(props.isDraft)} onClick={(e) => {
+                                                        console.log("jump click", e);
+                                                        props.jumpToWaypoint(indexs)
                                             }}>jump</Button>
                                         </ButtonGroup>
                                     </td>
