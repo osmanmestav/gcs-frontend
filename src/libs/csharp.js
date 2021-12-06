@@ -957,7 +957,7 @@ var csharp = {
             aircraftId: this.selectedAircraft.aircraftId,
             aircraftName: this.selectedAircraft.aircraftName,
             command: "Mission_Geofence_Update",
-            gefenceMessage: {isActivated: isActivated}
+            geoFenceMessage: {isActivated: isActivated}
         }
         window.dispatchEvent(new CustomEvent('CommandRequest', {detail: req}));
     }

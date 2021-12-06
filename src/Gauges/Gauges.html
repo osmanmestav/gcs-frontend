@@ -5,7 +5,7 @@ body {
    background-color: #2e2824;
    position: fixed;
    padding: 10px;
-   
+
    transform: scale(1);
 }
 
@@ -73,14 +73,15 @@ function draw() {
 function init() {
 	var url = new URL(document.URL);
 	var isTiny = (url.search == "?size=tiny");
+    //console.log(isTiny)
 	if (isTiny) {
 		alertSound.parentElement.removeChild(alertSound);
 		resizeLayout(500, 700);
 	}
 	else
-		resizeLayout(1920, 1017);
+		resizeLayout(1920, 1217);
 	loadContent("layout",isTiny? "LayoutTiny.html" : "Layout.html",function() {
-		["js/gaugeAttitude.js","js/gaugeRPM.js","js/gaugeSpeed.js","js/gaugeVariometer.js","js/gaugeYawHeadingWind.js","js/indicators.js","js/leds.js","js/dataTable.js","js/graph.js","js/graphAltitude.js","js/airplaneTravelVisual.js"].forEach(loadScript);		
+		["js/gaugeAttitude.js","js/gaugeRPM.js","js/gaugeSpeed.js","js/gaugeVariometer.js","js/gaugeYawHeadingWind.js","js/indicators.js","js/leds.js","js/dataTable.js","js/graph.js","js/graphAltitude.js","js/airplaneTravelVisual.js"].forEach(loadScript);
 		setTimeout(draw, 1000);
 	});
 };

@@ -101,7 +101,7 @@ function SidebarTabs(props: any) {
         if (e.detail.waypoint) {
             setwayPointCurrent({
                 ...e.detail.waypoint,
-                commandSource: e.detail.waypoint.index,
+                commandSource: e.detail.commandSource,
             })
         }
     };
@@ -147,12 +147,28 @@ function SidebarTabs(props: any) {
         setIsDraft(false);
     }
 
+    // @ts-ignore
+    function SetMapHome(e) {
+        if (e.detail) {
+            var newGeofence = null;
+            if (isDraft || !useDraftLogic) {
+                newGeofence = missionDraft!;
+                newGeofence.home = e.detail;
+                setMissionDraft(newGeofence);
+            } else {
+                newGeofence = missionData!;
+                newGeofence.home = e.detail;
+                setMissionData(newGeofence);
+            }
+        }
+    }
+
     useEffect(() => {
         props.mapWindow.addEventListener("WaypointAdded", addWaypoint);
         props.mapWindow.addEventListener("WaypointChanged", changedWaypoint);
         props.mapWindow.addEventListener("WaypointRemoved", removeWaypoint);
         props.mapWindow.addEventListener("WaypointsCleared", clearWaypoints);
-
+        props.mapWindow.addEventListener("HomeChanged", SetMapHome);
         props.mapWindow.addEventListener("CurrentWaypointChanged", setwayPoint);
         props.mapWindow.addEventListener("WaypointSelectionChanged", WaypointSelectionChanged);
         props.mapWindow.addEventListener("editWaypoint", WaypointEditAction);
@@ -163,7 +179,7 @@ function SidebarTabs(props: any) {
             props.mapWindow.removeEventListener("WaypointChanged", changedWaypoint);
             props.mapWindow.removeEventListener("WaypointRemoved", removeWaypoint);
             props.mapWindow.removeEventListener("WaypointsCleared", clearWaypoints);
-
+            props.mapWindow.removeEventListener("HomeChanged", SetMapHome);
             props.mapWindow.removeEventListener("CurrentWaypointChanged", setwayPoint);
             props.mapWindow.removeEventListener("WaypointSelectionChanged", WaypointSelectionChanged);
             props.mapWindow.removeEventListener("editWaypoint", WaypointEditAction);
@@ -216,7 +232,7 @@ function SidebarTabs(props: any) {
                 <tbody>
                 <tr>
                     <td>{props.mapWindow.csharp.CommandSourceType[wayPointCurrent?.commandSource]}</td>
-                    <td>{(wayPointCurrent?.commandSource)}</td>
+                    <td>{(wayPointCurrent?.index + 1)}</td>
                     <td>{wayPointCurrent?.command}</td>
                     <td>{wayPointCurrent?.latitude.toFixed(7)}</td>
                     <td>{wayPointCurrent?.longitude.toFixed(7)}</td>

@@ -206,7 +206,8 @@ class NavigationCommandParam {
     }
 
     set jumpWaypointIndex(value/*:number*/) {
-        this.ushort0 = value;
+        //this.ushort0 = value;
+        this.valueAsInt = PackHelper.PackBits(this.valueAsInt, 0, 16, value);
     }
 
     get vtolHoverTime() {
@@ -251,12 +252,12 @@ class NavigationCommandParam {
         switch (this.waypoint.command) {
             case Command.Jump:
                 return (
-                    this.jumpWaypointIndex >= 0 
-                                    // && this.waypoint.mission.waypointCount 
+                    this.jumpWaypointIndex >= 0
+                                    // && this.waypoint.mission.waypointCount
                                     // && this.jumpWaypointIndex < this.waypoint.mission.waypointCount
-                                    ) 
+                                    )
                         // eslint-disable-next-line no-useless-concat
-                        ? (this.jumpWaypointIndex + 1) + "-" + "Command" //Command[this.waypoint.mission.waypoints[this.jumpWaypointIndex].command] 
+                        ? (this.jumpWaypointIndex + 1) + "-" + "Command" //Command[this.waypoint.mission.waypoints[this.jumpWaypointIndex].command]
                         : "-";
             //case Command.Jump: return (this.jumpWaypointIndex + 1).toFixed(0);
             case Command.WayPoint:

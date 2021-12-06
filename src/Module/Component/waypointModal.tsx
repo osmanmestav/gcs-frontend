@@ -55,7 +55,7 @@ const waypointModal = (props: any) => {
                             // @ts-ignore
                             props.missionWaypoints?.waypoints?.map((data, indexs) => {
                                 return (
-                                    <tr key={indexs}>
+                                    <tr key={indexs} className={(indexs === props.waypointModalData?.index ? 'select-red' : '' ? 'select-red' : '')}>
                                         <td>{(indexs + 1)}</td>
                                         <td>{data.command}</td>
                                         <td>{data.latitude?.toFixed(7)}</td>
@@ -161,8 +161,10 @@ const waypointModal = (props: any) => {
                                     label={"Follow Track"}
                                     onChange={(e: any) => {
                                         var newAirspeedWaypoint = props.waypointModalData;
-                                        newAirspeedWaypoint.parameter.followTrack = (e.target.checked);
+                                        newAirspeedWaypoint.parameter.followTrack = e.target.checked;
                                         props.setwaypointModalData(newAirspeedWaypoint);
+                                        console.log(e.target.checked)
+                                        console.log(props.waypointModalData)
                                     }}
                                 />
                             </Form.Group>
@@ -268,6 +270,122 @@ const waypointModal = (props: any) => {
                                         props.setwaypointModalData(newAirspeedWaypoint);
                                     }}
                                 />
+
+                                <Form.Check
+                                    label="Return to Launch"
+                                    name="command"
+                                    type="radio"
+                                    id={"inline2"}
+                                    checked={(props.waypointModalData?.command == 'ReturnToLaunch' ? true : false)}
+                                    onChange={() => {
+                                        var newAirspeedWaypoint = props.waypointModalData;
+                                        newAirspeedWaypoint.command = 'ReturnToLaunch';
+                                        props.setwaypointModalData(newAirspeedWaypoint);
+                                    }}
+                                />
+
+
+                                <br/>
+                                <br/>
+
+
+                                <Form.Group className="mb-3" controlId="formBasicEmail">
+                                    <Form.Label>Radius m</Form.Label>
+                                    <Form.Select aria-label="Jump"
+                                                 disabled={(props.waypointModalData?.command != 'WayPoint' && props.waypointModalData?.command != 'ReturnToLaunch' && props.waypointModalData?.command != 'Jump' ? false : true)}
+                                                 value={props.waypointModalData?.parameter?.jumpWaypointIndex}
+                                                 onChange={(e: any) => {
+                                                     console.log(e)
+                                                     var newAirspeedWaypoint = props.waypointModalData;
+                                                     newAirspeedWaypoint.parameter.jumpWaypointIndex = (parseInt(e.target.value));
+                                                     props.setwaypointModalData(newAirspeedWaypoint);
+                                                 }}>
+                                        <option value={0}>Default</option>
+                                    </Form.Select>
+                                </Form.Group>
+
+
+                                <Form.Group className="mb-3" controlId="formBasicEmail">
+                                    <Form.Check
+                                        type="checkbox"
+                                        id={"default-1"}
+                                        checked={(props.waypointModalData?.parameter?.isLoiterClockwise)}
+                                        label={"Clockwise"}
+                                        onChange={(e: any) => {
+
+                                            var newAirspeedWaypoint = props.waypointModalData;
+                                            newAirspeedWaypoint.parameter.isLoiterClockwise = e.target.checked;
+                                            props.setwaypointModalData(newAirspeedWaypoint);
+                                            console.log(props.waypointModalData)
+                                        }}
+                                    />
+                                </Form.Group>
+
+
+                                <Form.Check
+                                    style={{width: "100%", float: "left"}}
+                                    label="Hover for second"
+                                    name="command"
+                                    type="radio"
+                                    id={"inline2"}
+                                    disabled
+                                    checked={(props.waypointModalData?.command == 'VtolHoverTime' ? true : false)}
+                                    onChange={() => {
+                                        var newAirspeedWaypoint = props.waypointModalData;
+                                        newAirspeedWaypoint.command = 'VtolHoverTime'
+                                        props.setwaypointModalData(newAirspeedWaypoint);
+                                    }}
+                                />
+
+                                <Form.Group style={{width: "100%", float: "left"}} className="mb-3"
+                                            controlId="loiterMinutes">
+                                    <Form.Control size="sm" type="text" placeholder="Index"
+                                                  disabled={(props.waypointModalData?.command == 'VtolHoverTime' ? false : true)}
+                                                  onChange={(e) => {
+                                                      console.log(e.target.value)
+                                                      var newAirspeedWaypoint = props.waypointModalData;
+                                                      newAirspeedWaypoint.parameter.vtolHoverTime = (parseInt(e.target.value));
+                                                      props.setwaypointModalData(newAirspeedWaypoint);
+                                                  }} value={props.waypointModalData?.parameter.vtolHoverTime}/>
+                                </Form.Group>
+
+                                <br/>
+                                <br/>
+
+                                <Form.Check
+                                    style={{width: "100%", float: "left"}}
+                                    label="Jump"
+                                    name="command"
+                                    type="radio"
+                                    id={"inline2"}
+                                    checked={(props.waypointModalData?.command == 'Jump' ? true : false)}
+                                    onChange={() => {
+                                        var newAirspeedWaypoint = props.waypointModalData;
+                                        newAirspeedWaypoint.command = 'Jump'
+                                        props.setwaypointModalData(newAirspeedWaypoint);
+                                    }}
+                                />
+
+                                <Form.Group className="mb-3" controlId="formBasicEmail">
+                                    <Form.Select aria-label="Jump"
+                                                 disabled={(props.waypointModalData?.command == 'Jump' ? false : true)}
+                                                 value={props.waypointModalData?.parameter?.jumpWaypointIndex}
+                                                 onChange={(e: any) => {
+                                                     console.log(e)
+                                                     var newAirspeedWaypoint = props.waypointModalData;
+                                                     newAirspeedWaypoint.parameter.jumpWaypointIndex = (parseInt(e.target.value));
+                                                     props.setwaypointModalData(newAirspeedWaypoint);
+                                                 }}>
+                                        {
+                                            props.missionWaypoints?.waypoints.map((option: any, index: number) => {
+                                                return (<option key={index}
+                                                                value={option.index}>{(index + 1) + "-" + option.command}</option>)
+                                            })
+                                        }
+                                    </Form.Select>
+                                </Form.Group>
+
+
 
 
                             </Form.Group>
