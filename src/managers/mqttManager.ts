@@ -43,6 +43,8 @@ export default class MQTTManager {
         this.AircraftSubscribe("dev2");
         this.AircraftSubscribe("dev3");
         this.AircraftSubscribe("dev4");
+        this.AircraftSubscribe("dev5");
+        this.AircraftSubscribe("dev6");
     }
 
     finalizeMQTT = () => {
