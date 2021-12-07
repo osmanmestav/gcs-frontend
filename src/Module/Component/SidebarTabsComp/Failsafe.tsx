@@ -148,6 +148,7 @@ function failSafeTab(props: any) {
                     <Form.Check
                         label="Block RC command switch"
                         inline
+                        disabled
                         name="command"
                         type="checkbox"
                         id={"inline2"}
@@ -193,6 +194,7 @@ function failSafeTab(props: any) {
 
                         <Form.Control size="sm" type="number" placeholder="Index"
                                       value={failSafe?.timeShortActionRC}
+                                      disabled
                                       onChange={(e) => {
                                           var newfailSafe = failSafe;
                                           newfailSafe.timeShortActionRC = parseInt(e.target.value);

@@ -322,9 +322,6 @@ function SidebarTabs(props: any) {
                         missionFailsafe={isDraft || !useDraftLogic ? missionDraft : missionData}
                         csharp={props.mapWindow.csharp}/>
                 </Tab>
-                <Tab eventKey="RcCommands" title="Rc Commands">
-                    Rc Commands
-                </Tab>
             </Tabs>
 
             {
