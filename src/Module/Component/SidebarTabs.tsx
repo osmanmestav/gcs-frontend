@@ -31,6 +31,7 @@ function SidebarTabs(props: any) {
         if (detail.missionUpdateOrigin == null || detail.missionUpdateOrigin !== 'draft-toggle') {
             try {
                 if (missionDraft) {
+                    console.log(missionDraft)
                     missionDraft.waypoints.push({...detail, agl: defaultAgl})
                     setMissionDraft(missionDraft);
                     if (!isDraft && useDraftLogic)
@@ -44,15 +45,16 @@ function SidebarTabs(props: any) {
 
     const changedWaypoint = (e: { detail: any; }) => {
         try {
+            console.log(e.detail)
+            if (!e.detail.agl) e.detail.agl = defaultAgl;
             let ss = missionDraft!;
-            ss.waypoints[e.detail.index] = {...e.detail, agl: defaultAgl};
+            ss.waypoints[e.detail.index] = {...e.detail};
             setMissionDraft(ss);
             if (!isDraft && useDraftLogic)
                 setIsDraft(true);
         } catch (e) {
             console.log(e)
         }
-        console.log(isDraft)
     }
 
     const removeWaypoint = (e: { detail: any; }) => {
@@ -128,7 +130,6 @@ function SidebarTabs(props: any) {
                     const MissionGeofenceChangeData = missionData;
                     MissionGeofenceChangeData!.geoFence = data.detail;
                     setMissionDraft(MissionGeofenceChangeData)
-                    console.log(missionData)
                 }
             }
         } catch (e) {
@@ -138,6 +139,9 @@ function SidebarTabs(props: any) {
 
     // @ts-ignore
     const DownloadMission = ({detail}) => {
+        for (let i = 0; i < detail.waypoints.length; i++) {
+            detail.waypoints[i].agl = defaultAgl;
+        }
         setMissionData(clone(detail));
         setMissionDraft(clone(detail));
         setIsDraft(false);
@@ -185,7 +189,7 @@ function SidebarTabs(props: any) {
     });
 
     const WaypointEditAction = (data: any) => {
-        if (data.detail) 
+        if (data.detail)
             setModalIndex(data.detail.index);
     }
 
@@ -201,10 +205,12 @@ function SidebarTabs(props: any) {
     }
 
     const onCloseModal = (saveChanges: boolean, editedWaypoints: waypointDataType[] | null) => {
-        if(saveChanges && editedWaypoints != null){
+        if (saveChanges && editedWaypoints != null) {
             editedWaypoints.forEach(w => {
-                props.mapWindow.csharp.updateWaypoint(w);  
+                props.mapWindow.csharp.updateWaypoint(w);
+                missionData!.waypoints[w.index].agl = w.agl;
             })
+            setMissionData(missionData);
         }
         setModalIndex(-1);
     }
@@ -259,7 +265,10 @@ function SidebarTabs(props: any) {
                         isDraft={isDraft}
                         currentMissionIndex={wayPointCurrent?.index}
                         defaultAgl={defaultAgl}
-                        setDefaultAgl={setDefaultAgl}
+                        setDefaultAgl={(e: number) => {
+                            props.mapWindow.csharp.setAltitudeOverHome(e)
+                            setDefaultAgl(e);
+                        }}
                         WaypointEditAction={(e: any) => {
                             WaypointEditAction(e);
                         }}
@@ -319,14 +328,14 @@ function SidebarTabs(props: any) {
             </Tabs>
 
             {
-            modalIndex !== -1 ?
-            <ModalsWaypoint
-                missionWaypoints={isDraft || !useDraftLogic ? missionDraft!.waypoints : missionData!.waypoints}
-                show={modalIndex !== -1}
-                editIndex={modalIndex}
-                onCloseModal={onCloseModal}
-            />
-            : null
+                modalIndex !== -1 ?
+                    <ModalsWaypoint
+                        missionWaypoints={isDraft || !useDraftLogic ? missionDraft!.waypoints : missionData!.waypoints}
+                        show={modalIndex !== -1}
+                        editIndex={modalIndex}
+                        onCloseModal={onCloseModal}
+                    />
+                    : null
             }
         </div>
     );

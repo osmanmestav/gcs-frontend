@@ -722,6 +722,7 @@ var csharp = {
     },
 
     async addWaypoint(index, command, latitude, longitude, altitude, parameter) {
+        console.log(altitude)
         let AddWaypoint = (index, command, latitude, longitude, altitude, parameter) => {
             try {
                 let wp = new WayPoint(index, command, latitude, longitude, altitude, parameter);
@@ -960,7 +961,14 @@ var csharp = {
             geoFenceMessage: {isActivated: isActivated}
         }
         window.dispatchEvent(new CustomEvent('CommandRequest', {detail: req}));
-    }
+    },
+
+    setAltitudeOverHome(number) {
+        ConfigInfo.AltitudeOverHome = number;
+    },
+    getAltitudeOverHome() {
+        return ConfigInfo.AltitudeOverHome;
+    },
 };
 
 window.csharp = csharp;

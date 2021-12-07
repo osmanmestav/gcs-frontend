@@ -73,8 +73,9 @@ function WaypointsTab(props: WaypointsTabProps) {
                                     key={indexs}
                                     className={(indexs === props.currentMissionIndex ? 'select-red' : '' ? 'select-red' : '') + (props.selectedWaypointIndices.indexOf(indexs) >= 0 ? ' select-grey' : '')}
                                     onClick={(e) => {
-                                        console.log("tr click", e);
-                                        props.onWaypointClick(indexs)
+                                        if (e.defaultPrevented == false) {
+                                            props.onWaypointClick(indexs)
+                                        }
                                     }}>
                                     <td>{(indexs + 1)}</td>
                                     <td>{data.command}</td>
@@ -85,16 +86,21 @@ function WaypointsTab(props: WaypointsTabProps) {
                                     <td>{data.parameter?.toString()}</td>
                                     <td>
                                         <ButtonGroup aria-label="Basic example" size="sm">
-                                            <Button style={{fontSize: "10px"}} variant="dark" onClick={() => {
-                                                props.WaypointEditAction({detail: data});
-                                            }}>
+                                            <Button style={{fontSize: "10px"}}
+                                                    variant="dark"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        props.WaypointEditAction({detail: data});
+                                                    }}>
                                                 <i className="fa fa-pencil-alt"></i>
                                             </Button>
-                                            <Button style={{fontSize: "10px"}} variant="warning"
-                                                    disabled={(props.isDraft)} onClick={(e) => {
-                                                        console.log("jump click", e);
+                                            <Button style={{fontSize: "10px"}}
+                                                    variant="warning"
+                                                    disabled={(props.isDraft)}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
                                                         props.jumpToWaypoint(indexs)
-                                            }}>jump</Button>
+                                                    }}>jump</Button>
                                         </ButtonGroup>
                                     </td>
                                 </tr>

@@ -18,6 +18,8 @@ code {
 
 .select-red {
     background-color: #dd8a8a;
+    border-bottom: 3px solid #8B0000 !important;
+    border-top: 3px solid #8b0000 !important;
 }
 
 .select-grey {
