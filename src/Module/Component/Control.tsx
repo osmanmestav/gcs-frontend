@@ -31,7 +31,14 @@ function SidebarControlButtons(props: any) {
         }
     }
     const startMission = () => {
-        props.mapWindow.csharp.startMission();
+        const telemetrySummary = props.mapWindow.csharp.getCurrentTelemetrySummary();
+
+        if(telemetrySummary.isSittingOnGround){
+            props.mapWindow.csharp.startMission();
+        }
+        else {
+            props.mapWindow.FlightSummary.addToSummary("Warning", "Aircraft is already flying! \r\n");
+        }
     }
     const stopAllMissions = () => {
         props.mapWindow.csharp.stopAllMissions();
