@@ -140,12 +140,15 @@ function SidebarControlButtons(props: any) {
                     <Button style={{width: '24%', marginRight: '5px'}} variant="dark" size="sm"
                             onClick={() => Upload()}><i className="fas fa-cloud-upload-alt"></i> Upload</Button>
                     <Button style={{width: '24%', marginRight: '5px'}} variant="dark" size="sm"
+                            disabled={true}
                             onClick={() => loadMission()}>
                         <i className="fas fa-spinner"></i> Load
                     </Button>
                     <input type="file" ref={loadMissionFile} className="form-control form-control-sm"
                            style={{display: "none"}} accept={".json"} onChange={handleFileUpload}/>
-                    <Button style={{width: '25%'}} variant="dark" size="sm" onClick={() => saveMission()}>
+                    <Button style={{width: '25%'}} variant="dark" 
+                            disabled={true}
+                            size="sm" onClick={() => saveMission()}>
                         <i className="fas fa-file-export"></i> Save</Button>
 
                 </Col>
