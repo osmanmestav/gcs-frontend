@@ -12,7 +12,7 @@ var csharp = {
              1=Return To Launch
              2=Jump
              */
-            longAction: {type: 1}, // {"type": 1, "wayPointIndex": 2}, if(type==2) wayPointIndex = waypoints.index
+            /*longAction: {type: 1}, // {"type": 1, "wayPointIndex": 2}, if(type==2) wayPointIndex = waypoints.index
             rescueOnLossOfControl: false,
             blockRCCommandSwitch: false,
             lossOfRCACtionChoice: 0, // 2 Enable long action, 1 Enable short action, 0 Disable
@@ -21,7 +21,7 @@ var csharp = {
             timeShortActionRC: 1, //Seconds
             timeShortActionGPS: 2, //Seconds
             timeShortActionGCS: 10, //Seconds
-            timeLongAction: 300, //Seconds
+            timeLongAction: 300, //Seconds*/
 
         }
     },
@@ -203,12 +203,12 @@ var csharp = {
 
     async receivedMission(mission, missionUpdateOrigin = 'not-set') {
         // console.log(isFromDownload)
-
         await this.clearWaypoints(missionUpdateOrigin);
         if (mission.mission.waypoints == null) {
             return;
         }
         for (var i = 0; i < mission.mission.waypoints.length; i++) {
+
             let w = mission.mission.waypoints[i];
             let wp = new WayPoint(i, Command[w.command], w.latitude, w.longitude, w.altitude, w.parameter);
             this.mission.waypoints.push(wp);
@@ -221,7 +221,7 @@ var csharp = {
         this.mission.home.missionUpdateOrigin = missionUpdateOrigin;
         this.mission.geoFence = mission.geoFence;
         this.mission.geoFence.missionUpdateOrigin = missionUpdateOrigin;
-        this.mission.failsafe = mission.failsafe;
+        this.mission.failsafe = mission.failSafe;
         window.dispatchEvent(new CustomEvent('HomeChanged', {detail: this.mission.home}));
         window.dispatchEvent(new CustomEvent('GeoFenceChanged', {detail: this.mission.geoFence}));
 
@@ -969,6 +969,7 @@ var csharp = {
     getAltitudeOverHome() {
         return ConfigInfo.AltitudeOverHome;
     },
+
 };
 
 window.csharp = csharp;
