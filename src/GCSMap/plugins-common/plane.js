@@ -189,21 +189,18 @@ $('#left-toolbar').append(
         .click(goToPlane)
 );
 
-var isConnected = false;
+
 var connectButton = $("<button></button>", {style: "float:left;"})
     .addClass("cesium-button")
-    .text("Connect")
+    .text("Manage")
     .click(() => {
-        if (isConnected) csharp.disconnect();
-        else csharp.connect();
-        connectButton.attr("disabled", true);
-        // setTimeout(() => connectButton.attr("disabled", false), 3000);
+        csharp.manageAircrafts();
     });
 $('#left-toolbar').prepend(connectButton);
-connectButton.attr("disabled", true);
+connectButton.attr("disabled", false);
 // Called from C#
-function setConnectionStatus(status) {
-    connectButton.attr("disabled", false);
-    isConnected = (status != "Disconnected");
-    connectButton.text(isConnected ? "Disconnect" : "Connect");
-}
+// function setConnectionStatus(status) {
+//     connectButton.attr("disabled", false);
+//     isConnected = (status != "Disconnected");
+//     connectButton.text(isConnected ? "Disconnect" : "Connect");
+// }

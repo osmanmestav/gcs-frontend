@@ -2,6 +2,7 @@ import "../login";
 import Amplify from "@aws-amplify/core";
 import PubSub, {AWSIoTProvider} from "@aws-amplify/pubsub";
 import {preprocessTelemetry} from "../preprocessTelemetry";
+import { publishEvent, PubSubEvent } from "../utils/PubSubService";
 
 interface AircraftModel {
     aircraftId: number,
@@ -133,9 +134,29 @@ export default class MQTTManager {
     };
 
     simulateTelemetryPublish = (certificateNameForTelemetrySimulation: string, sampleTelemetryMessage: any) => {
-        PubSub.publish('UL/U/' + certificateNameForTelemetrySimulation + '/T', sampleTelemetryMessage).then(() => {
+        PubSub.publish('UL/U/' + certificateNameForTelemetrySimulation + '/S', sampleTelemetryMessage).then(() => {
         }).catch(err => {
             console.log(err);
         });
+    }
+
+    allStatus : any;
+    manageAircrafts = (initiate: boolean) => {
+
+        if(this.allStatus != null){
+            this.allStatus.unsubscribe();
+            console.log('stopped listening to the status messages\n');
+        }
+        if(initiate){
+            console.log('started listening to the status messages\n');
+            this.allStatus = PubSub.subscribe('UL/U/+/S').subscribe({
+                next: data => {
+                    console.log('status message: ', data.value); 
+                    publishEvent(PubSubEvent.StatusMessageReceivedOnAircraftManagement, data.value);        
+                },
+                error: error => console.error(error),
+                complete: () => console.log('Done'),
+            });
+        }
     }
 }

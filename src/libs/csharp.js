@@ -970,6 +970,9 @@ var csharp = {
         return ConfigInfo.AltitudeOverHome;
     },
 
+    manageAircrafts(){
+        window.dispatchEvent(new CustomEvent('ManageAircrafts', {detail: null}));
+    },
 };
 
 window.csharp = csharp;

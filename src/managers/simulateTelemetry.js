@@ -93,6 +93,7 @@ var sampleTelemetryMessage = {
     "linkStatus": 3,
     "incrementalCommandId": 9,
     "currentCommand": "7-WayPoint",
+    "command": "WayPoint",
     "commandSource": "Mission",
     "remainingAmount": 63,
     "distanceToWayPoint": "1.2 km",
