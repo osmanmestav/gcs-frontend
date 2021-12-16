@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {Table, Button, ButtonGroup} from 'react-bootstrap'
 import {missionDataType} from '../../models/missionTypes';
+import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
 
 
 type WaypointsTabProps = {
@@ -13,7 +14,8 @@ type WaypointsTabProps = {
     WaypointEditAction: any;
     onWaypointClick: (index: number) => void;
     clearWaypoints: any;
-    isDraft: boolean
+    isDraft: boolean,
+    setIndexWaypoints: (val: number) => void;
 }
 
 
@@ -24,6 +26,10 @@ function WaypointsTab(props: WaypointsTabProps) {
         setWaypointsData(props.missionWaypoints);
     }, [props.missionWaypoints])
 
+    const handleDragEnd = (e: any) => {
+        console.log(e)
+        props.setIndexWaypoints(e);
+    }
     // @ts-ignore
     return (
         <div>
@@ -52,63 +58,85 @@ function WaypointsTab(props: WaypointsTabProps) {
                 </tbody>
             </Table>
             <div style={{height: '260px', overflow: 'scroll'}}>
-                <Table striped bordered hover>
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Command</th>
-                        <th>Latitude</th>
-                        <th>Longitude</th>
-                        <th>MSL</th>
-                        <th>AGL</th>
-                        <th>Parameter</th>
-                        <th></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {// @ts-ignore
-                        waypointsTabData?.waypoints?.map((data, indexs) => {
-                            return (
-                                <tr
-                                    key={indexs}
-                                    className={(indexs === props.currentMissionIndex ? 'select-red' : '' ? 'select-red' : '') + (props.selectedWaypointIndices.indexOf(indexs) >= 0 ? ' select-grey' : '')}
-                                    onClick={(e) => {
-                                        if (e.defaultPrevented === false) {
-                                            props.onWaypointClick(indexs)
-                                        }
-                                    }}>
-                                    <td>{(indexs + 1)}</td>
-                                    <td>{data.command}</td>
-                                    <td>{data.latitude?.toFixed(7)}</td>
-                                    <td>{data.longitude?.toFixed(7)}</td>
-                                    <td style={{width: "100px"}}>{data.altitude?.toFixed(0)} m</td>
-                                    <td>{data.agl} m</td>
-                                    <td>{data.parameter?.toString()}</td>
-                                    <td>
-                                        <ButtonGroup aria-label="Basic example" size="sm">
-                                            <Button style={{fontSize: "10px"}}
-                                                    variant="dark"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        props.WaypointEditAction({detail: data});
-                                                    }}>
-                                                <i className="fa fa-pencil-alt"></i>
-                                            </Button>
-                                            <Button style={{fontSize: "10px"}}
-                                                    variant="warning"
-                                                    disabled={(props.isDraft)}
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        props.jumpToWaypoint(indexs)
-                                                    }}>jump</Button>
-                                        </ButtonGroup>
-                                    </td>
-                                </tr>
-                            );
-                        })
-                    }
-                    </tbody>
-                </Table>
+                <DragDropContext onDragEnd={handleDragEnd}>
+                    <Table striped bordered hover>
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>#</th>
+                            <th>Command</th>
+                            <th>Latitude</th>
+                            <th>Longitude</th>
+                            <th>MSL</th>
+                            <th>AGL</th>
+                            <th>Parameter</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <Droppable droppableId="droppable-1">
+                            {(provider) => (
+                                <tbody
+                                    className="text-capitalize"
+                                    ref={provider.innerRef}
+                                    {...provider.droppableProps}
+                                >
+                                {// @ts-ignore
+                                    waypointsTabData?.waypoints?.map((data, indexs) => {
+                                        return (
+                                            <Draggable
+                                                key={indexs}
+                                                draggableId={(data.command + '-' + indexs)}
+                                                index={indexs}
+                                            >
+                                                {(provider) => (
+                                                    <tr
+                                                        {...provider.draggableProps} ref={provider.innerRef}
+                                                        key={indexs}
+                                                        className={(indexs === props.currentMissionIndex ? 'select-red' : '' ? 'select-red' : '') + (props.selectedWaypointIndices.indexOf(indexs) >= 0 ? ' select-grey' : '')}
+                                                        onClick={(e) => {
+                                                            if (e.defaultPrevented === false) {
+                                                                props.onWaypointClick(indexs)
+                                                            }
+                                                        }}>
+                                                        <td {...provider.dragHandleProps}> =</td>
+                                                        <td>{(indexs + 1)}</td>
+                                                        <td>{data.command}</td>
+                                                        <td>{data.latitude?.toFixed(7)}</td>
+                                                        <td>{data.longitude?.toFixed(7)}</td>
+                                                        <td style={{width: "100px"}}>{data.altitude?.toFixed(0)} m</td>
+                                                        <td>{data.agl} m</td>
+                                                        <td>{data.parameter?.toString()}</td>
+                                                        <td>
+                                                            <ButtonGroup aria-label="Basic example" size="sm">
+                                                                <Button style={{fontSize: "10px"}}
+                                                                        variant="dark"
+                                                                        onClick={(e) => {
+                                                                            e.preventDefault();
+                                                                            props.WaypointEditAction({detail: data});
+                                                                        }}>
+                                                                    <i className="fa fa-pencil-alt"></i>
+                                                                </Button>
+                                                                <Button style={{fontSize: "10px"}}
+                                                                        variant="warning"
+                                                                        disabled={(props.isDraft)}
+                                                                        onClick={(e) => {
+                                                                            e.preventDefault();
+                                                                            props.jumpToWaypoint(indexs)
+                                                                        }}>jump</Button>
+                                                            </ButtonGroup>
+                                                        </td>
+                                                    </tr>
+                                                )}
+
+                                            </Draggable>
+                                        );
+                                    })
+                                }
+                                </tbody>
+                            )}
+                        </Droppable>
+                    </Table>
+                </DragDropContext>
             </div>
         </div>
     );

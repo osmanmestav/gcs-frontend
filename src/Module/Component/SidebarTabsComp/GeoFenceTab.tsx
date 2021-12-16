@@ -6,8 +6,7 @@ import Switch from 'react-switch';
 type GeoFenceTabType = {
     missionGeofence: geoFenceType;
     setGeoFenceActive: (val: any) => void;
-    setGeoFenceVisible: (val: any) => void;
-    clearGeoFence: (val: any) => void;
+    setGeoFenceVisible: (val: boolean) => void;
     isDraft: boolean;
     csharp: any;
 }
@@ -40,13 +39,15 @@ function GeoFenceTab(props: any) {
                     <th>MaxAlt</th>
                     <th>
                         <Button style={{fontSize: "10px"}} size="sm" variant="secondary"
-                                onClick={() => {
-                                    clearGeoFenceClick()
-                                }}>Clear</Button>
-                        <Switch disabled={props.isDraft} checked={(geoFenceData?.isActive as any)} height={15} width={40} className="switch-geofence"
-                                onChange={(activeValue: boolean) => {
-                                     props.setGeoFenceActive(activeValue)
-                                }}/>
+                                onClick={() => clearGeoFenceClick()}>Clear</Button>
+                        <Switch
+                            disabled={props.isDraft}
+                            checked={(geoFenceData?.isActive as any)}
+                            height={15}
+                            width={40}
+                            className="switch-geofence"
+                            onChange={(activeValue: boolean) => props.setGeoFenceActive(activeValue)}
+                        />
                     </th>
                 </tr>
                 </thead>
@@ -66,9 +67,8 @@ function GeoFenceTab(props: any) {
                             id={"inline2"}
                             checked={(geoFenceData?.isVisible)}
                             onChange={(e) => {
-                                props.setGeoFenceVisible(e)
+                                props.setGeoFenceVisible(e.target.checked)
                             }}
-
                         />
                     </td>
                 </tr>

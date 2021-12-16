@@ -11,7 +11,7 @@ import ModalsWaypoint from "./waypointModal";
 import {missionDataType, waypointDataType} from "../models/missionTypes";
 
 function SidebarTabs(props: any) {
-    const useDraftLogic: boolean = false;
+    const useDraftLogic: boolean = true;
     const [defaultAgl, setDefaultAgl] = useState<number>(400);
     const [isDraft, setIsDraft] = useState<boolean>(false);
     const [missionData, setMissionData] = useState<missionDataType>(); //Mission
@@ -215,6 +215,61 @@ function SidebarTabs(props: any) {
         setModalIndex(-1);
     }
 
+
+    const setGeoFenceActive = (e: boolean) => {
+        var newGeofence = null;
+        if (isDraft || !useDraftLogic) {
+            newGeofence = missionDraft;
+            newGeofence!.geoFence.isActive = e;
+            setMissionDraft(newGeofence);
+        } else {
+            newGeofence = missionData!;
+            newGeofence.geoFence.isActive = e;
+            setMissionData(newGeofence);
+        }
+        props.mapWindow.csharp.geoFenceActive(e);
+    }
+    const setGeoFenceVisible = (e: boolean) => {
+        var newGeofence = null;
+        if (isDraft || !useDraftLogic) {
+            newGeofence = missionDraft;
+            newGeofence!.geoFence.isVisible = e;
+            setMissionDraft(newGeofence);
+        } else {
+            newGeofence = missionData!;
+            newGeofence.geoFence.isVisible = e;
+            setMissionData(newGeofence);
+        }
+    }
+
+    const indexWaypointEdit = (e: any) => {
+        if (!e.destination) return;
+        try {
+            let tempData = Array.from(missionDraft!.waypoints);
+            let [source_data] = tempData.splice(e.source.index, 1);
+            tempData.splice(e.destination.index, 0, source_data);
+            var newMissionDraft = missionDraft;
+            newMissionDraft!.waypoints = tempData;
+            setMissionDraft(newMissionDraft);
+
+            let mission = clone(missionDraft);
+            props.mapWindow.csharp.receivedMission({
+                mission: {
+                    waypoints: mission?.waypoints,
+                    home: mission?.home,
+                },
+                geoFence: mission?.geoFence,
+                failsafe: mission?.failsafe,
+            }, 'draft-toggle');
+
+
+            if (!isDraft && useDraftLogic)
+                setIsDraft(true);
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
     // @ts-ignore
     return (
         <div>
@@ -244,14 +299,18 @@ function SidebarTabs(props: any) {
                     <td>{wayPointCurrent?.altitude.toFixed(0)}</td>
                     <td>{wayPointCurrent?.parameter.toString()}</td>
                     <td style={{display: useDraftLogic ? "block" : "none"}}>
-                        <Switch checked={isDraft} height={15} width={40} className="react-switch"
-                                onChange={(isDraftValue: boolean) => {
-                                    if (useDraftLogic) {
-                                        setIsDraft(isDraftValue);
-                                        let mission = isDraftValue ? clone(missionDraft) : clone(missionData);
-                                        sendMission(mission!);
-                                    }
-                                }}/>
+                        <Switch
+                            className="react-switch"
+                            checked={isDraft}
+                            height={15}
+                            width={40}
+                            onChange={(isDraftValue: boolean) => {
+                                if (useDraftLogic) {
+                                    setIsDraft(isDraftValue);
+                                    let mission = isDraftValue ? clone(missionDraft) : clone(missionData);
+                                    sendMission(mission!);
+                                }
+                            }}/>
                     </td>
                 </tr>
 
@@ -269,51 +328,20 @@ function SidebarTabs(props: any) {
                             props.mapWindow.csharp.setAltitudeOverHome(e)
                             setDefaultAgl(e);
                         }}
-                        WaypointEditAction={(e: any) => {
-                            WaypointEditAction(e);
-                        }}
+                        WaypointEditAction={(e: any) => WaypointEditAction(e)}
                         onWaypointClick={onWaypointClick}
                         selectedWaypointIndices={selectedWaypointIndices}
-                        jumpToWaypoint={
-                            (index: number) => {
-                                props.mapWindow.csharp.jumpToWaypoint(index)
-                            }
-                        }
-                        clearWaypoints={() => {
-                            props.mapWindow.csharp.clearWaypoints()
-                        }
-                        }
+                        jumpToWaypoint={(index: number) => props.mapWindow.csharp.jumpToWaypoint(index)}
+                        clearWaypoints={() => props.mapWindow.csharp.clearWaypoints()}
+                        setIndexWaypoints={(e: any) => indexWaypointEdit(e)}
                     />
                 </Tab>
                 <Tab eventKey="Geofence" title="Geofence">
                     <GeoFenceTab
                         missionGeofence={isDraft || !useDraftLogic ? missionDraft?.geoFence! : missionData?.geoFence!}
-                        setGeoFenceActive={(e: any) => {
-                            var newGeofence = null;
-                            if (isDraft || !useDraftLogic) {
-                                newGeofence = missionDraft;
-                                newGeofence!.geoFence.isActive = e;
-                                setMissionDraft(newGeofence);
-                            } else {
-                                newGeofence = missionData!;
-                                newGeofence.geoFence.isActive = e;
-                                setMissionData(newGeofence);
-                            }
-                            props.mapWindow.csharp.geoFenceActive(e);
-                        }}
+                        setGeoFenceActive={(e: boolean) => setGeoFenceActive(e)}
                         isDraft={isDraft}
-                        setGeoFenceVisible={(e: any) => {
-                            var newGeofence = null;
-                            if (isDraft || !useDraftLogic) {
-                                newGeofence = missionDraft;
-                                newGeofence!.geoFence.isVisible = e.target.checked;
-                                setMissionDraft(newGeofence);
-                            } else {
-                                newGeofence = missionData!;
-                                newGeofence.geoFence.isVisible = e.target.checked;
-                                setMissionData(newGeofence);
-                            }
-                        }}
+                        setGeoFenceVisible={(e: boolean) => setGeoFenceVisible(e)}
                         csharp={props.mapWindow.csharp}
                     ></GeoFenceTab>
                 </Tab>
