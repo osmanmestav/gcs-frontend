@@ -3,6 +3,7 @@ import SidebarTabs from "./Component/SidebarTabs";
 import Console from "./Component/Console"
 import Control from "./Component/Control"
 import AircraftsListModal from './Component/AircraftsManagement/AircraftsListModal';
+import { publishEvent, PubSubEvent } from '../utils/PubSubService';
 
 
 type SidebarProps = {
@@ -22,9 +23,12 @@ function Sidebar(props: SidebarProps) {
         props.manageAircrafts(true);
     }
     
-    const onAircraftsListModalClosed = (isCancelled: boolean) => {
+    const onAircraftsListModalClosed = (isCancelled: boolean, aircraftNames: string[]) => {
         setShowAircraftsListModal(false);    
         props.manageAircrafts(false);
+        if(!isCancelled && aircraftNames.length > 0){
+            publishEvent(PubSubEvent.ManageAircrafts, ...aircraftNames)
+        }
     }
 
     useEffect(() => {

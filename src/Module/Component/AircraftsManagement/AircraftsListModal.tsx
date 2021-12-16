@@ -4,7 +4,7 @@ import { PubSubEvent, removeEvent, subscribeEvent } from "../../../utils/PubSubS
 
 type AircraftsListModalProps = {
     show: boolean;
-    onCloseModal: (isCancelled: boolean) => void;
+    onCloseModal: (isCancelled: boolean, aircraftNames: string[]) => void;
 }
 
 const AircraftsListModal = (props: AircraftsListModalProps) => {
@@ -33,13 +33,13 @@ const AircraftsListModal = (props: AircraftsListModalProps) => {
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                List of aircrafts.
+                Toggle Connect/Disconnect functionality for all possible aircrafts (dev1, dev2, dev3, dev4, dev5, dev6)
             </Modal.Body>
             <Modal.Footer>
-                <Button variant={"success"} onClick={() => { props.onCloseModal(false); }}>
+                <Button variant={"success"} onClick={() => { props.onCloseModal(false, ['dev1', 'dev2', 'dev3', 'dev4', 'dev5', 'dev6']); }}>
                     Ok
                 </Button>
-                <Button onClick={() => { props.onCloseModal(true); }}>
+                <Button onClick={() => { props.onCloseModal(true, []); }}>
                     Cancel
                 </Button>
             </Modal.Footer>

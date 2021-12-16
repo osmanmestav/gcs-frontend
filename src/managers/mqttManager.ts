@@ -2,14 +2,37 @@ import "../login";
 import Amplify from "@aws-amplify/core";
 import PubSub, {AWSIoTProvider} from "@aws-amplify/pubsub";
 import {preprocessTelemetry} from "../preprocessTelemetry";
-import { publishEvent, PubSubEvent } from "../utils/PubSubService";
+import { publishEvent, PubSubEvent, removeEvent, subscribeEvent } from "../utils/PubSubService";
 
-interface AircraftModel {
-    aircraftId: number,
-    aircraftName: string,
-    certificationName: string,
-    isSubscribed: boolean,
-    isSelected: boolean
+class AircraftModel {
+    constructor(name: string){
+        this.aircraftCertificateName = name;
+    }
+    aircraftCertificateName: string;
+    telemetrySubscription: any;
+    missionSubscription: any;
+    heartbeatSubscription: any;
+    commandPublisher: any;
+
+    addTelemetrySubscription(tSub: any){
+        this.telemetrySubscription = tSub;
+    };
+    addMissionSubscription(tSub: any){
+        this.missionSubscription = tSub;
+    };
+    addHeartbeatSubscription(tSub: any){
+        this.heartbeatSubscription = tSub;
+    };
+    addCommandPublisher(pub: any){
+        this.commandPublisher = pub;
+    };
+
+    unregister(){
+        this.telemetrySubscription.unsubscribe();
+        this.missionSubscription.unsubscribe();
+        this.heartbeatSubscription?.unsubscribe();
+
+    };
 }
 
 export default class MQTTManager {
@@ -36,26 +59,45 @@ export default class MQTTManager {
         return this.mapsWindow && this.mapsWindow.csharp;
     }
 
+    subscribeAircrafts = (aircraftCertificateNames: string[]) => {
+        aircraftCertificateNames.forEach(x=> {
+            const aircraft = this.aircrafts.filter(y => y.aircraftCertificateName === x)[0];
+            if(aircraft === undefined){
+                this.aircrafts.push(new AircraftModel(x));
+                this.registerAircraft(x);
+            }
+            else {
+                this.unregisterAircraft(x);
+                this.aircrafts = this.aircrafts.filter(y=> y.aircraftCertificateName !== x);
+                const csharp = this.getcsharp();
+                if(csharp){
+                    csharp.removeAircraftByCertificateName(x);
+                }
+            }
+        });
+    };
+
     initializeMQTT = () => {
         console.log("initialize mqTT");
         // Apply plugin with configuration
         Amplify.addPluggable(new AWSIoTProvider(this.awsIoTProviderOptions));
-        this.AircraftSubscribe("dev1");
-        this.AircraftSubscribe("dev2");
-        this.AircraftSubscribe("dev3");
-        this.AircraftSubscribe("dev4");
-        this.AircraftSubscribe("dev5");
-        this.AircraftSubscribe("dev6");
+        subscribeEvent(PubSubEvent.ManageAircrafts, this.subscribeAircrafts);
     }
 
     finalizeMQTT = () => {
         console.log("finalize mqTT");
+        removeEvent(PubSubEvent.ManageAircrafts, this.subscribeAircrafts);
     }
 
-    AircraftSubscribe = (aircraftCertificateName: any) => {
+    registerAircraft = (aircraftCertificateName: any) => {
 
-        console.log("aircraftCertificateName in subscribe: ", aircraftCertificateName)
-        PubSub.subscribe('UL/U/' + aircraftCertificateName + '/T').subscribe({
+        const aircraft = this.aircrafts.filter(x => x.aircraftCertificateName === aircraftCertificateName)[0];
+        if(aircraft === null)
+            return;
+        console.log("aircraftCertificateName in register: ", aircraftCertificateName)
+
+
+        const telemetry = PubSub.subscribe('UL/U/' + aircraftCertificateName + '/T').subscribe({
             next: data => {
 
                 let csharp = this.getcsharp();
@@ -76,13 +118,16 @@ export default class MQTTManager {
                         //Waypoint Current Command Expanded
                         csharp.applyCurrentCommand(data.value);
                     }
+                    
                 }
             },
             error: error => console.error(error),
             complete: () => console.log('Done'),
         });
+        aircraft.addTelemetrySubscription(telemetry);
+        
 
-        PubSub.subscribe('UL/U/' + aircraftCertificateName + '/M').subscribe({
+        const mission = PubSub.subscribe('UL/U/' + aircraftCertificateName + '/M').subscribe({
             next: data => {
                 console.log('Mission received', data.value);
                 let csharp = this.getcsharp();
@@ -95,22 +140,34 @@ export default class MQTTManager {
             error: error => console.error(error),
             complete: () => console.log('Done'),
         });
+        aircraft.addMissionSubscription(mission);
 
-        // this is no good but harmless for now. All aircrafts listen to the same event - but fortunately adapter drops if name and/or id does not match
-        var requestId = 0;
-        this.mapsWindow.addEventListener("CommandRequest", (e: any) => {
+        const onCommandRequest = (e: any) => {
+            let requestId = 0;
             let csharp = this.getcsharp();
             if (csharp && aircraftCertificateName === csharp.selectedAircraft.aircraftCertificateName) {
                 requestId++;
                 e.detail.requestId = requestId;
                 PubSub.publish('UL/U/' + aircraftCertificateName + '/C', e.detail);
             }
-        });
+        }
+        aircraft.addCommandPublisher(onCommandRequest);
+        // this is no good but harmless for now. All aircrafts listen to the same event - but fortunately adapter drops if name and/or id does not match
+        this.mapsWindow.addEventListener("CommandRequest", aircraft.commandPublisher);
 
-
-        this.publishHeartBeat(aircraftCertificateName);
+        // this.publishHeartBeat(aircraftCertificateName);
     }
 
+    unregisterAircraft = (aircraftCertificateName: any) => {
+        const aircraft = this.aircrafts.filter(x => x.aircraftCertificateName === aircraftCertificateName)[0];
+        if(aircraft === undefined)
+            return;
+
+        console.log("aircraftCertificateName in unregister: ", aircraftCertificateName);
+        aircraft.unregister();
+        this.mapsWindow.removeEventListener("CommandRequest", aircraft.commandPublisher);
+
+    }
 
     publishHeartBeat = (aircraftCertificateName: any) => {
         let csharp = this.getcsharp();
@@ -134,7 +191,7 @@ export default class MQTTManager {
     };
 
     simulateTelemetryPublish = (certificateNameForTelemetrySimulation: string, sampleTelemetryMessage: any) => {
-        PubSub.publish('UL/U/' + certificateNameForTelemetrySimulation + '/S', sampleTelemetryMessage).then(() => {
+        PubSub.publish('UL/U/' + certificateNameForTelemetrySimulation + '/T', sampleTelemetryMessage).then(() => {
         }).catch(err => {
             console.log(err);
         });

@@ -63,7 +63,6 @@ function App() {
     const startSimulation = () => {
         const message = simulateTelemetry(mapsWindow.unitsHelper, mapsWindow.UnitType);
         mqttManager?.simulateTelemetryPublish(certificateNameForTelemetrySimulation, message);
-        mapsWindow.window.dispatchEvent(new CustomEvent("planeChanged", {"detail": message}));
     }
 
     const startTelemetrySimulation = () => {
@@ -72,7 +71,7 @@ function App() {
 
     useEffect(() => {
         if(mqttManager != null && simulationStarted){
-            mqttManager?.AircraftSubscribe(certificateNameForTelemetrySimulation);
+            mqttManager?.registerAircraft(certificateNameForTelemetrySimulation);
             setInterval(startSimulation, 100);
         }
     }, [simulationStarted]);
