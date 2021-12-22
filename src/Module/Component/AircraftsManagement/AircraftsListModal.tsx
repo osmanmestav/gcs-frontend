@@ -9,14 +9,20 @@ type AircraftsListModalProps = {
 
 const AircraftsListModal = (props: AircraftsListModalProps) => {
     
-    const onStatusReceived = (args: any[]) => {
+    const onAircraftStatusReceived = (args: any[]) => {
+        console.log(args[0]);
+    }
+
+    const onUserStatusReceived = (args: any[]) => {
         console.log(args[0]);
     }
 
     useEffect(() => {
-        subscribeEvent(PubSubEvent.StatusMessageReceivedOnAircraftManagement, onStatusReceived);
+        subscribeEvent(PubSubEvent.AnyAircraftStatusMessageReceived, onAircraftStatusReceived);
+        subscribeEvent(PubSubEvent.AnyUserStatusMessageReceived, onUserStatusReceived);
         return () => {
-            removeEvent(PubSubEvent.StatusMessageReceivedOnAircraftManagement, onStatusReceived);
+            removeEvent(PubSubEvent.AnyUserStatusMessageReceived, onUserStatusReceived);
+            removeEvent(PubSubEvent.AnyAircraftStatusMessageReceived, onAircraftStatusReceived);
         }
     })
 

@@ -171,6 +171,7 @@ var csharp = {
             let req = {
                 aircraftId: aircraft.aircraftId,
                 aircraftName: aircraft.aircraftName,
+                aircraftCertificateName: aircraft.aircraftCertificateName,
                 command: "DownloadMission"
             };
             window.dispatchEvent(new CustomEvent('CommandRequest', {detail: req}));
@@ -191,6 +192,7 @@ var csharp = {
             let req = {
                 aircraftId: aircraft.aircraftId,
                 aircraftName: aircraft.aircraftName,
+                aircraftCertificateName: aircraft.aircraftCertificateName,
                 command: "UploadMission",
                 mission: {
                     mission: {
@@ -375,6 +377,7 @@ var csharp = {
         let req = {
             aircraftId: this.selectedAircraft.aircraftId,
             aircraftName: this.selectedAircraft.aircraftName,
+            aircraftCertificateName: this.selectedAircraft.aircraftCertificateName,
             command: "StartMission",
         }
         window.dispatchEvent(new CustomEvent('CommandRequest', {detail: req}));
@@ -662,6 +665,7 @@ var csharp = {
         let req = {
             aircraftId: this.selectedAircraft.aircraftId,
             aircraftName: this.selectedAircraft.aircraftName,
+            aircraftCertificateName: this.selectedAircraft.aircraftCertificateName,
             command: "SetAirSpeed",
             speed: speed,
         }
@@ -925,6 +929,7 @@ var csharp = {
         let req = {
             aircraftId: this.selectedAircraft.aircraftId,
             aircraftName: this.selectedAircraft.aircraftName,
+            aircraftCertificateName: this.selectedAircraft.aircraftCertificateName,
             command: "Jump",
             index: index
         }
@@ -968,6 +973,7 @@ var csharp = {
         let req = {
             aircraftId: this.selectedAircraft.aircraftId,
             aircraftName: this.selectedAircraft.aircraftName,
+            aircraftCertificateName: this.selectedAircraft.aircraftCertificateName,
             command: "Mission_Geofence_Update",
             geoFenceMessage: {isActivated: isActivated}
         }

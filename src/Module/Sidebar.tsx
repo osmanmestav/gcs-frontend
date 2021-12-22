@@ -10,7 +10,8 @@ type SidebarProps = {
     mapsWindow: any;
     openGauges: () => void;
     startTelemetrySimulation: () => void;
-    manageAircrafts: (initiate: boolean) => void;
+    subscribeToAircraftStatuses: (initiate: boolean) => void;
+    subscribeToUserStatuses: (initiate: boolean) => void;
 };
 
 function Sidebar(props: SidebarProps) {
@@ -20,12 +21,14 @@ function Sidebar(props: SidebarProps) {
         if(showAircraftsListModal )
             return;
         setShowAircraftsListModal(true);    
-        props.manageAircrafts(true);
+        props.subscribeToAircraftStatuses(true);
+        props.subscribeToUserStatuses(true);
     }
     
-    const onAircraftsListModalClosed = (isCancelled: boolean, aircraftNames: string[]) => {
+    const onAircraftsManagementModalClosed = (isCancelled: boolean, aircraftNames: string[]) => {
         setShowAircraftsListModal(false);    
-        props.manageAircrafts(false);
+        props.subscribeToAircraftStatuses(false);
+        props.subscribeToUserStatuses(false);
         if(!isCancelled && aircraftNames.length > 0){
             publishEvent(PubSubEvent.ManageAircrafts, ...aircraftNames)
         }
@@ -49,7 +52,7 @@ function Sidebar(props: SidebarProps) {
             <Console mapWindow={props.mapsWindow}></Console>
             {
                 showAircraftsListModal && 
-                <AircraftsListModal show={showAircraftsListModal} onCloseModal={onAircraftsListModalClosed}/>
+                <AircraftsListModal show={showAircraftsListModal} onCloseModal={onAircraftsManagementModalClosed}/>
             }
         </div>
     );

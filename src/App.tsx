@@ -99,7 +99,8 @@ function App() {
                     {mapsWindow && mapsWindow.csharp && mqttManager ?
                         <Col lg="4" className={"sidebar " + (sidebarStatus ? "open" : "close")}>
                             <Sidebar mapsWindow={mapsWindow} openGauges={openGauges}
-                                    manageAircrafts={mqttManager.manageAircrafts}
+                                    subscribeToAircraftStatuses={mqttManager.subscribeToAircraftStatuses}
+                                    subscribeToUserStatuses={mqttManager.subscribeToControlStationStatuses}
                                     startTelemetrySimulation={startTelemetrySimulation}/>
                         </Col>
                         : null
