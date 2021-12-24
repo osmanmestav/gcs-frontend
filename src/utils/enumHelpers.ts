@@ -1,26 +1,39 @@
-export function convertEnumToArray(e: any): { [key: string]: Object }[] {
-    const enumObjectList = Object.values(e) as string[];
-    const enumTexts = enumObjectList.filter((_v: string, i: number) => i < enumObjectList.length / 2) as string[];
-    const enumValues = enumObjectList.filter((_v: string, i: number) => i >= enumObjectList.length / 2) as string[];
-    const array = enumTexts.map((p: string, i: number) => {
-      return { value: enumValues[i], text: p.toString() };
-    });
-    return array;
-  };
+// This helper methos assume the enum types are not mixed or heterogenous. 
+// They are either string enums, or number enums.
+// partially inspired by https://www.angularjswiki.com/angular/names-of-enums-typescript/
 
-  export function getEnumKeyByEnumValue(myEnum: any, enumValue: number | string): string {
-    let keys = Object.keys(myEnum).filter((x) => myEnum[x] === enumValue);
-    return keys.length > 0 ? keys[0] : '';
-  };
 
-  export function getEnumKeys(e: any): string[] {
-    const enumObjectList = Object.values(e) as string[];
-    const enumTexts = enumObjectList.filter((_v: string, i: number) => i < enumObjectList.length / 2) as string[];
-    return enumTexts;
-  };
+export function getEnumKeyValuePairs(myEnum: any): any {
+  const keyValuePairs = {};
+  let enumKeys = getEnumKeys(myEnum);
+  enumKeys.forEach( x => (keyValuePairs as any)[x] = myEnum[x]);
+  return keyValuePairs;
+}
 
-  export function getEnumValues(e: any): string[] {
-    const enumObjectList = Object.values(e) as string[];
-    const enumValues = enumObjectList.filter((_v: string, i: number) => i >= enumObjectList.length / 2) as string[];
-    return enumValues;
-  };
+export function getEnumKeyByEnumValue(myEnum: any, enumValue: number | string): string {
+  let enumKeys = getEnumKeys(myEnum);
+  const key = enumKeys.find(x=> myEnum[x] === enumValue);
+  if(key)
+    return key;
+  
+  throw new Error("not matching enum key-value");
+};
+
+export function getEnumValueByEnumKey(myEnum: any, enumKey: string): number | string {
+  let values = getEnumValues(myEnum);
+  const val = values.find(x => myEnum[enumKey] === x);
+  if(val)
+    return val;
+  
+    throw new Error("not matching enum key-value");
+};
+
+export function getEnumKeys(myEnum: any): string[] {
+  let enumKeys = Object.keys(myEnum).filter(x=> isNaN(Number(x)));
+  return enumKeys;
+};
+
+export function getEnumValues(myEnum: any): (number | string)[] {
+  let enumKeys = getEnumKeys(myEnum);
+  return enumKeys.map(x => myEnum[x]);
+};

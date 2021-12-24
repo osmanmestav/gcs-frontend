@@ -6,6 +6,8 @@ import { publishEvent, PubSubEvent, removeEvent, subscribeEvent } from "../utils
 import { Auth } from "aws-amplify";
 import { processingFunctions } from "../models/managerModels/aircraftModel";
 import FlightData from "./flightData";
+// import { getEnumKeyByEnumValue, getEnumKeys, getEnumKeyValuePairs, getEnumValueByEnumKey, getEnumValues } from "../utils/enumHelpers";
+// import { UnitSystemEnum, UnitTypeEnum } from "../utils/unitsHelperNew";
 
 export default class MQTTManager {
     constructor(maps: any) {
@@ -60,6 +62,13 @@ export default class MQTTManager {
         subscribeEvent(PubSubEvent.ManageAircrafts, this.subscribeAircrafts);
         this.isActive = true;
         this.publishUserStatus();
+
+
+        // console.log(getEnumKeyValuePairs(UnitSystemEnum));
+        // console.log(getEnumValueByEnumKey(UnitSystemEnum, "SI"));
+        // console.log(getEnumKeyByEnumValue(UnitSystemEnum, UnitSystemEnum.US));
+        // console.log(getEnumKeys(UnitSystemEnum));
+        // console.log(getEnumValues(UnitSystemEnum));
     }
 
     finalizeMQTT = () => {
@@ -186,3 +195,4 @@ export default class MQTTManager {
         }
     }
 }
+
