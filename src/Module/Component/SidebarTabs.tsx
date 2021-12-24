@@ -11,7 +11,7 @@ import ModalsWaypoint from "./waypointModal";
 import {missionDataType, waypointDataType} from "../models/missionTypes";
 
 function SidebarTabs(props: any) {
-    const useDraftLogic: boolean = true;
+    const useDraftLogic: boolean = false;
     const [defaultAgl, setDefaultAgl] = useState<number>(400);
     const [isDraft, setIsDraft] = useState<boolean>(false);
     const [missionData, setMissionData] = useState<missionDataType>(); //Mission

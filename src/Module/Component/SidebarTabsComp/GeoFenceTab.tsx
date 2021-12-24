@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {Table, Button, Form} from 'react-bootstrap'
-import {geoFenceType, missionDataType} from "../../models/missionTypes";
+import {geoFenceType} from "../../models/missionTypes";
 import Switch from 'react-switch';
 
-type GeoFenceTabType = {
+type GeoFenceTabProps = {
     missionGeofence: geoFenceType;
     setGeoFenceActive: (val: any) => void;
     setGeoFenceVisible: (val: boolean) => void;
@@ -11,7 +11,7 @@ type GeoFenceTabType = {
     csharp: any;
 }
 
-function GeoFenceTab(props: any) {
+function GeoFenceTab(props: GeoFenceTabProps) {
     const [geoFenceData, setGeoFenceData] = useState<geoFenceType>();
 
     useEffect(() => {

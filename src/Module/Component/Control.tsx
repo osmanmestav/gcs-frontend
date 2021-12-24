@@ -102,7 +102,7 @@ function SidebarControlButtons(props: any) {
                             onClick={props.openGauges}>Open Gauges</Button>
                 </Col>
                 <Col>
-                    <Button style={{marginRight: '5px', display: "none"}} variant="dark" size="sm"
+                    <Button style={{marginRight: '5px'}} variant="dark" size="sm"
                             id="simulateTelemetry"
                             disabled={false}
                             onClick={props.startTelemetrySimulation}>Simulate Telemetry</Button>

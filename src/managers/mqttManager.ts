@@ -4,67 +4,21 @@ import PubSub, {AWSIoTProvider} from "@aws-amplify/pubsub";
 import {preprocessTelemetry} from "../preprocessTelemetry";
 import { publishEvent, PubSubEvent, removeEvent, subscribeEvent } from "../utils/PubSubService";
 import { Auth } from "aws-amplify";
-
-
-type processingFunctions = {
-    processTelemetry: (data: any) => void;
-    processStatus: (data: any) => void;
-};
-
-class AircraftModel {
-    constructor(name: string){
-        this.aircraftCertificateName = name;
-    }
-    aircraftCertificateName: string;
-    telemetrySubscription: any;
-    missionSubscription: any;
-
-    aircraftMission: any;
-
-    commandPublisher = (e: any) => {
-        let requestId = 0;
-        if (this.aircraftCertificateName === e.detail.aircraftCertificateName) {
-            requestId++;
-            e.detail.requestId = requestId;
-            PubSub.publish('UL/G/pilot1/' + this.aircraftCertificateName + '/C', e.detail);
-        }
-    }
-
-    startObserving = (next: processingFunctions) => {
-        this.telemetrySubscription = PubSub.subscribe('UL/U/' + this.aircraftCertificateName + '/T').subscribe({
-            next: next.processTelemetry,
-            error: error => console.error(error),
-            complete: () => console.log('Done'),
-        });
-        this.missionSubscription = PubSub.subscribe('UL/U/' + this.aircraftCertificateName + '/M').subscribe({
-            next: data => {
-                console.log('Mission received', data.value);
-                this.aircraftMission = data.value;
-                next.processStatus(data);
-            },
-            error: error => console.error(error),
-            complete: () => console.log('Done'),
-        });
-    }
-
-    unregister(){
-        this.telemetrySubscription?.unsubscribe();
-        this.missionSubscription?.unsubscribe();
-    };
-}
+import { processingFunctions } from "../models/managerModels/aircraftModel";
+import FlightData from "./flightData";
 
 export default class MQTTManager {
     constructor(maps: any) {
         this.mapsWindow = maps;
         this.gaugesWindow = null;
-        this.aircrafts = [];
+        this.flightData = new FlightData();
         this.isActive = false;
     };
 
 
     mapsWindow: any;
     gaugesWindow: any;
-    aircrafts: AircraftModel[];
+    flightData: FlightData;
     isActive: boolean;
 
     awsIoTProviderOptions = {
@@ -82,14 +36,15 @@ export default class MQTTManager {
 
     subscribeAircrafts = (aircraftCertificateNames: string[]) => {
         aircraftCertificateNames.forEach(x=> {
-            const aircraft = this.aircrafts.filter(y => y.aircraftCertificateName === x)[0];
-            if(aircraft === undefined){
-                this.aircrafts.push(new AircraftModel(x));
+            // var aircraft = this.flightData.aircraftFleet.getAircraftByCertificateName(x);
+            var anyAircraft = this.flightData.aircraftFleet.any(x);
+            if(anyAircraft === false){
+                this.flightData.aircraftFleet.insert(x);
                 this.registerAircraft(x);
             }
             else {
                 this.unregisterAircraft(x);
-                this.aircrafts = this.aircrafts.filter(y=> y.aircraftCertificateName !== x);
+                this.flightData.aircraftFleet.remove(x);
                 const csharp = this.getcsharp();
                 if(csharp){
                     csharp.removeAircraftByCertificateName(x);
@@ -113,22 +68,20 @@ export default class MQTTManager {
         this.isActive = false;
     }
 
-    registerAircraft = (aircraftCertificateName: any) => {
-
-        const aircraft = this.aircrafts.filter(x => x.aircraftCertificateName === aircraftCertificateName)[0];
-        if(aircraft === undefined)
+    registerAircraft = (aircraftCertificateName: string) => {
+        var aircraft = this.flightData.aircraftFleet.getAircraftByCertificateName(aircraftCertificateName);
+        if(aircraft === null)
             return;
         console.log("aircraftCertificateName in register: ", aircraftCertificateName)
         const processMessages: processingFunctions = {
             processTelemetry : data => {
-
                 let csharp = this.getcsharp();
 
                 this.mapsWindow.window.dispatchEvent(new CustomEvent("planeChanged", {"detail": data.value}));
                 setTimeout(() => {
                     this.mapsWindow.window.dispatchEvent(new CustomEvent("planeChanged", {"detail": data.value}));
                 }, 2000);
-                //console.log('Message received', data.value);
+                // console.log('Message received', data.value);
                 let values = preprocessTelemetry(data.value);
                 if (csharp) {
                     csharp.updateAircraft(values);
@@ -143,23 +96,25 @@ export default class MQTTManager {
                     
                 }
             },
-            processStatus: (data) => {
+            processMission: (data) => {
                 let csharp = this.getcsharp();
                 if (csharp && data.value.aircraftName === csharp.selectedAircraft.aircraftName) {
                     setTimeout(() => {
                         csharp.receivedMission(data.value, 'mission-download');
                     }, 1000);
                 }
-            }
+            },
+            processStatus: (data) => {},
+            processParameters: (data) => {},
         }
         aircraft.startObserving(processMessages);
         this.mapsWindow.addEventListener("CommandRequest", aircraft.commandPublisher);
 
     }
 
-    unregisterAircraft = (aircraftCertificateName: any) => {
-        const aircraft = this.aircrafts.filter(x => x.aircraftCertificateName === aircraftCertificateName)[0];
-        if(aircraft === undefined)
+    unregisterAircraft = (aircraftCertificateName: string) => {
+        var aircraft = this.flightData.aircraftFleet.getAircraftByCertificateName(aircraftCertificateName);
+        if(aircraft === null)
             return;
 
         console.log("aircraftCertificateName in unregister: ", aircraftCertificateName);
@@ -171,12 +126,12 @@ export default class MQTTManager {
         if(!this.isActive)
             return;
         
-        const user = await Auth.currentAuthenticatedUser();
-        console.log('attributes:', user.attributes);
+        // const user = await Auth.currentAuthenticatedUser();
+        // console.log('attributes:', user.attributes);
         let req = {
             userCode: 'pilot1',
-            listOfControllingAircrafts: this.aircrafts.map(x=> x.aircraftCertificateName),
-            listOfObservingAircrafts: this.aircrafts.map(x=> x.aircraftCertificateName),
+            listOfControllingAircrafts: this.flightData.aircraftFleet.getListOfControllingAircraftCertificateNames(),
+            listOfObservingAircrafts: this.flightData.aircraftFleet.getListOfObservingAircraftCertificateNames(),
         };
         PubSub.publish('UL/G/' + 'pilot1' + '/S', req).then(() => {
             setTimeout(this.publishUserStatus, 1000);
