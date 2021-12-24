@@ -121,7 +121,6 @@ var csharp = {
         } catch (err) {
             console.log(err);
         }
-        ;
     },
     async uploadMissionToAllAircrafts() {
         FlightSummary.addToSummary(SummaryEntryType.Warning, "********************************************");
@@ -148,7 +147,6 @@ var csharp = {
         } catch (err) {
             console.log(err);
         }
-        ;
     },
 
     // invoked by plane.js on dropdown box selection changed - no need to invoke AircraftSelectionChanged.

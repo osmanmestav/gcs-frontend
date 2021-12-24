@@ -1,12 +1,14 @@
-let PredefinedAirspeedSetPoint = {
+import { UnitsHelperNew, UnitTypeEnum } from "../../utils/unitsHelperNew";
+
+let PredefinedAirspeedSetPointModel = {
     DefaultSpeed: 0,
     LowSpeed: 1,
     HighSpeed: 2,
     Rush: 3,
 }
 
-let PackHelper = {
-    PackBits(existingValue/*: number*/, bitValues/*: number*/, startBit/*: number*/, bitCount/*: number*/) {
+let PackHelperNew = {
+    PackBits(existingValue: number, bitValues: number, startBit: number, bitCount: number) {
         var ones = (65535 >> (16 - bitCount));
         bitValues &= ones; // make sure we have correct number of bits in bitValues;
         existingValue &= ~(ones << startBit); // Reset bits
@@ -14,16 +16,16 @@ let PackHelper = {
         return existingValue;
     },
 
-    UnpackBits(value/*: number*/, startBit/*: number*/, bitCount/*: number*/) {
+    UnpackBits(value: number, startBit: number, bitCount: number) {
         var ones = (65535 >> (16 - bitCount));
         return (value >> startBit) & ones;
     }
 };
 
-class NavigationCommandParam {
-    //private waypoint: Waypoint;
-    //valueAsInt: number;
-    constructor(waypoint/*: Waypoint*/) {
+export class WayPointParam {
+    private waypoint: WayPointModel;
+    valueAsInt: number;
+    constructor(waypoint: WayPointModel) {
         this.waypoint = waypoint;
         this.valueAsInt = 0;
     }
@@ -32,7 +34,7 @@ class NavigationCommandParam {
         return Number.isFinite(this.valueAsInt);
     }
 
-    assign(value/*: number||object*/) {
+    assign(value: number) {
         switch (typeof (value)) {
             case "undefined":
                 this.valueAsInt = 0;
@@ -40,68 +42,68 @@ class NavigationCommandParam {
             case "number":
                 this.valueAsInt = value;
                 break;
-            case "object":
-                Object.keys(value).forEach((k) => this[k] = value[k]);
-                break;
+            // case "object":
+            //     Object.keys(value).forEach((k) => this[k] = value[k]);
+            //     break;
         }
         return this;
     }
 
-    assignFrom(value/*: NavigationCommandParam*/) {
+    assignFrom(value: WayPointParam) {
         this.valueAsInt = value.valueAsInt;
         return this;
     }
 
-    isEqual(p/*: NavigationCommandParam|null*/) {
+    isEqual(p: WayPointParam | null) {
         return p && this.valueAsInt === p.valueAsInt;
     }
 
     get ushort0() {
-        return PackHelper.UnpackBits(this.valueAsInt, 0, 16);
+        return PackHelperNew.UnpackBits(this.valueAsInt, 0, 16);
     }
 
     set ushort0(value/*: number*/) {
-        this.valueAsInt = PackHelper.PackBits(this.valueAsInt, value, 0, 16);
+        this.valueAsInt = PackHelperNew.PackBits(this.valueAsInt, value, 0, 16);
     }
 
     get ushort1() {
-        return PackHelper.UnpackBits(this.valueAsInt, 16, 16);
+        return PackHelperNew.UnpackBits(this.valueAsInt, 16, 16);
     }
 
     set ushort1(value/*: number*/) {
-        this.valueAsInt = PackHelper.PackBits(this.valueAsInt, value, 16, 16);
+        this.valueAsInt = PackHelperNew.PackBits(this.valueAsInt, value, 16, 16);
     }
 
     get byte0() {
-        return PackHelper.UnpackBits(this.valueAsInt, 0, 8);
+        return PackHelperNew.UnpackBits(this.valueAsInt, 0, 8);
     }
 
     set byte0(value/*: number*/) {
-        this.valueAsInt = PackHelper.PackBits(this.valueAsInt, value, 0, 8);
+        this.valueAsInt = PackHelperNew.PackBits(this.valueAsInt, value, 0, 8);
     }
 
     get byte1() {
-        return PackHelper.UnpackBits(this.valueAsInt, 8, 8);
+        return PackHelperNew.UnpackBits(this.valueAsInt, 8, 8);
     }
 
     set byte1(value/*: number*/) {
-        this.valueAsInt = PackHelper.PackBits(this.valueAsInt, value, 8, 8);
+        this.valueAsInt = PackHelperNew.PackBits(this.valueAsInt, value, 8, 8);
     }
 
     get byte2() {
-        return PackHelper.UnpackBits(this.valueAsInt, 16, 8);
+        return PackHelperNew.UnpackBits(this.valueAsInt, 16, 8);
     }
 
     set byte2(value/*: number*/) {
-        this.valueAsInt = PackHelper.PackBits(this.valueAsInt, value, 16, 8);
+        this.valueAsInt = PackHelperNew.PackBits(this.valueAsInt, value, 16, 8);
     }
 
     get byte3() {
-        return PackHelper.UnpackBits(this.valueAsInt, 24, 8);
+        return PackHelperNew.UnpackBits(this.valueAsInt, 24, 8);
     }
 
     set byte3(value/*: number*/) {
-        this.valueAsInt = PackHelper.PackBits(this.valueAsInt, value, 24, 8);
+        this.valueAsInt = PackHelperNew.PackBits(this.valueAsInt, value, 24, 8);
     }
 
     get taxiThrottle() {
@@ -137,27 +139,27 @@ class NavigationCommandParam {
     }
 
     get followTrack() {
-        return PackHelper.UnpackBits(this.valueAsInt, 15, 1) > 0;
+        return PackHelperNew.UnpackBits(this.valueAsInt, 15, 1) > 0;
     }
 
     set followTrack(value/*: boolean*/) {
-        this.valueAsInt = PackHelper.PackBits(this.valueAsInt, value ? 1 : 0, 15, 1);
+        this.valueAsInt = PackHelperNew.PackBits(this.valueAsInt, value ? 1 : 0, 15, 1);
     }
 
     get isLoiterClockwise() {
-        return PackHelper.UnpackBits(this.valueAsInt, 14, 1) > 0;
+        return PackHelperNew.UnpackBits(this.valueAsInt, 14, 1) > 0;
     }
 
     set isLoiterClockwise(value/*: boolean*/) {
-        this.valueAsInt = PackHelper.PackBits(this.valueAsInt, value ? 1 : 0, 14, 1);
+        this.valueAsInt = PackHelperNew.PackBits(this.valueAsInt, value ? 1 : 0, 14, 1);
     }
 
     get loiterRadius() {
-        return PackHelper.UnpackBits(this.valueAsInt, 0, 14);
+        return PackHelperNew.UnpackBits(this.valueAsInt, 0, 14);
     }
 
     set loiterRadius(value/*:number*/) {
-        this.valueAsInt = PackHelper.PackBits(this.valueAsInt, value, 0, 14);
+        this.valueAsInt = PackHelperNew.PackBits(this.valueAsInt, value, 0, 14);
     }
 
     get loiterTurns() {
@@ -218,23 +220,23 @@ class NavigationCommandParam {
 
     toString() {
         var cwSt = this.isLoiterClockwise ? "Cw " : "Ccw ";
-        if (this.loiterRadius > 1) cwSt += UnitsHelper.convertToString(UnitType.Distance, this.loiterRadius) + " ";
+        if (this.loiterRadius > 1) cwSt += UnitsHelperNew.convertToString(UnitTypeEnum.Distance, this.loiterRadius) + " ";
         var navSt = "";
         switch (this.airspeedSetPoint) {
-            case PredefinedAirspeedSetPoint.DefaultSpeed:
+            case PredefinedAirspeedSetPointModel.DefaultSpeed:
                 navSt = "Ds ";
                 break; // Default speed
-            case PredefinedAirspeedSetPoint.LowSpeed:
+            case PredefinedAirspeedSetPointModel.LowSpeed:
                 navSt = "Ls ";
                 break; // Low speed
-            case PredefinedAirspeedSetPoint.HighSpeed:
+            case PredefinedAirspeedSetPointModel.HighSpeed:
                 navSt = "Hs ";
                 break; // High speed
-            case PredefinedAirspeedSetPoint.Rush:
+            case PredefinedAirspeedSetPointModel.Rush:
                 navSt = "Ru ";
                 break; // Rush
             default:
-                navSt = UnitsHelper.convertToString(UnitType.HorizontalSpeed, this.airspeedSetPoint) + "m/s ";
+                navSt = UnitsHelperNew.convertToString(UnitTypeEnum.HorizontalSpeed, this.airspeedSetPoint) + "m/s ";
                 break;
         }
         var trkSt = "";
@@ -263,7 +265,7 @@ class NavigationCommandParam {
             case Command.LoiterTurns:
                 return navSt + cwSt + this.loiterTurns.toFixed(0) + "t";
             case Command.VtolHoverTime:
-                return UnitsHelper.convertToString(UnitType.TimePrecise, this.vtolHoverTime);
+                return UnitsHelperNew.convertToString(UnitTypeEnum.TimePrecise, this.vtolHoverTime);
             case Command.VtolTakeOff:
                 return navSt + "Th" + this.vtolTakeOffThrottle + "%";
             default:
@@ -272,14 +274,21 @@ class NavigationCommandParam {
     }
 }
 
-class WayPoint {
-    constructor(index, command, latitude, longitude, altitude, parameter) {
+export class WayPointModel {
+    index: number;
+    command: string;
+    latitude: number;
+    longitude: number;
+    altitude: number;
+    parameter: WayPointParam;
+
+    constructor(index: number, command: string, latitude: number, longitude: number, altitude: number, parameter:number) {
         this.index = index;
         this.command = command;
         this.latitude = latitude;
         this.longitude = longitude;
         this.altitude = altitude;
-        this.parameter = new NavigationCommandParam(this);
+        this.parameter = new WayPointParam(this);
         this.parameter.assign(parameter);
     }
 
@@ -288,19 +297,32 @@ class WayPoint {
     }
 };
 
-class CommandExpanded {
-    /*
-        public int index;
-        public WayPoint data;
-        public string name;
-        public bool isLoiter, clockwise, isLandingApproach, isLanding, isLandingTaxi, isTakeoff, isTaxi, isTaxiSpeedUp, isVtolTakeOff, isVtolSpeedUp, isVtolLand, isChuteLand;
-        public float loiterRadius, runwayWidth;
-    */
-    constructor(index, /*Command */command, /*Decimal */latitude, /*Decimal */longitude, /*float */altitude, /*int */parameter) {
-        if (typeof (parameter) === "number")
-            parameter = new NavigationCommandParam(parameter);
+export class WayPointCommand {
+    index: number;
+    data: WayPointModel;
+    loiterRadius!: number;
+    runwayWidth!: number;
+    name!: string;
+    isLoiter!: boolean;
+    isLandingApproach!: boolean;
+    isLanding!: boolean;
+    isVtolTakeOff!: boolean;
+    isVtolLand!: boolean;
+    isVtolSpeedUp!: boolean;
+    isLandingTaxi!: boolean;
+    isChuteLand!: boolean;
+    clockwise!: boolean;
+    isTakeoff!: boolean;
+    isTaxi!: boolean;
+    isTaxiSpeedUp!: boolean;
+    
+    static fromWaypoint = (w: any) => { 
+        return new WayPointCommand(w.index, w.command, w.latitude, w.longitude, w.altitude, w.parameter)
+    };
+    
+    constructor(index: number, command: string, latitude: number, longitude: number, altitude: number, parameter: number) {
         this.index = index;
-        this.data = new WayPoint(index, command, latitude, longitude, altitude, parameter);
+        this.data = new WayPointModel(index, command, latitude, longitude, altitude, parameter);
         this.updateProperties();
     }
 
@@ -310,25 +332,23 @@ class CommandExpanded {
         var command = this.data.command;
         this.name = command;
         this.isLoiter = command.startsWith("Loiter") || command === Command.ReturnToLaunch;
-        this.isLandingApproach = (command == Command.ApproachLanding);
-        this.isLanding = (command == Command.Land);
-        this.isLandingTaxi = (command == Command.TaxiStop);
-        this.isVtolTakeOff = (command == Command.VtolTakeOff);
-        this.isVtolSpeedUp = (command == Command.VtolSpeedUp);
-        this.isVtolLand = (command == Command.VtolLand);
-        this.isChuteLand = (command == Command.ChuteLand);
+        this.isLandingApproach = (command === Command.ApproachLanding);
+        this.isLanding = (command === Command.Land);
+        this.isLandingTaxi = (command === Command.TaxiStop);
+        this.isVtolTakeOff = (command === Command.VtolTakeOff);
+        this.isVtolSpeedUp = (command === Command.VtolSpeedUp);
+        this.isVtolLand = (command === Command.VtolLand);
+        this.isChuteLand = (command === Command.ChuteLand);
 
         if (this.isLoiter || this.isLandingApproach)
             this.clockwise = this.data.parameter.isLoiterClockwise;
         if (this.isLoiter && this.data.parameter.loiterRadius > 10)
             this.loiterRadius = this.data.parameter.loiterRadius;
+            
+        this.isTakeoff = (command === Command.TakeOff);
 
-        this.isTakeoff = (command == Command.TakeOff);
+        this.isTaxi = (command === Command.TaxiToPoint);
 
-        this.isTaxi = (command == Command.TaxiToPoint);
-
-        this.isTaxiSpeedUp = (command == Command.TaxiSpeedUp);
+        this.isTaxiSpeedUp = (command === Command.TaxiSpeedUp);
     }
 };
-
-CommandExpanded.fromWaypoint = (w) => (new CommandExpanded(w.index, w.command, w.latitude, w.longitude, w.altitude, w.parameter));

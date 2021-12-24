@@ -1,3 +1,5 @@
+import { WayPointModel } from "../../models/missionModels/waypointModels";
+
 export type missionDataType = {
     waypoints: waypointDataType[],
     failsafe: failsafeType,
@@ -27,15 +29,8 @@ export type geoFenceType = {
     isVisible: boolean,
 }
 
-export type waypointDataType = {
-    index: number,
-    lat: number,
-    command: string,
-    latitude: number,
-    longitude: number,
-    altitude: number,
+export interface waypointDataType extends WayPointModel {
     agl: number,
-    parameter: any,
 };
 
 
@@ -43,12 +38,4 @@ export type homeType = {
     altitude: number,
     latitude: number,
     longitude: number,
-}
-
-export type TelemetrySummaryModel = {
-    aircraftId: string,
-    altitude: number,
-    latitude: number,
-    longitude: number,
-    isSittingOnGround: boolean,
 }

@@ -1,4 +1,5 @@
-import { homeType, missionDataType, TelemetrySummaryModel } from "../Module/models/missionTypes";
+import { homeType, missionDataType } from "../Module/models/missionTypes";
+import { TelemetrySummaryModel } from "../Module/models/telemetryModels";
 import geoHelper from "../utils/geoHelper";
 
 const StringJoin = (s: string, r: string[] = [] )=>{
