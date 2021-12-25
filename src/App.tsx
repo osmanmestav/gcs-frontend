@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import "./login";
 import './App.css';
 // @ts-ignore
-import Sidebar from './Module/Sidebar.tsx'
+import Sidebar from './views/Sidebar.tsx'
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {Container, Row, Col, Button} from 'react-bootstrap'

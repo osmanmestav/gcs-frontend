@@ -1,6 +1,6 @@
-import { homeType, missionDataType } from "../Module/models/missionTypes";
-import { TelemetrySummaryModel } from "../Module/models/telemetryModels";
-import geoHelper from "../utils/geoHelper";
+import { missionDataType } from "../views/viewModels/missionTypes";
+import { TelemetrySummaryModel } from "../models/telemetryModels/telemetryModels";
+import geoHelperNew from "../utils/geoHelper";
 
 const StringJoin = (s: string, r: string[] = [] )=>{
     r.forEach((v, i) => {
@@ -29,7 +29,7 @@ class SanityCheckItem {
 //         this.home = mission.home;
 //     }   
 //     waypoints: WayPoint[];
-//     home: homeType;
+//     home: GeoLocationModel;
 
 // }
 
@@ -49,7 +49,7 @@ export default class MissionManager{
     }
 
     distanceToHome = () => {
-        return geoHelper.getDistance(this.telemetrySummary.latitude, this.telemetrySummary.longitude, this.mission.home.latitude, this.mission.home.longitude);
+        return geoHelperNew.getDistance(this.telemetrySummary.latitude, this.telemetrySummary.longitude, this.mission.home.latitude, this.mission.home.longitude);
     }
 
     createCheckList: () => SanityCheckItem[] = () => {
@@ -105,7 +105,7 @@ export default class MissionManager{
                         return  {
                             index: i,
                             waypoint: w,
-                            distance: geoHelper.getDistance(this.mission.home.latitude, this.mission.home.longitude, w.latitude, w.longitude)    
+                            distance: geoHelperNew.getDistance(this.mission.home.latitude, this.mission.home.longitude, w.latitude, w.longitude)    
                         };})
                     .filter((w, i) => w.waypoint.command !== Command.ReturnToLaunch && w.distance > 50000)
                     .sort((a, b ) => a.distance - b.distance);
@@ -132,7 +132,7 @@ export default class MissionManager{
                             index: i,
                             waypoint: w,
                             distance: i === 0 ? 0 :
-                                     geoHelper.getDistance(this.mission.waypoints[i-1].latitude, this.mission.waypoints[i-1].longitude, w.latitude, w.longitude)    
+                                geoHelperNew.getDistance(this.mission.waypoints[i-1].latitude, this.mission.waypoints[i-1].longitude, w.latitude, w.longitude)    
                         };})
                     .filter((w, i) => w.waypoint.command !== Command.ReturnToLaunch 
                                         && w.distance > 50000
@@ -250,7 +250,7 @@ export default class MissionManager{
                             command: w.command,
                             distance: i === 0 ? 0 :
                                      Math.abs(this.mission.waypoints[i-1].altitude - w.altitude) +
-                                     geoHelper.getDistance(this.mission.waypoints[i-1].latitude, this.mission.waypoints[i-1].longitude, w.latitude, w.longitude)    
+                                     geoHelperNew.getDistance(this.mission.waypoints[i-1].latitude, this.mission.waypoints[i-1].longitude, w.latitude, w.longitude)    
                         };})
                     .filter((w, i)  => w.command !== Command.VtolSpeedUp
                                     && w.command.startsWith("Vtol")

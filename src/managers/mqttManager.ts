@@ -7,7 +7,7 @@ import { Auth } from "aws-amplify";
 import { processingFunctions } from "../models/managerModels/aircraftModel";
 import FlightData from "./flightData";
 // import { getEnumKeyByEnumValue, getEnumKeys, getEnumKeyValuePairs, getEnumValueByEnumKey, getEnumValues } from "../utils/enumHelpers";
-// import { UnitSystemEnum, UnitTypeEnum } from "../utils/unitsHelperNew";
+// import { UnitsHelperNew, UnitSystemEnum, UnitTypeEnum } from "../utils/unitsHelperNew";
 
 export default class MQTTManager {
     constructor(maps: any) {
@@ -64,6 +64,8 @@ export default class MQTTManager {
         this.publishUserStatus();
 
 
+        
+        // console.log(UnitsHelperNew.unitDictionaryNew);
         // console.log(getEnumKeyValuePairs(UnitSystemEnum));
         // console.log(getEnumValueByEnumKey(UnitSystemEnum, "SI"));
         // console.log(getEnumKeyByEnumValue(UnitSystemEnum, UnitSystemEnum.US));

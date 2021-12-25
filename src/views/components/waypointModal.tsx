@@ -1,7 +1,7 @@
 import clone from 'clone';
 import React, {useState} from 'react';
 import {Row, Col, Form, Table, Button, ButtonGroup, Modal} from 'react-bootstrap'
-import {waypointDataType} from "../models/missionTypes";
+import {waypointDataType} from "../viewModels/missionTypes";
 
 type waypointModalType = {
     show: boolean;

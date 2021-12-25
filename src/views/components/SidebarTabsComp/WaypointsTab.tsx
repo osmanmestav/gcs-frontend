@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {Table, Button, ButtonGroup} from 'react-bootstrap'
-import {missionDataType} from '../../models/missionTypes';
+import {missionDataType} from '../../viewModels/missionTypes';
 import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
 
 

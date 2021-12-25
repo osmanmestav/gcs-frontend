@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {Row, Col, Form} from 'react-bootstrap'
-import {failsafeType} from "../../models/missionTypes";
+import {failsafeType} from "../../viewModels/missionTypes";
 
 
 type failSafeTypes = {

@@ -8,7 +8,7 @@ import WaypointsTab from "./SidebarTabsComp/WaypointsTab";
 import GeoFenceTab from "./SidebarTabsComp/GeoFenceTab";
 import Failsafe from "./SidebarTabsComp/Failsafe";
 import ModalsWaypoint from "./waypointModal";
-import {missionDataType, waypointDataType} from "../models/missionTypes";
+import {missionDataType, waypointDataType} from "../viewModels/missionTypes";
 
 function SidebarTabs(props: any) {
     const useDraftLogic: boolean = false;

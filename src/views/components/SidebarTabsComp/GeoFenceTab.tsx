@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Table, Button, Form} from 'react-bootstrap'
-import {geoFenceType} from "../../models/missionTypes";
+import {geoFenceType} from "../../viewModels/missionTypes";
 import Switch from 'react-switch';
 
 type GeoFenceTabProps = {
@@ -74,7 +74,7 @@ function GeoFenceTab(props: GeoFenceTabProps) {
                 </tr>
                 </tbody>
             </Table>
-            {geoFenceData &&
+            {geoFenceData && geoFenceData.points.length > 0 &&
             <div style={{height: '260px', overflow: 'scroll'}}>
                 <Table striped bordered hover>
                     <thead>
@@ -85,13 +85,13 @@ function GeoFenceTab(props: GeoFenceTabProps) {
                     </tr>
                     </thead>
                     <tbody>
-                    {// @ts-ignore
-                        geoFenceData.points.map((data, index) => {
+                    {
+                        geoFenceData.points.map((point, index) => {
                                 return (
                                     <tr key={index}>
                                         <td>{(index + 1)}</td>
-                                        <td>{(data as any)?.latitude.toFixed(7)}</td>
-                                        <td>{(data as any)?.longitude.toFixed(7)}</td>
+                                        <td>{point.latitude.toFixed(7)}</td>
+                                        <td>{point.longitude.toFixed(7)}</td>
                                     </tr>
                                 );
                             }

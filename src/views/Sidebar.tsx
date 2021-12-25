@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import SidebarTabs from "./Component/SidebarTabs";
-import Console from "./Component/Console"
-import Control from "./Component/Control"
-import AircraftsListModal from './Component/AircraftsManagement/AircraftsListModal';
+import SidebarTabs from "./components/SidebarTabs";
+import Console from "./components/Console"
+import Control from "./components/Control"
+import AircraftsListModal from './components/AircraftsManagement/AircraftsListModal';
 import { publishEvent, PubSubEvent } from '../utils/PubSubService';
 
 

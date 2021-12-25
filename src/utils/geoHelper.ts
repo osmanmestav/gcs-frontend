@@ -1,5 +1,5 @@
 
-var geoHelper = {
+var geoHelperNew = {
 	toDegrees: function(rad: any) { return rad * (180 / Math.PI); },
 	toRadians: function(degrees: any) { return degrees * (Math.PI / 180); },
 
@@ -46,4 +46,4 @@ var geoHelper = {
 	}
 
 };
-export default geoHelper;
+export default geoHelperNew;

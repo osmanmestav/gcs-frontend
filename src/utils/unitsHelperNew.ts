@@ -1,6 +1,6 @@
-import { getEnumKeyByEnumValue, getEnumKeys } from "./enumHelpers";
+import { getEnumKeyByEnumValue, getEnumKeys, getEnumValues } from "./enumHelpers";
 
-enum UnitSystemEnum {
+export enum UnitSystemEnum {
     SI = 0,
     US = 1
 };
@@ -21,7 +21,7 @@ export enum UnitTypeEnum {
     Temperature = 12
 };
 
-type UnitTypeSystemMap = {
+export type UnitTypeSystemMap = {
     type: UnitTypeEnum;
     system: UnitSystemEnum;
 };
@@ -118,21 +118,16 @@ let mathRoundNew = function(value: number, digit: number = 0)
 
 export class UnitsHelperNew {
 
-    private static unitDictionaryNew : UnitTypeSystemMap[] = [
-        {type: UnitTypeEnum.None, system: UnitSystemEnum.SI},
-        {type: UnitTypeEnum.Distance, system: UnitSystemEnum.SI},
-        {type: UnitTypeEnum.ShortDistance, system: UnitSystemEnum.SI},
-        {type: UnitTypeEnum.LongDistance, system: UnitSystemEnum.SI},
-        {type: UnitTypeEnum.Altitude, system: UnitSystemEnum.SI},
-        {type: UnitTypeEnum.HorizontalSpeed, system: UnitSystemEnum.SI},
-        {type: UnitTypeEnum.VerticalSpeed, system: UnitSystemEnum.SI},
-        {type: UnitTypeEnum.WindSpeed, system: UnitSystemEnum.SI},
-        {type: UnitTypeEnum.TimePrecise, system: UnitSystemEnum.SI},
-        {type: UnitTypeEnum.LatLon, system: UnitSystemEnum.SI},
-        {type: UnitTypeEnum.Weight, system: UnitSystemEnum.SI},
-        {type: UnitTypeEnum.Volume, system: UnitSystemEnum.SI},
-        {type: UnitTypeEnum.Temperature, system: UnitSystemEnum.SI},
-    ];     
+    // Default unit system is SI. Need to override this object as below for US units:
+    // if(x == UnitTypeEnum.Distance)
+    //       return { type: x as UnitTypeEnum, system: UnitSystemEnum.US } as UnitTypeSystemMap }    
+    // return { type: x as UnitTypeEnum, system: UnitSystemEnum.SI } as UnitTypeSystemMap }
+    //
+    public static unitDictionaryNew : UnitTypeSystemMap[] = getEnumValues(UnitTypeEnum).map( x => {
+        return { type: x as UnitTypeEnum, system: UnitSystemEnum.SI } as UnitTypeSystemMap
+        }
+    );
+    
 
     static loadUnits = (unitDict: UnitTypeSystemMap[]) => {
         this.unitDictionaryNew = unitDict;
