@@ -10,7 +10,10 @@ export default class FlightData {
     }
 
     aircraftFleet: AircraftFleet;
-    telemetryMessages: any;
+    /**
+     * an object with keys as aircraftId.
+     */
+    telemetryMessages: { [key: number]: any };
     telemetrySummaries: TelemetrySummaryModel[];
     activeAircraft: AircraftIdentifier | null;
 
@@ -25,7 +28,7 @@ export default class FlightData {
     };
 
     // addAircraft in csharp
-    addNewTelemetry = (telMsg: any) => {
+    initiateNewFlightTelemetry = (telMsg: any) => {
         let aircraftId = telMsg.aircraftId;
         this.telemetryMessages[aircraftId] = telMsg;
         this.telemetrySummaries[aircraftId] = Object.assign({}, this.prepareTelemetrySummary(telMsg));
@@ -39,11 +42,13 @@ export default class FlightData {
         }
     } 
     // updateAircraft in csharp
-    updateTelemetryMessage = (telMsg: any) => {
+    insertTelemetryMessage = (telMsg: any) => {
+        if(!this.aircraftFleet.any(telMsg.aircraftCertificateName))
+            return;
         try {
             let aircraft = this.telemetryMessages[telMsg.aircraftId];
             if (!aircraft) {
-                this.addNewTelemetry(telMsg);
+                this.initiateNewFlightTelemetry(telMsg);
                 aircraft = this.telemetryMessages[telMsg.aircraftId];
             }
             this.telemetrySummaries[telMsg.aircraftId] = Object.assign({}, this.prepareTelemetrySummary(telMsg));

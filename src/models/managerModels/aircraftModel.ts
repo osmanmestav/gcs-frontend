@@ -64,8 +64,8 @@ export class AircraftModel {
         if (this.aircraftCertificateName === e.detail.aircraftCertificateName) {
             requestId++;
             e.detail.requestId = requestId;
-            // PubSub.publish('UL/G/pilot1/' + this.aircraftCertificateName + '/C', e.detail);
-            PubSub.publish('UL/U/' + this.aircraftCertificateName + '/C', e.detail);
+            PubSub.publish('UL/G/pilot1/' + this.aircraftCertificateName + '/C', e.detail);
+            // PubSub.publish('UL/U/' + this.aircraftCertificateName + '/C', e.detail);
         }
     }
 

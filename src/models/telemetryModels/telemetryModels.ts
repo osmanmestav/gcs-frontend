@@ -1,5 +1,5 @@
 export type TelemetrySummaryModel = {
-    aircraftId: string,
+    aircraftId: number,
     altitude: number,
     latitude: number,
     longitude: number,
@@ -7,7 +7,7 @@ export type TelemetrySummaryModel = {
 };
 
 export type AircraftIdentifier = {
-    aircraftId: string,
+    aircraftId: number,
     aircraftName: string, 
     aircraftCertificateName: string
 };

@@ -58,10 +58,24 @@ export default class MQTTManager {
     initializeMQTT = () => {
         console.log("initialize mqTT");
         // Apply plugin with configuration
-        Amplify.addPluggable(new AWSIoTProvider(this.awsIoTProviderOptions));
+        // Amplify.addPluggable(new AWSIoTProvider(this.awsIoTProviderOptions));
+
+        Auth.currentCredentials().then(user => {
+            Amplify.addPluggable(
+                new AWSIoTProvider({
+                    aws_pubsub_region: 'eu-west-1',
+                    aws_pubsub_endpoint: 'wss://a3do8wha900gm6-ats.iot.eu-west-1.amazonaws.com/mqtt',
+                    clientId: user.identityId
+                })
+            );
+            console.log("IdentityId: ", user.identityId);
+            this.publishUserStatus();
+        });
+
+
         subscribeEvent(PubSubEvent.ManageAircrafts, this.subscribeAircrafts);
         this.isActive = true;
-        this.publishUserStatus();
+        
 
 
         
@@ -95,6 +109,7 @@ export default class MQTTManager {
                 // console.log('Message received', data.value);
                 let values = preprocessTelemetry(data.value);
                 if (csharp) {
+                    // this.flightData.insertTelemetryMessage(data.value);
                     csharp.updateAircraft(values);
                     if (data.value.aircraftName === csharp.selectedAircraft.aircraftName) {
                         let setGaugeValues = this.gaugesWindow && (this.gaugesWindow as any).setValues;
