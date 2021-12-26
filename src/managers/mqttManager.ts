@@ -2,9 +2,9 @@ import "../login";
 import Amplify from "@aws-amplify/core";
 import PubSub, {AWSIoTProvider} from "@aws-amplify/pubsub";
 import {preprocessTelemetry} from "../preprocessTelemetry";
-import { publishEvent, PubSubEvent, removeEvent, subscribeEvent } from "../utils/PubSubService";
-import { Auth } from "aws-amplify";
-import { processingFunctions } from "../models/managerModels/aircraftModel";
+import {publishEvent, PubSubEvent, removeEvent, subscribeEvent} from "../utils/PubSubService";
+import {Auth} from "aws-amplify";
+import {processingFunctions} from "../models/managerModels/aircraftModel";
 import FlightData from "./flightData";
 // import { getEnumKeyByEnumValue, getEnumKeys, getEnumKeyValuePairs, getEnumValueByEnumKey, getEnumValues } from "../utils/enumHelpers";
 // import { UnitsHelperNew, UnitSystemEnum, UnitTypeEnum } from "../utils/unitsHelperNew";
@@ -36,20 +36,19 @@ export default class MQTTManager {
         return this.mapsWindow && this.mapsWindow.csharp;
     }
 
-    subscribeAircrafts = (aircraftCertificateNames: string[]) => {
-        aircraftCertificateNames.forEach(x=> {
+    subscribeAircrafts = (aircraftCertificateNames: any[]) => {
+        aircraftCertificateNames.forEach(x => {
             // var aircraft = this.flightData.aircraftFleet.getAircraftByCertificateName(x);
-            var anyAircraft = this.flightData.aircraftFleet.any(x);
-            if(anyAircraft === false){
-                this.flightData.aircraftFleet.insert(x);
-                this.registerAircraft(x);
-            }
-            else {
-                this.unregisterAircraft(x);
-                this.flightData.aircraftFleet.remove(x);
+            var anyAircraft = this.flightData.aircraftFleet.any(x.name);
+            if (anyAircraft === false) {
+                this.flightData.aircraftFleet.insert(x.name);
+                this.registerAircraft(x.name);
+            } else {
+                this.unregisterAircraft(x.name);
+                this.flightData.aircraftFleet.remove(x.name);
                 const csharp = this.getcsharp();
-                if(csharp){
-                    csharp.removeAircraftByCertificateName(x);
+                if (csharp) {
+                    csharp.removeAircraftByCertificateName(x.name);
                 }
             }
         });
@@ -75,10 +74,8 @@ export default class MQTTManager {
 
         subscribeEvent(PubSubEvent.ManageAircrafts, this.subscribeAircrafts);
         this.isActive = true;
-        
 
 
-        
         // console.log(UnitsHelperNew.unitDictionaryNew);
         // console.log(getEnumKeyValuePairs(UnitSystemEnum));
         // console.log(getEnumValueByEnumKey(UnitSystemEnum, "SI"));
@@ -95,11 +92,11 @@ export default class MQTTManager {
 
     registerAircraft = (aircraftCertificateName: string) => {
         var aircraft = this.flightData.aircraftFleet.getAircraftByCertificateName(aircraftCertificateName);
-        if(aircraft === null)
+        if (aircraft === null)
             return;
         console.log("aircraftCertificateName in register: ", aircraftCertificateName)
         const processMessages: processingFunctions = {
-            processTelemetry : data => {
+            processTelemetry: data => {
                 let csharp = this.getcsharp();
 
                 this.mapsWindow.window.dispatchEvent(new CustomEvent("planeChanged", {"detail": data.value}));
@@ -119,7 +116,7 @@ export default class MQTTManager {
                         //Waypoint Current Command Expanded
                         csharp.applyCurrentCommand(data.value);
                     }
-                    
+
                 }
             },
             processMission: (data) => {
@@ -130,8 +127,10 @@ export default class MQTTManager {
                     }, 1000);
                 }
             },
-            processStatus: (data) => {},
-            processParameters: (data) => {},
+            processStatus: (data) => {
+            },
+            processParameters: (data) => {
+            },
         }
         aircraft.startObserving(processMessages);
         this.mapsWindow.addEventListener("CommandRequest", aircraft.commandPublisher);
@@ -140,7 +139,7 @@ export default class MQTTManager {
 
     unregisterAircraft = (aircraftCertificateName: string) => {
         var aircraft = this.flightData.aircraftFleet.getAircraftByCertificateName(aircraftCertificateName);
-        if(aircraft === null)
+        if (aircraft === null)
             return;
 
         console.log("aircraftCertificateName in unregister: ", aircraftCertificateName);
@@ -149,9 +148,9 @@ export default class MQTTManager {
     }
 
     publishUserStatus = async () => {
-        if(!this.isActive)
+        if (!this.isActive)
             return;
-        
+
         // const user = await Auth.currentAuthenticatedUser();
         // console.log('attributes:', user.attributes);
         let req = {
@@ -174,18 +173,18 @@ export default class MQTTManager {
         });
     }
 
-    aircraftStatusSubscription : any;
+    aircraftStatusSubscription: any;
     subscribeToAircraftStatuses = (initiate: boolean) => {
-        if(this.aircraftStatusSubscription != null){
+        if (this.aircraftStatusSubscription != null) {
             this.aircraftStatusSubscription.unsubscribe();
             console.log('stopped listening to the aircraft status messages\n');
         }
-        if(initiate){
+        if (initiate) {
             console.log('started listening to the aircraft status messages\n');
             this.aircraftStatusSubscription = PubSub.subscribe('UL/U/+/S').subscribe({
                 next: data => {
-                    console.log('aircraft status message: ', data.value); 
-                    publishEvent(PubSubEvent.AnyAircraftStatusMessageReceived, data.value);        
+                    console.log('aircraft status message: ', data.value);
+                    publishEvent(PubSubEvent.AnyAircraftStatusMessageReceived, data.value);
                 },
                 error: error => console.error(error),
                 complete: () => console.log('Done'),
@@ -193,18 +192,18 @@ export default class MQTTManager {
         }
     }
 
-    stationStatusSubscription : any;
+    stationStatusSubscription: any;
     subscribeToControlStationStatuses = (initiate: boolean) => {
-        if(this.stationStatusSubscription != null){
+        if (this.stationStatusSubscription != null) {
             this.stationStatusSubscription.unsubscribe();
             console.log('stopped listening to the user status messages\n');
         }
-        if(initiate){
+        if (initiate) {
             console.log('started listening to the user status messages\n');
             this.stationStatusSubscription = PubSub.subscribe('UL/G/+/S').subscribe({
                 next: data => {
-                    console.log('user status message: ', data.value); 
-                    publishEvent(PubSubEvent.AnyUserStatusMessageReceived, data.value);        
+                    console.log('user status message: ', data.value);
+                    publishEvent(PubSubEvent.AnyUserStatusMessageReceived, data.value);
                 },
                 error: error => console.error(error),
                 complete: () => console.log('Done'),

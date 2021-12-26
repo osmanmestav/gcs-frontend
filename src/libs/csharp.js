@@ -1,4 +1,5 @@
 var csharp = {
+    IsMissionEditable: false,
     aircrafts: {},
     selectedAircraft: {},
     mission: {
@@ -88,22 +89,22 @@ var csharp = {
         try {
             delete this.aircrafts[aircraftId];
             delete this.telemetrySummaries[aircraftId];
-            if (this.selectedAircraft && this.selectedAircraft.aircraftId === aircraftId){
+            if (this.selectedAircraft && this.selectedAircraft.aircraftId === aircraftId) {
                 this.selectedAircraft = null;
                 this.clearWaypoints("aircraftRemoval");
                 this.clearGeoFence();
             }
-                
+
             window.dispatchEvent(new CustomEvent('AircraftRemoved', {detail: aircraftId}));
         } catch (err) {
             console.log(err);
         }
     },
     async removeAircraftByCertificateName(aircraftCertificateName) {
-        const aircraft = Object.values(this.aircrafts).filter(x=> x.aircraftCertificateName === aircraftCertificateName)[0];
-        if(aircraft === undefined)
+        const aircraft = Object.values(this.aircrafts).filter(x => x.aircraftCertificateName === aircraftCertificateName)[0];
+        if (aircraft === undefined)
             return;
-        
+
         const aircraftId = aircraft.aircraftId;
         this.removeAircraftById(aircraftId);
     },
@@ -985,7 +986,7 @@ var csharp = {
         return ConfigInfo.AltitudeOverHome;
     },
 
-    manageAircrafts(){
+    manageAircrafts() {
         window.dispatchEvent(new CustomEvent('ManageAircrafts', {detail: null}));
     },
 };

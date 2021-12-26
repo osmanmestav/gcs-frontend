@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import SidebarTabs from "./components/SidebarTabs";
 import Console from "./components/Console"
 import Control from "./components/Control"
 import AircraftsListModal from './components/AircraftsManagement/AircraftsListModal';
-import { publishEvent, PubSubEvent } from '../utils/PubSubService';
+import {publishEvent, PubSubEvent} from '../utils/PubSubService';
 
 
 type SidebarProps = {
@@ -15,21 +15,21 @@ type SidebarProps = {
 };
 
 function Sidebar(props: SidebarProps) {
-    const [showAircraftsListModal, setShowAircraftsListModal ] = useState<boolean>(false);
+    const [showAircraftsListModal, setShowAircraftsListModal] = useState<boolean>(false);
 
     const manageAircrafts = () => {
-        if(showAircraftsListModal )
+        if (showAircraftsListModal)
             return;
-        setShowAircraftsListModal(true);    
+        setShowAircraftsListModal(true);
         props.subscribeToAircraftStatuses(true);
         props.subscribeToUserStatuses(true);
     }
-    
-    const onAircraftsManagementModalClosed = (isCancelled: boolean, aircraftNames: string[]) => {
-        setShowAircraftsListModal(false);    
+
+    const onAircraftsManagementModalClosed = (isCancelled: boolean, aircraftNames: any[]) => {
+        setShowAircraftsListModal(false);
         props.subscribeToAircraftStatuses(false);
         props.subscribeToUserStatuses(false);
-        if(!isCancelled && aircraftNames.length > 0){
+        if (!isCancelled && aircraftNames.length > 0) {
             publishEvent(PubSubEvent.ManageAircrafts, ...aircraftNames)
         }
     }
@@ -39,19 +39,19 @@ function Sidebar(props: SidebarProps) {
         return () => {
             props.mapsWindow.removeEventListener("ManageAircrafts", manageAircrafts);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.mapsWindow]);
 
     return (
         <div>
-            <Control openGauges={props.openGauges} 
-                    startTelemetrySimulation={props.startTelemetrySimulation}
-                    mapWindow={props.mapsWindow}>
+            <Control openGauges={props.openGauges}
+                     startTelemetrySimulation={props.startTelemetrySimulation}
+                     mapWindow={props.mapsWindow}>
             </Control>
             <SidebarTabs mapWindow={props.mapsWindow}></SidebarTabs>
             <Console mapWindow={props.mapsWindow}></Console>
             {
-                showAircraftsListModal && 
+                showAircraftsListModal &&
                 <AircraftsListModal show={showAircraftsListModal} onCloseModal={onAircraftsManagementModalClosed}/>
             }
         </div>
