@@ -65,7 +65,6 @@ export class AircraftModel {
             requestId++;
             e.detail.requestId = requestId;
             PubSub.publish('UL/G/pilot1/' + this.aircraftCertificateName + '/C', e.detail);
-            // PubSub.publish('UL/U/' + this.aircraftCertificateName + '/C', e.detail);
         }
     }
 
@@ -96,7 +95,19 @@ export class AircraftModel {
             error: error => console.error(error),
             complete: () => console.log('Done'),
         });
-
+        this.commandPublisher(
+            {
+                detail: { 
+                    requestId: 1,
+	                userCode: 'pilot1',
+                    aircraftCertificateName: this.aircraftCertificateName,
+	                aircraftName: this.aircraftCertificateName,
+	                aircraftId: 11,
+                    command: 'Claim',
+                    data: {}
+                }
+            }
+        );
         // temporary set for full control.
         this.pilotageStatus = AircraftPilotageStatus.Controlling;
     }
