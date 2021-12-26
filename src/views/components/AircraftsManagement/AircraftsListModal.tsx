@@ -4,33 +4,27 @@ import {PubSubEvent, removeEvent, subscribeEvent} from "../../../utils/PubSubSer
 
 type AircraftsListModalProps = {
     show: boolean;
-    onCloseModal: (isCancelled: boolean, aircraftNames: any) => void;
-}
+    aircraftStates: AircraftPilotageStatus[];
+    onCloseModal: (isCancelled: boolean, aircraftNames: AircraftPilotageStatus[]) => void;
+};
+
+export class AircraftPilotageStatus {
+    constructor(name: string, isControlling: boolean){
+        this.name = name;
+        this.controlling = isControlling;
+    };
+    name: string;
+    controlling: boolean; 
+};
 
 const AircraftsListModal = (props: AircraftsListModalProps) => {
-    const [aircraft, setAircraft] = useState([
-        {
-            name: 'dev1',
-            controlling: false
-        }, {
-            name: 'dev2',
-            controlling: false
-        }, {
-            name: 'dev3',
-            controlling: false
-        }, {
-            name: 'dev4',
-            controlling: false
-        }, {
-            name: 'dev5',
-            controlling: false
-        }, {
-            name: 'dev6',
-            controlling: false
-        }, {
-            name: 'dev7',
-            controlling: false
-        }
+    const [aircraft, setAircraft] = useState<AircraftPilotageStatus[]>([
+        new AircraftPilotageStatus('dev1', false),
+        new AircraftPilotageStatus('dev2', false),
+        new AircraftPilotageStatus('dev3', false),
+        new AircraftPilotageStatus('dev4', false),
+        new AircraftPilotageStatus('dev5', false),
+        new AircraftPilotageStatus('dev6', false),
     ]);
 
 
@@ -46,18 +40,28 @@ const AircraftsListModal = (props: AircraftsListModalProps) => {
                 var index = aircraft.map(function (e) {
                     return e.name;
                 }).indexOf(data);
-                if (aircraft[index].name == data) {
-                    aircraft[index].controlling = true
+                if (aircraft[index].name === data) {
+                    // burada bunu set etmeyeceksin. Bu bilgiyi ObservedBy icin kullanacaksin
+                    // controlun kimin tarafindan yapildigini aircraftStatus ten alacaksin.
+                    // aircraft[index].controlling props olarak gelmeli - ve sadece component mount oldugu zaman set edilmeli. props olarak koyuyorum.
+                    // aircraft[index].controlling = true
                     setAircraft(aircraft)
                     //console.log(aircraft)
                 }
             });
-
-
         });
-
-
     }
+
+    useEffect(() => {
+        props.aircraftStates.forEach(x=> {
+            let index = aircraft.findIndex(y=> y.name === x.name);
+            if(index !== -1){
+                aircraft[index].controlling = true;
+            }
+        });
+        setAircraft([...aircraft]);
+
+    }, [props.aircraftStates]);
 
     useEffect(() => {
         subscribeEvent(PubSubEvent.AnyAircraftStatusMessageReceived, onAircraftStatusReceived);
@@ -66,7 +70,8 @@ const AircraftsListModal = (props: AircraftsListModalProps) => {
             removeEvent(PubSubEvent.AnyUserStatusMessageReceived, onUserStatusReceived);
             removeEvent(PubSubEvent.AnyAircraftStatusMessageReceived, onAircraftStatusReceived);
         }
-    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
         <Modal
@@ -77,10 +82,11 @@ const AircraftsListModal = (props: AircraftsListModalProps) => {
         >
             <Modal.Header>
                 <Modal.Title id="contained-modal-title-vcenter">
-                    Manage Aircrafts
+                    Manage Aircrafts (Temporary Logic: To control check Controlling, to give up check Observing)
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
+                
                 <Table striped bordered hover>
                     <thead>
                     <tr>
@@ -109,11 +115,11 @@ const AircraftsListModal = (props: AircraftsListModalProps) => {
                                         type="radio"
                                         disabled={data.controlling}
                                         id={data.name + "inline" + index}
-                                        checked={(data.controlling == true ? true : false)}
+                                        checked={(data.controlling === true ? true : false)}
                                         onChange={(e) => {
                                             console.log(aircraft)
                                             aircraft[index].controlling = true;
-                                            setAircraft(aircraft);
+                                            setAircraft([...aircraft]);
 
                                         }}
                                     />
@@ -124,10 +130,10 @@ const AircraftsListModal = (props: AircraftsListModalProps) => {
                                         name={data.name}
                                         type="radio"
                                         id={data.name + "inline" + index}
-                                        checked={(data.controlling == false ? true : false)}
+                                        checked={(data.controlling === false ? true : false)}
                                         onChange={(e) => {
                                             aircraft[index].controlling = false;
-                                            setAircraft(aircraft);
+                                            setAircraft([...aircraft]);
                                         }}
                                     />
                                 </td>
@@ -138,8 +144,6 @@ const AircraftsListModal = (props: AircraftsListModalProps) => {
                     </tbody>
                 </Table>
 
-
-                Toggle Connect/Disconnect functionality for all possible aircrafts (dev1, dev2, dev3, dev4, dev5, dev6)
             </Modal.Body>
             <Modal.Footer>
                 <Button variant={"success"} onClick={() => {

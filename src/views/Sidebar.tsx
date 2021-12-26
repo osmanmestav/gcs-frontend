@@ -2,13 +2,15 @@ import React, {useEffect, useState} from 'react';
 import SidebarTabs from "./components/SidebarTabs";
 import Console from "./components/Console"
 import Control from "./components/Control"
-import AircraftsListModal from './components/AircraftsManagement/AircraftsListModal';
+import AircraftsListModal, { AircraftPilotageStatus } from './components/AircraftsManagement/AircraftsListModal';
 import {publishEvent, PubSubEvent} from '../utils/PubSubService';
+import FlightData from '../managers/flightData';
 
 
 type SidebarProps = {
     mapsWindow: any;
     openGauges: () => void;
+    flightData: FlightData;
     startTelemetrySimulation: () => void;
     subscribeToAircraftStatuses: (initiate: boolean) => void;
     subscribeToUserStatuses: (initiate: boolean) => void;
@@ -25,7 +27,7 @@ function Sidebar(props: SidebarProps) {
         props.subscribeToUserStatuses(true);
     }
 
-    const onAircraftsManagementModalClosed = (isCancelled: boolean, aircraftNames: any[]) => {
+    const onAircraftsManagementModalClosed = (isCancelled: boolean, aircraftNames: AircraftPilotageStatus[]) => {
         setShowAircraftsListModal(false);
         props.subscribeToAircraftStatuses(false);
         props.subscribeToUserStatuses(false);
@@ -52,7 +54,9 @@ function Sidebar(props: SidebarProps) {
             <Console mapWindow={props.mapsWindow}></Console>
             {
                 showAircraftsListModal &&
-                <AircraftsListModal show={showAircraftsListModal} onCloseModal={onAircraftsManagementModalClosed}/>
+                <AircraftsListModal show={showAircraftsListModal} 
+                    aircraftStates={props.flightData.aircraftFleet.getListOfControllingAircraftCertificateNames().map(x=> new AircraftPilotageStatus(x, true))}
+                    onCloseModal={onAircraftsManagementModalClosed}/>
             }
         </div>
     );

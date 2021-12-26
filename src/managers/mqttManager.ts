@@ -6,6 +6,7 @@ import {publishEvent, PubSubEvent, removeEvent, subscribeEvent} from "../utils/P
 import {Auth} from "aws-amplify";
 import {processingFunctions} from "../models/managerModels/aircraftModel";
 import FlightData from "./flightData";
+import { AircraftPilotageStatus } from "../views/components/AircraftsManagement/AircraftsListModal";
 // import { getEnumKeyByEnumValue, getEnumKeys, getEnumKeyValuePairs, getEnumValueByEnumKey, getEnumValues } from "../utils/enumHelpers";
 // import { UnitsHelperNew, UnitSystemEnum, UnitTypeEnum } from "../utils/unitsHelperNew";
 
@@ -23,11 +24,6 @@ export default class MQTTManager {
     flightData: FlightData;
     isActive: boolean;
 
-    awsIoTProviderOptions = {
-        aws_pubsub_region: 'eu-west-1',
-        aws_pubsub_endpoint: 'wss://a3do8wha900gm6-ats.iot.eu-west-1.amazonaws.com/mqtt',
-    };
-
     setGaugesWindow = (gauges: any) => {
         this.gaugesWindow = gauges;
     }
@@ -36,19 +32,22 @@ export default class MQTTManager {
         return this.mapsWindow && this.mapsWindow.csharp;
     }
 
-    subscribeAircrafts = (aircraftCertificateNames: any[]) => {
+    subscribeAircrafts = (aircraftCertificateNames: AircraftPilotageStatus[]) => {
         aircraftCertificateNames.forEach(x => {
-            // var aircraft = this.flightData.aircraftFleet.getAircraftByCertificateName(x);
             var anyAircraft = this.flightData.aircraftFleet.any(x.name);
             if (anyAircraft === false) {
-                this.flightData.aircraftFleet.insert(x.name);
-                this.registerAircraft(x.name);
+                if(x.controlling){
+                    this.flightData.aircraftFleet.insert(x.name);
+                    this.registerAircraft(x.name);
+                }
             } else {
-                this.unregisterAircraft(x.name);
-                this.flightData.aircraftFleet.remove(x.name);
-                const csharp = this.getcsharp();
-                if (csharp) {
-                    csharp.removeAircraftByCertificateName(x.name);
+                if(x.controlling === false){
+                    this.unregisterAircraft(x.name);
+                    this.flightData.aircraftFleet.remove(x.name);
+                    const csharp = this.getcsharp();
+                    if (csharp) {
+                        csharp.removeAircraftByCertificateName(x.name);
+                    }
                 }
             }
         });
@@ -56,9 +55,6 @@ export default class MQTTManager {
 
     initializeMQTT = () => {
         console.log("initialize mqTT");
-        // Apply plugin with configuration
-        // Amplify.addPluggable(new AWSIoTProvider(this.awsIoTProviderOptions));
-
         Auth.currentCredentials().then(user => {
             Amplify.addPluggable(
                 new AWSIoTProvider({
@@ -70,7 +66,6 @@ export default class MQTTManager {
             console.log("IdentityId: ", user.identityId);
             this.publishUserStatus();
         });
-
 
         subscribeEvent(PubSubEvent.ManageAircrafts, this.subscribeAircrafts);
         this.isActive = true;
@@ -202,7 +197,7 @@ export default class MQTTManager {
             console.log('started listening to the user status messages\n');
             this.stationStatusSubscription = PubSub.subscribe('UL/G/+/S').subscribe({
                 next: data => {
-                    console.log('user status message: ', data.value);
+                    // console.log('user status message: ', data.value);
                     publishEvent(PubSubEvent.AnyUserStatusMessageReceived, data.value);
                 },
                 error: error => console.error(error),

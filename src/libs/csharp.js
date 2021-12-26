@@ -157,7 +157,7 @@ var csharp = {
     },
 
     async downloadMission() {
-        console.log("selected aircraft in download mission: ", this.selectedAircraft);
+        // console.log("selected aircraft in download mission: ", this.selectedAircraft);
         return this.downloadMissionFromAircraft(this.selectedAircraft);
     },
 
