@@ -1,4 +1,5 @@
 import { PubSub } from "aws-amplify";
+import { defaultUserCode } from "../../managers/mqttManager";
 
 export type processingFunctions = {
     processTelemetry: (data: any) => void;
@@ -64,7 +65,7 @@ export class AircraftModel {
         if (this.aircraftCertificateName === e.detail.aircraftCertificateName) {
             requestId++;
             e.detail.requestId = requestId;
-            PubSub.publish('UL/G/pilot1/' + this.aircraftCertificateName + '/C', e.detail);
+            PubSub.publish('UL/G/' + defaultUserCode+ '/' + this.aircraftCertificateName + '/C', e.detail);
         }
     }
 
@@ -99,7 +100,7 @@ export class AircraftModel {
             {
                 detail: { 
                     requestId: 1,
-	                userCode: 'pilot1',
+	                userCode: defaultUserCode,
                     aircraftCertificateName: this.aircraftCertificateName,
 	                aircraftName: this.aircraftCertificateName,
 	                aircraftId: 11,

@@ -10,6 +10,9 @@ import { AircraftPilotageStatus } from "../views/components/AircraftsManagement/
 // import { getEnumKeyByEnumValue, getEnumKeys, getEnumKeyValuePairs, getEnumValueByEnumKey, getEnumValues } from "../utils/enumHelpers";
 // import { UnitsHelperNew, UnitSystemEnum, UnitTypeEnum } from "../utils/unitsHelperNew";
 
+
+export const defaultUserCode: string = "pilot1";
+
 export default class MQTTManager {
     constructor(maps: any) {
         this.mapsWindow = maps;
@@ -150,11 +153,11 @@ export default class MQTTManager {
         // const user = await Auth.currentAuthenticatedUser();
         // console.log('attributes:', user.attributes);
         let req = {
-            userCode: 'pilot1',
+            userCode: defaultUserCode,
             listOfControllingAircrafts: this.flightData.aircraftFleet.getListOfControllingAircraftCertificateNames(),
             listOfObservingAircrafts: this.flightData.aircraftFleet.getListOfObservingAircraftCertificateNames(),
         };
-        PubSub.publish('UL/G/' + 'pilot1' + '/S', req).then(() => {
+        PubSub.publish('UL/G/' + defaultUserCode + '/S', req).then(() => {
             setTimeout(this.publishUserStatus, 1000);
         }).catch(err => {
             console.log(err);

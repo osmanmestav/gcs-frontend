@@ -3,19 +3,80 @@ import {Button, Modal, Table, Form} from "react-bootstrap";
 import {PubSubEvent, removeEvent, subscribeEvent} from "../../../utils/PubSubService";
 
 type AircraftsListModalProps = {
+    userCode: string;
     show: boolean;
     aircraftStates: AircraftPilotageStatus[];
     onCloseModal: (isCancelled: boolean, aircraftNames: AircraftPilotageStatus[]) => void;
 };
 
+export enum PilotageState {
+    None, 
+    Observing,
+    Controlling
+};
+
 export class AircraftPilotageStatus {
-    constructor(name: string, isControlling: boolean){
+    constructor(name: string, isControlling: boolean, state: PilotageState = PilotageState.None){
         this.name = name;
         this.controlling = isControlling;
+        this.state = state;
     };
+
     name: string;
     controlling: boolean; 
+    state: PilotageState;
 };
+
+class AircraftsListItemViewModel {
+    constructor(name: string, userState: PilotageState, controller: string){
+        this.aircraftName = name;
+        this.userPilotageState= userState;
+        this.controller = controller;
+        this.observers = [];
+    }
+
+    private aircraftName: string;
+    controller: string;
+    observers: string[];
+    userPilotageState: PilotageState;
+
+    isCLaimingDisabled = () => {
+        return this.userPilotageState === PilotageState.Controlling
+    };
+
+    isObserving = () => {
+        return this.userPilotageState !== PilotageState.None;
+    };
+
+    isControlling = () => {
+        return this.userPilotageState !== PilotageState.None;
+    };
+
+    extractAirraftPilotageStatus = (userCode: string) => {
+        if(this.controller === userCode){
+            return new AircraftPilotageStatus(this.aircraftName, true, PilotageState.Controlling);
+        }
+        else if(this.observers.some(x => x === userCode)) {
+            return new AircraftPilotageStatus(this.aircraftName, true, PilotageState.Observing);
+        }
+        else 
+            return null;
+    }
+}
+
+class AircraftsListViewModel {
+    constructor(){
+        this.aircraftItems = [];
+    };
+
+    private aircraftItems: AircraftsListItemViewModel[];
+
+    extractAirraftPilotageStatus = (userCode: string) => {
+        return this.aircraftItems.map(x=> x.extractAirraftPilotageStatus(userCode))
+                                 .filter(x => x !== null).map(x => x!);
+    }
+
+}
 
 const AircraftsListModal = (props: AircraftsListModalProps) => {
     const [aircraft, setAircraft] = useState<AircraftPilotageStatus[]>([
@@ -27,13 +88,14 @@ const AircraftsListModal = (props: AircraftsListModalProps) => {
         new AircraftPilotageStatus('dev6', false),
     ]);
 
+    const [aircraftListItems, setAircraftListItems] = useState<AircraftsListViewModel>(new AircraftsListViewModel());
 
     const onAircraftStatusReceived = (args: any[]) => {
         console.log(args[0]);
     }
 
     const onUserStatusReceived = (args: any[]) => {
-
+        console.log(args[0]);
         args.forEach((arg) => {
 
             arg.listOfControllingAircrafts.forEach((data: any) => {
@@ -72,6 +134,10 @@ const AircraftsListModal = (props: AircraftsListModalProps) => {
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    const extractOkInformation = () => {
+        return aircraftListItems.extractAirraftPilotageStatus(props.userCode);
+    }
 
     return (
         <Modal

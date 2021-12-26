@@ -2,9 +2,10 @@ import React, {useEffect, useState} from 'react';
 import SidebarTabs from "./components/SidebarTabs";
 import Console from "./components/Console"
 import Control from "./components/Control"
-import AircraftsListModal, { AircraftPilotageStatus } from './components/AircraftsManagement/AircraftsListModal';
+import AircraftsListModal, { AircraftPilotageStatus, PilotageState } from './components/AircraftsManagement/AircraftsListModal';
 import {publishEvent, PubSubEvent} from '../utils/PubSubService';
 import FlightData from '../managers/flightData';
+import { defaultUserCode } from '../managers/mqttManager';
 
 
 type SidebarProps = {
@@ -44,6 +45,14 @@ function Sidebar(props: SidebarProps) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.mapsWindow]);
 
+
+    const getAircraftStates = () => {
+
+        const controllingList = props.flightData.aircraftFleet.getListOfControllingAircraftCertificateNames().map(x=> new AircraftPilotageStatus(x, true, PilotageState.Controlling));
+        const observingList = props.flightData.aircraftFleet.getListOfObservingAircraftCertificateNames().map(x=> new AircraftPilotageStatus(x, true, PilotageState.Observing));
+        return controllingList.concat(...observingList);
+    }
+
     return (
         <div>
             <Control openGauges={props.openGauges}
@@ -54,8 +63,10 @@ function Sidebar(props: SidebarProps) {
             <Console mapWindow={props.mapsWindow}></Console>
             {
                 showAircraftsListModal &&
-                <AircraftsListModal show={showAircraftsListModal} 
-                    aircraftStates={props.flightData.aircraftFleet.getListOfControllingAircraftCertificateNames().map(x=> new AircraftPilotageStatus(x, true))}
+                <AircraftsListModal 
+                    show={showAircraftsListModal}
+                    userCode={defaultUserCode}
+                    aircraftStates={getAircraftStates()}
                     onCloseModal={onAircraftsManagementModalClosed}/>
             }
         </div>
