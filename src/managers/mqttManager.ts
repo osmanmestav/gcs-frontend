@@ -6,19 +6,28 @@ import {publishEvent, PubSubEvent, removeEvent, subscribeEvent} from "../utils/P
 import {Auth} from "aws-amplify";
 import {processingFunctions} from "../models/managerModels/aircraftModel";
 import FlightData from "./flightData";
-import {AircraftPilotageStatus} from "../views/components/AircraftsManagement/AircraftsListModal";
+import {AircraftPilotageStatus, PilotageState} from "../views/components/AircraftsManagement/AircraftsListModal";
+import { UserStatusTopicMessage } from "../models/brokerModels/userStatusTopicMessage";
+import { AircraftStatusTopicMessage } from "../models/brokerModels/aircraftStatusTopicMessage";
 // import { getEnumKeyByEnumValue, getEnumKeys, getEnumKeyValuePairs, getEnumValueByEnumKey, getEnumValues } from "../utils/enumHelpers";
 // import { UnitsHelperNew, UnitSystemEnum, UnitTypeEnum } from "../utils/unitsHelperNew";
 
-let pilot = "pilot1";
-if (window.location.pathname) pilot = window.location.pathname.split('/')[1];
-export const defaultUserCode: string = pilot;
+const getUserCode = (pathName: string) => {
+    const splitted = pathName.split('/')
+    if(splitted.length > 1 && splitted[1] !== '')  {
+        return splitted[1];
+    }
+    return 'pilot1';
+}
 
+export const defaultUserCode: string = getUserCode(window.location.pathname);
 export default class MQTTManager {
     constructor(maps: any) {
+        
         this.mapsWindow = maps;
         this.gaugesWindow = null;
-        this.flightData = new FlightData();
+        debugger;
+        this.flightData = new FlightData(defaultUserCode);
         this.isActive = false;
     };
 
@@ -36,21 +45,19 @@ export default class MQTTManager {
         return this.mapsWindow && this.mapsWindow.csharp;
     }
 
-    subscribeAircrafts = (aircraftCertificateNames: AircraftPilotageStatus[]) => {
-
-        aircraftCertificateNames.forEach(x => {
+    subscribeAircrafts = (pilotage: AircraftPilotageStatus[]) => {
+        pilotage.forEach(x => {
             console.log("state:", x.state)
             var anyAircraft = this.flightData.aircraftFleet.any(x.name);
             console.log("status:", anyAircraft)
             if (anyAircraft === false) {
-                //Controlling
-                if (x.state == 2) {
+                if (x.state !== PilotageState.None) {
                     this.flightData.aircraftFleet.insert(x.name);
-                    this.registerAircraft(x.name);
+                    this.registerAircraft(x.name, x.state === PilotageState.Controlling);
                 }
             } else {
-                //Observing
-                if (x.state === 1) {
+                // var observingList = this.flightData.aircraftFleet.getListOfObservingAircraftCertificateNames();
+                if (x.state === PilotageState.None) {
                     this.unregisterAircraft(x.name);
                     this.flightData.aircraftFleet.remove(x.name);
                     const csharp = this.getcsharp();
@@ -95,7 +102,7 @@ export default class MQTTManager {
         this.isActive = false;
     }
 
-    registerAircraft = (aircraftCertificateName: string) => {
+    registerAircraft = (aircraftCertificateName: string, requestClaim: boolean) => {
         var aircraft = this.flightData.aircraftFleet.getAircraftByCertificateName(aircraftCertificateName);
         if (aircraft === null)
             return;
@@ -126,18 +133,18 @@ export default class MQTTManager {
             },
             processMission: (data) => {
                 let csharp = this.getcsharp();
-                if (csharp && data.value.aircraftName === csharp.selectedAircraft.aircraftName) {
                     setTimeout(() => {
-                        csharp.receivedMission(data.value, 'mission-download');
+                        if (csharp && csharp.selectedAircraft && data.value.aircraftName === csharp.selectedAircraft.aircraftName) {
+                            csharp.receivedMission(data.value, 'mission-download');
+                        }
                     }, 1000);
-                }
             },
             processStatus: (data) => {
             },
             processParameters: (data) => {
             },
         }
-        aircraft.startObserving(processMessages);
+        aircraft.startObserving(processMessages, requestClaim);
         this.mapsWindow.addEventListener("CommandRequest", aircraft.commandPublisher);
 
     }
@@ -188,8 +195,16 @@ export default class MQTTManager {
             console.log('started listening to the aircraft status messages\n');
             this.aircraftStatusSubscription = PubSub.subscribe('UL/U/+/S').subscribe({
                 next: data => {
-                    //console.log('aircraft status message: ', data.value);
-                    publishEvent(PubSubEvent.AnyAircraftStatusMessageReceived, data.value);
+                    // console.log('aircraft status message: ', data.value);
+                    const aircraftStatusMsg = new AircraftStatusTopicMessage();
+                    aircraftStatusMsg.aircraftId = data.value.aircraftID;
+                    aircraftStatusMsg.aircraftName = data.value.aircraftName;
+                    aircraftStatusMsg.aircraftCertificateName = data.value.aircraftCertificateName;
+                    aircraftStatusMsg.gcsController = {
+                        userCode: data.value.gcsController.userCode,
+                        userName: data.value.gcsController.userName,
+                    };
+                    publishEvent(PubSubEvent.AnyAircraftStatusMessageReceived, aircraftStatusMsg);
                 },
                 error: error => console.error(error),
                 complete: () => console.log('Done'),
@@ -208,7 +223,10 @@ export default class MQTTManager {
             this.stationStatusSubscription = PubSub.subscribe('UL/G/+/S').subscribe({
                 next: data => {
                     // console.log('user status message: ', data.value);
-                    publishEvent(PubSubEvent.AnyUserStatusMessageReceived, data.value);
+                    const userStatusMsg = new UserStatusTopicMessage(data.value.userCode);
+                    userStatusMsg.listOfObservingAircrafts = data.value.listOfObservingAircrafts;
+                    userStatusMsg.listOfControllingAircrafts = data.value.listOfControllingAircrafts;
+                    publishEvent(PubSubEvent.AnyUserStatusMessageReceived, userStatusMsg);
                 },
                 error: error => console.error(error),
                 complete: () => console.log('Done'),

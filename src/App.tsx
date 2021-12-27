@@ -73,7 +73,7 @@ function App() {
 
     useEffect(() => {
         if (mqttManager != null && simulationStarted) {
-            mqttManager?.registerAircraft(certificateNameForTelemetrySimulation);
+            mqttManager?.registerAircraft(certificateNameForTelemetrySimulation, false);
             setInterval(startSimulation, 100);
         }
     }, [simulationStarted]);

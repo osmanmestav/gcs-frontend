@@ -1,9 +1,12 @@
 import { AircraftModel } from "../models/managerModels/aircraftModel";
 
 export default class AircraftFleet {
-    constructor(){
+    constructor(userCode: string){
+        this.userCode = userCode;
         this.aircrafts = [];
     }
+
+    userCode: string;
     private aircrafts: AircraftModel[];
 
     any = (certificateName: string) => {
@@ -22,7 +25,7 @@ export default class AircraftFleet {
         if(this.any(certificateName))
             return false;
         
-        const aircraft = new AircraftModel(certificateName);
+        const aircraft = new AircraftModel(certificateName, this.userCode);
         this.aircrafts.push(aircraft);
 
         return true;

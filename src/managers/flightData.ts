@@ -2,13 +2,14 @@ import { AircraftIdentifier, TelemetrySummaryModel } from "../models/telemetryMo
 import AircraftFleet from "./aircraftFleet";
 
 export default class FlightData {
-    constructor(){
-        this.aircraftFleet = new AircraftFleet();
+    constructor(userCode: string){
+        this.userCode = userCode;
+        this.aircraftFleet = new AircraftFleet(userCode);
         this.telemetryMessages = {};
         this.telemetrySummaries = [];
         this.activeAircraft = null;
     }
-
+    userCode: string;
     aircraftFleet: AircraftFleet;
     /**
      * an object with keys as aircraftId.

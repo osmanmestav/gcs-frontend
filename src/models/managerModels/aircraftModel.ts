@@ -1,5 +1,4 @@
 import { PubSub } from "aws-amplify";
-import { defaultUserCode } from "../../managers/mqttManager";
 
 export type processingFunctions = {
     processTelemetry: (data: any) => void;
@@ -16,10 +15,12 @@ enum AircraftPilotageStatus {
 } 
 
 export class AircraftModel {
-    constructor(name: string){
+    constructor(name: string, userCode: string){
+        this.userCode = userCode;
         this.aircraftCertificateName = name;
         this.pilotageStatus = AircraftPilotageStatus.None;
     }
+    userCode: string;
     aircraftCertificateName: string;
     private telemetrySubscription: any;
     private missionSubscription: any;
@@ -65,11 +66,11 @@ export class AircraftModel {
         if (this.aircraftCertificateName === e.detail.aircraftCertificateName) {
             requestId++;
             e.detail.requestId = requestId;
-            PubSub.publish('UL/G/' + defaultUserCode+ '/' + this.aircraftCertificateName + '/C', e.detail);
+            PubSub.publish('UL/G/' + this.userCode + '/' + this.aircraftCertificateName + '/C', e.detail);
         }
     }
 
-    startObserving = (next: processingFunctions) => {
+    startObserving = (next: processingFunctions, requestClaim: boolean) => {
         this.telemetrySubscription = PubSub.subscribe('UL/U/' + this.aircraftCertificateName + '/T').subscribe({
             next: data => {
                 if(this.isObserving())
@@ -82,7 +83,10 @@ export class AircraftModel {
             next: data => {
                 console.log('Mission received', data.value);
                 this.receivedMission(data.value);
-                next.processMission(data);
+                setTimeout(() => {
+                    next.processMission(data);
+                }, 1000);
+                
             },
             error: error => console.error(error),
             complete: () => console.log('Done'),
@@ -96,21 +100,24 @@ export class AircraftModel {
             error: error => console.error(error),
             complete: () => console.log('Done'),
         });
-        this.commandPublisher(
-            {
-                detail: { 
-                    requestId: 1,
-	                userCode: defaultUserCode,
-                    aircraftCertificateName: this.aircraftCertificateName,
-	                aircraftName: this.aircraftCertificateName,
-	                aircraftId: 11,
-                    command: 'Claim',
-                    data: {}
+
+        if(requestClaim){
+            this.commandPublisher(
+                {
+                    detail: { 
+                        requestId: 1,
+                        userCode: this.userCode,
+                        aircraftCertificateName: this.aircraftCertificateName,
+                        aircraftName: this.aircraftCertificateName,
+                        aircraftId: 11,
+                        command: 'Claim',
+                        data: {}
+                    }
                 }
-            }
-        );
+            );
+        }
         // temporary set for full control.
-        this.pilotageStatus = AircraftPilotageStatus.Controlling;
+        // this.pilotageStatus = AircraftPilotageStatus.Controlling;
     }
 
     unregister(){

@@ -8,7 +8,6 @@ import AircraftsListModal, {
 } from './components/AircraftsManagement/AircraftsListModal';
 import {publishEvent, PubSubEvent} from '../utils/PubSubService';
 import FlightData from '../managers/flightData';
-import {defaultUserCode} from '../managers/mqttManager';
 
 
 type SidebarProps = {
@@ -67,7 +66,7 @@ function Sidebar(props: SidebarProps) {
                 showAircraftsListModal &&
                 <AircraftsListModal
                     show={showAircraftsListModal}
-                    userCode={defaultUserCode}
+                    userCode={props.flightData.userCode}
                     aircraftStates={getAircraftStates()}
                     onCloseModal={onAircraftsManagementModalClosed}/>
             }
