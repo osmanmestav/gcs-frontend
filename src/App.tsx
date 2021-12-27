@@ -9,7 +9,7 @@ import {Container, Row, Col, Button} from 'react-bootstrap'
 import {Auth} from 'aws-amplify';
 import MQTTManager from './managers/mqttManager';
 import simulateTelemetry from './managers/simulateTelemetry';
-import { MessageBoxProvider } from './hooks/messageBox';
+import {MessageBoxProvider} from './hooks/messageBox';
 
 const loginURL = "/login/signin.html";
 
@@ -33,19 +33,21 @@ function App() {
         });
     }, []);
 
+
     const onIFrameLoad = () => {
+
         var gcsMap = document.getElementById('gcsMap') as any;
         setMapsWindow(gcsMap?.contentWindow);
 
         if (isLoggedIn && gcsMap != null && gcsMap.contentWindow != null) {
-            if(mqttManager != null){
+            if (mqttManager != null) {
                 mqttManager.finalizeMQTT();
             }
             const mqtt = new MQTTManager(gcsMap?.contentWindow);
             mqtt.initializeMQTT();
             setMQTTManager({...mqtt});
         } else {
-            if(mqttManager != null){
+            if (mqttManager != null) {
                 mqttManager.finalizeMQTT();
             }
             setMQTTManager(null);
@@ -70,7 +72,7 @@ function App() {
     }
 
     useEffect(() => {
-        if(mqttManager != null && simulationStarted){
+        if (mqttManager != null && simulationStarted) {
             mqttManager?.registerAircraft(certificateNameForTelemetrySimulation);
             setInterval(startSimulation, 100);
         }
@@ -83,34 +85,35 @@ function App() {
                 <Row>
                     <Col lg="12" className="mr-0 p-0">
                         <iframe id="gcsMap" src="GCSMap/GCSMap.html" title="Map"
-                            style={{
-                                width: '100%',
-                                height: '99.80vh',
-                                border: '0px',
-                                padding: '0px',
-                                margin: '0px'
-                            }}
-                            onLoad={ ()=> onIFrameLoad()}
+                                style={{
+                                    width: '100%',
+                                    height: '99.80vh',
+                                    border: '0px',
+                                    padding: '0px',
+                                    margin: '0px'
+                                }}
+                                onLoad={() => onIFrameLoad()}
                         />
                     </Col>
-                    <Button size="sm" variant="dark" className="openButton" onClick={() => setSidebarStatus(!sidebarStatus)}>
+                    <Button size="sm" variant="dark" className="openButton"
+                            onClick={() => setSidebarStatus(!sidebarStatus)}>
                         <i className="fas fa-align-justify"/>
                     </Button>
                     {mapsWindow && mapsWindow.csharp && mqttManager ?
                         <Col lg="4" className={"sidebar " + (sidebarStatus ? "open" : "close")}>
                             <Sidebar mapsWindow={mapsWindow} openGauges={openGauges}
-                                    flightData={mqttManager.flightData}
-                                    subscribeToAircraftStatuses={mqttManager.subscribeToAircraftStatuses}
-                                    subscribeToUserStatuses={mqttManager.subscribeToControlStationStatuses}
-                                    startTelemetrySimulation={startTelemetrySimulation}/>
+                                     flightData={mqttManager.flightData}
+                                     subscribeToAircraftStatuses={mqttManager.subscribeToAircraftStatuses}
+                                     subscribeToUserStatuses={mqttManager.subscribeToControlStationStatuses}
+                                     startTelemetrySimulation={startTelemetrySimulation}/>
                         </Col>
                         : null
-                    }   
+                    }
                 </Row>
                 }
             </Container>
         </MessageBoxProvider>
-        
+
     );
 }
 

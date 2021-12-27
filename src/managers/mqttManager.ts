@@ -6,12 +6,13 @@ import {publishEvent, PubSubEvent, removeEvent, subscribeEvent} from "../utils/P
 import {Auth} from "aws-amplify";
 import {processingFunctions} from "../models/managerModels/aircraftModel";
 import FlightData from "./flightData";
-import { AircraftPilotageStatus } from "../views/components/AircraftsManagement/AircraftsListModal";
+import {AircraftPilotageStatus} from "../views/components/AircraftsManagement/AircraftsListModal";
 // import { getEnumKeyByEnumValue, getEnumKeys, getEnumKeyValuePairs, getEnumValueByEnumKey, getEnumValues } from "../utils/enumHelpers";
 // import { UnitsHelperNew, UnitSystemEnum, UnitTypeEnum } from "../utils/unitsHelperNew";
 
-
-export const defaultUserCode: string = "pilot1";
+let pilot = "pilot1";
+if (window.location.pathname) pilot = window.location.pathname.split('/')[1];
+export const defaultUserCode: string = pilot;
 
 export default class MQTTManager {
     constructor(maps: any) {
@@ -36,15 +37,20 @@ export default class MQTTManager {
     }
 
     subscribeAircrafts = (aircraftCertificateNames: AircraftPilotageStatus[]) => {
+
         aircraftCertificateNames.forEach(x => {
+            console.log("state:", x.state)
             var anyAircraft = this.flightData.aircraftFleet.any(x.name);
+            console.log("status:", anyAircraft)
             if (anyAircraft === false) {
-                if(x.controlling){
+                //Controlling
+                if (x.state == 2) {
                     this.flightData.aircraftFleet.insert(x.name);
                     this.registerAircraft(x.name);
                 }
             } else {
-                if(x.controlling === false){
+                //Observing
+                if (x.state === 1) {
                     this.unregisterAircraft(x.name);
                     this.flightData.aircraftFleet.remove(x.name);
                     const csharp = this.getcsharp();
@@ -182,7 +188,7 @@ export default class MQTTManager {
             console.log('started listening to the aircraft status messages\n');
             this.aircraftStatusSubscription = PubSub.subscribe('UL/U/+/S').subscribe({
                 next: data => {
-                    console.log('aircraft status message: ', data.value);
+                    //console.log('aircraft status message: ', data.value);
                     publishEvent(PubSubEvent.AnyAircraftStatusMessageReceived, data.value);
                 },
                 error: error => console.error(error),
