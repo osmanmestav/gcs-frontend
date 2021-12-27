@@ -16,8 +16,8 @@ type WaypointsTabProps = {
     clearWaypoints: any;
     isDraft: boolean,
     setIndexWaypoints: (val: number) => void;
+    isMissionEditable: boolean,
 }
-
 
 function WaypointsTab(props: WaypointsTabProps) {
     const [waypointsTabData, setWaypointsData] = useState<missionDataType | null>(null);
@@ -48,12 +48,24 @@ function WaypointsTab(props: WaypointsTabProps) {
                     <td>{waypointsTabData?.home?.latitude.toFixed(7)}</td>
                     <td>{waypointsTabData?.home?.longitude.toFixed(7)}</td>
                     <td>{waypointsTabData?.home?.altitude.toFixed(0)}</td>
-                    <td><input type="number" value={props.defaultAgl}
-                               onChange={e => props.setDefaultAgl(parseInt(e.target.value))}/> m
+                    <td><input
+                        disabled={props.isMissionEditable === false}
+                        type="number"
+                        value={props.defaultAgl}
+                        onChange={e => props.setDefaultAgl(parseInt(e.target.value))}/> m
                     </td>
-                    <td><Button style={{fontSize: "10px"}} variant="secondary" size="sm" onClick={() => {
-                        props.clearWaypoints()
-                    }}><i className="fa fa-trash"></i> Clear</Button></td>
+                    <td>
+                        <Button
+                            style={{fontSize: "10px"}}
+                            variant="secondary"
+                            size="sm"
+                            disabled={props.isMissionEditable === false}
+                            onClick={() => {
+                                props.clearWaypoints()
+                            }}>
+                            <i className="fa fa-trash"></i> Clear
+                        </Button>
+                    </td>
                 </tr>
                 </tbody>
             </Table>
@@ -62,7 +74,7 @@ function WaypointsTab(props: WaypointsTabProps) {
                     <Table striped bordered hover>
                         <thead>
                         <tr>
-                            <th></th>
+                            <th style={{display: (props.isMissionEditable === false ? "none" : '')}}></th>
                             <th>#</th>
                             <th>Command</th>
                             <th>Latitude</th>
@@ -98,7 +110,7 @@ function WaypointsTab(props: WaypointsTabProps) {
                                                                 props.onWaypointClick(indexs)
                                                             }
                                                         }}>
-                                                        <td {...provider.dragHandleProps}> =</td>
+                                                        <td style={{display: (props.isMissionEditable === false ? "none" : '')}} {...provider.dragHandleProps}> =</td>
                                                         <td>{(indexs + 1)}</td>
                                                         <td>{data.command}</td>
                                                         <td>{data.latitude?.toFixed(7)}</td>
@@ -109,6 +121,7 @@ function WaypointsTab(props: WaypointsTabProps) {
                                                         <td>
                                                             <ButtonGroup aria-label="Basic example" size="sm">
                                                                 <Button style={{fontSize: "10px"}}
+                                                                        disabled={props.isMissionEditable === false}
                                                                         variant="dark"
                                                                         onClick={(e) => {
                                                                             e.preventDefault();
@@ -118,7 +131,7 @@ function WaypointsTab(props: WaypointsTabProps) {
                                                                 </Button>
                                                                 <Button style={{fontSize: "10px"}}
                                                                         variant="warning"
-                                                                        disabled={(props.isDraft)}
+                                                                        disabled={props.isDraft && props.isMissionEditable === false}
                                                                         onClick={(e) => {
                                                                             e.preventDefault();
                                                                             props.jumpToWaypoint(indexs)

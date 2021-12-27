@@ -16,6 +16,7 @@ type failSafeTypes = {
     timeShortActionGPS: number
     timeShortActionRC: number
     csharp: any
+    isMissionEditable: boolean
 }
 
 function failSafeTab(props: any) {
@@ -71,6 +72,7 @@ function failSafeTab(props: any) {
                     <Form.Group className="mb-3" controlId="formBasicEmail">
                         <Form.Label>Lost GCS Action</Form.Label>
                         <Form.Select size="sm" aria-label="Default select example"
+                                     disabled={props.isMissionEditable === false}
                                      value={failSafe?.lossOfGCSActionChoice}
                                      onChange={(e: any) => {
                                          var newfailSafe = failSafe;
@@ -91,6 +93,7 @@ function failSafeTab(props: any) {
                     <Form.Group className="mb-3" controlId="formBasicEmail">
                         <Form.Label>Long Action</Form.Label>
                         <Form.Select size="sm" aria-label="Default select example"
+                                     disabled={props.isMissionEditable === false}
                                      value={(failSafe?.longAction.type == 1 ? 'return' : failSafe?.longAction.wayPointIndex)}
                                      onChange={(e: any) => {
                                          var newfailSafe = failSafe;
@@ -126,6 +129,7 @@ function failSafeTab(props: any) {
             <Row style={{marginTop: "15px"}}>
                 <Col>
                     <Form.Check
+                        disabled={props.isMissionEditable === false}
                         label="Rescue on loss of manuel control"
                         inline
                         name="command"
@@ -168,17 +172,19 @@ function failSafeTab(props: any) {
                 <Col><Form.Label>Climbrate tolerance for rescue (m/s)</Form.Label></Col>
                 <Col sm={3}>
                     <Form.Group>
-
-                        <Form.Control size="sm" type="number" placeholder="Index"
-                                      value={failSafe?.climbRateToleranceForRescue}
-                                      onChange={(e) => {
-                                          var newfailSafe = failSafe;
-                                          newfailSafe.climbRateToleranceForRescue = parseInt(e.target.value);
-                                          setFailSafe(newfailSafe);
-                                          props.csharp?.setFailsafe(newfailSafe)
-                                          console.log(props.csharp?.getFailsafe())
-                                      }}
-
+                        <Form.Control
+                            disabled={props.isMissionEditable === false}
+                            size="sm"
+                            type="number"
+                            placeholder="Index"
+                            value={failSafe?.climbRateToleranceForRescue}
+                            onChange={(e) => {
+                                var newfailSafe = failSafe;
+                                newfailSafe.climbRateToleranceForRescue = parseInt(e.target.value);
+                                setFailSafe(newfailSafe);
+                                props.csharp?.setFailsafe(newfailSafe)
+                                console.log(props.csharp?.getFailsafe())
+                            }}
                         />
                     </Form.Group>
                 </Col>
@@ -192,15 +198,18 @@ function failSafeTab(props: any) {
                 <Col sm={3}>
                     <Form.Group>
 
-                        <Form.Control size="sm" type="number" placeholder="Index"
-                                      value={failSafe?.timeShortActionRC}
-                                      disabled
-                                      onChange={(e) => {
-                                          var newfailSafe = failSafe;
-                                          newfailSafe.timeShortActionRC = parseInt(e.target.value);
-                                          setFailSafe(newfailSafe);
-                                          props.csharp?.setFailsafe(newfailSafe)
-                                      }}
+                        <Form.Control
+                            size="sm"
+                            type="number"
+                            placeholder="Index"
+                            value={failSafe?.timeShortActionRC}
+                            disabled
+                            onChange={(e) => {
+                                var newfailSafe = failSafe;
+                                newfailSafe.timeShortActionRC = parseInt(e.target.value);
+                                setFailSafe(newfailSafe);
+                                props.csharp?.setFailsafe(newfailSafe)
+                            }}
                         />
                     </Form.Group>
                 </Col>
@@ -214,14 +223,18 @@ function failSafeTab(props: any) {
                 <Col sm={3}>
                     <Form.Group>
 
-                        <Form.Control size="sm" type="number" placeholder="Index"
-                                      value={failSafe?.timeShortActionGPS}
-                                      onChange={(e) => {
-                                          var newfailSafe = failSafe;
-                                          newfailSafe.timeShortActionGPS = parseInt(e.target.value);
-                                          setFailSafe(newfailSafe);
-                                          props.csharp?.setFailsafe(newfailSafe)
-                                      }}
+                        <Form.Control
+                            disabled={props.isMissionEditable === false}
+                            size="sm"
+                            type="number"
+                            placeholder="Index"
+                            value={failSafe?.timeShortActionGPS}
+                            onChange={(e) => {
+                                var newfailSafe = failSafe;
+                                newfailSafe.timeShortActionGPS = parseInt(e.target.value);
+                                setFailSafe(newfailSafe);
+                                props.csharp?.setFailsafe(newfailSafe)
+                            }}
                         />
                     </Form.Group>
                 </Col>
@@ -234,14 +247,18 @@ function failSafeTab(props: any) {
                 <Col sm={3}>
                     <Form.Group>
 
-                        <Form.Control size="sm" type="number" placeholder="Index"
-                                      value={failSafe?.timeShortActionGCS}
-                                      onChange={(e) => {
-                                          var newfailSafe = failSafe;
-                                          newfailSafe.timeShortActionGCS = parseInt(e.target.value);
-                                          setFailSafe(newfailSafe);
-                                          props.csharp?.setFailsafe(newfailSafe)
-                                      }}
+                        <Form.Control
+                            disabled={props.isMissionEditable === false}
+                            size="sm"
+                            type="number"
+                            placeholder="Index"
+                            value={failSafe?.timeShortActionGCS}
+                            onChange={(e) => {
+                                var newfailSafe = failSafe;
+                                newfailSafe.timeShortActionGCS = parseInt(e.target.value);
+                                setFailSafe(newfailSafe);
+                                props.csharp?.setFailsafe(newfailSafe)
+                            }}
                         />
                     </Form.Group>
                 </Col>
@@ -253,13 +270,18 @@ function failSafeTab(props: any) {
                 </Col>
                 <Col sm={3}>
                     <Form.Group>
-                        <Form.Control size="sm" type="number" placeholder="Index" value={failSafe?.timeLongAction}
-                                      onChange={(e) => {
-                                          var newfailSafe = failSafe;
-                                          newfailSafe.timeLongAction = parseInt(e.target.value);
-                                          setFailSafe(newfailSafe);
-                                          props.csharp?.setFailsafe(newfailSafe)
-                                      }}
+                        <Form.Control
+                            disabled={props.isMissionEditable === false}
+                            size="sm"
+                            type="number"
+                            placeholder="Index"
+                            value={failSafe?.timeLongAction}
+                            onChange={(e) => {
+                                var newfailSafe = failSafe;
+                                newfailSafe.timeLongAction = parseInt(e.target.value);
+                                setFailSafe(newfailSafe);
+                                props.csharp?.setFailsafe(newfailSafe)
+                            }}
                         />
                     </Form.Group>
                 </Col>

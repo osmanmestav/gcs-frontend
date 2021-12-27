@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Table, Button, Tabs, Tab} from 'react-bootstrap'
+import {Table, Tabs, Tab} from 'react-bootstrap'
 import Switch from 'react-switch';
 import clone from 'clone';
 
@@ -300,6 +300,7 @@ function SidebarTabs(props: any) {
                     <td>{wayPointCurrent?.parameter.toString()}</td>
                     <td style={{display: useDraftLogic ? "block" : "none"}}>
                         <Switch
+                            disabled={props.isMissionEditable === false}
                             className="react-switch"
                             checked={isDraft}
                             height={15}
@@ -320,6 +321,7 @@ function SidebarTabs(props: any) {
             <Tabs defaultActiveKey="waypoints" transition={false} id="noanim-tab-example" className="mb-3">
                 <Tab eventKey="waypoints" title="Waypoints">
                     <WaypointsTab
+                        isMissionEditable={props.isMissionEditable}
                         missionWaypoints={isDraft || !useDraftLogic ? missionDraft! : missionData!}
                         isDraft={isDraft}
                         currentMissionIndex={wayPointCurrent?.index}
@@ -338,6 +340,7 @@ function SidebarTabs(props: any) {
                 </Tab>
                 <Tab eventKey="Geofence" title="Geofence">
                     <GeoFenceTab
+                        isMissionEditable={props.isMissionEditable}
                         missionGeofence={isDraft || !useDraftLogic ? missionDraft?.geoFence! : missionData?.geoFence!}
                         setGeoFenceActive={(e: boolean) => setGeoFenceActive(e)}
                         isDraft={isDraft}
@@ -347,6 +350,7 @@ function SidebarTabs(props: any) {
                 </Tab>
                 <Tab eventKey="Failsafe" title="Failsafe">
                     <Failsafe
+                        isMissionEditable={props.isMissionEditable}
                         missionFailsafe={isDraft || !useDraftLogic ? missionDraft : missionData}
                         csharp={props.mapWindow.csharp}/>
                 </Tab>

@@ -1,13 +1,7 @@
-import React, {useRef, useState, useEffect} from 'react';
-import {
-    Row,
-    Col,
-    Button,
-    Form,
-} from 'react-bootstrap'
+import React, {useRef} from 'react';
+import {Row, Col, Button} from 'react-bootstrap'
 import {useMessageBox} from '../../hooks/messageBox';
 import MissionManager from '../../managers/missionManager';
-import {forEach} from "react-bootstrap/ElementChildren";
 
 function SidebarControlButtons(props: any) {
     const {askConfirmation} = useMessageBox();
@@ -104,12 +98,18 @@ function SidebarControlButtons(props: any) {
                 <Col>
                     <Button style={{marginRight: '5px'}} variant="dark" size="sm"
                             id="simulateTelemetry"
-                            disabled={false}
+                            disabled={true}
                             onClick={props.startTelemetrySimulation}>Simulate Telemetry</Button>
                 </Col>
-                <Button className="mb-2" style={{width: '100%', height: '28%', marginTop: '10px'}} variant="dark"
-                        size="sm"
-                        onClick={() => startMission()}><i className="fas fa-play"></i> Start Mission</Button>
+                <Button
+                    className="mb-2"
+                    style={{width: '100%', height: '28%', marginTop: '10px'}}
+                    variant="dark"
+                    size="sm"
+                    disabled={props.isMissionEditable === false}
+                    onClick={() => startMission()}>
+                    <i className="fas fa-play"></i> Start Mission
+                </Button>
             </Row>
             <Row style={{marginTop: '20px'}}>
                 <Col lg="2" className="p-1" style={{display: "none"}}>
@@ -144,6 +144,7 @@ function SidebarControlButtons(props: any) {
                 </Col>
                 <Col lg="2" style={{display: "none"}}>
                     <Button className="mb-2" style={{width: '100%', height: '28%'}} variant="dark" size="sm"
+                            disabled={props.isMissionEditable === false}
                             onClick={() => startMission()}><i className="fas fa-play"></i> Start Mission</Button>
                     <Button className="mb-2" style={{width: '100%', height: '28%'}} variant="dark" size="sm"
                             onClick={() => stopAllMissions()}><i className="fas fa-stop"></i> Stop Mission</Button>
@@ -155,16 +156,20 @@ function SidebarControlButtons(props: any) {
                     <Button style={{width: '24%', marginRight: '5px'}} variant="dark" size="sm"
                             onClick={() => Download()}><i className="fas fa-cloud-download-alt"></i> Download</Button>
                     <Button style={{width: '24%', marginRight: '5px'}} variant="dark" size="sm"
+                            disabled={props.isMissionEditable === false}
                             onClick={() => Upload()}><i className="fas fa-cloud-upload-alt"></i> Upload</Button>
-                    <Button style={{width: '24%', marginRight: '5px'}} variant="dark" size="sm"
-
-                            onClick={() => loadMission()}>
+                    <Button
+                        style={{width: '24%', marginRight: '5px'}}
+                        variant="dark"
+                        size="sm"
+                        disabled={props.isMissionEditable === false}
+                        onClick={() => loadMission()}>
                         <i className="fas fa-spinner"></i> Load
                     </Button>
                     <input type="file" ref={loadMissionFile} className="form-control form-control-sm"
                            style={{display: "none"}} accept={".json"} onChange={handleFileUpload}/>
                     <Button style={{width: '25%'}} variant="dark"
-
+                            disabled={props.isMissionEditable === false}
                             size="sm" onClick={() => saveMission()}>
                         <i className="fas fa-file-export"></i> Save</Button>
 

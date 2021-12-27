@@ -21,6 +21,7 @@ type SidebarProps = {
 
 function Sidebar(props: SidebarProps) {
     const [showAircraftsListModal, setShowAircraftsListModal] = useState<boolean>(false);
+    const [isMissionEditable, setIsMissionEditable] = useState<boolean>(props.mapsWindow.csharp.isMissionEditable);
 
     const manageAircrafts = () => {
         if (showAircraftsListModal)
@@ -56,11 +57,13 @@ function Sidebar(props: SidebarProps) {
 
     return (
         <div>
-            <Control openGauges={props.openGauges}
-                     startTelemetrySimulation={props.startTelemetrySimulation}
-                     mapWindow={props.mapsWindow}>
+            <Control
+                isMissionEditable={isMissionEditable}
+                openGauges={props.openGauges}
+                startTelemetrySimulation={props.startTelemetrySimulation}
+                mapWindow={props.mapsWindow}>
             </Control>
-            <SidebarTabs mapWindow={props.mapsWindow}></SidebarTabs>
+            <SidebarTabs isMissionEditable={isMissionEditable} mapWindow={props.mapsWindow}></SidebarTabs>
             <Console mapWindow={props.mapsWindow}></Console>
             {
                 showAircraftsListModal &&

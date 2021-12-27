@@ -1,5 +1,5 @@
 var csharp = {
-    IsMissionEditable: false,
+    isMissionEditable: false,
     aircrafts: {},
     selectedAircraft: {},
     mission: {
@@ -180,6 +180,7 @@ var csharp = {
     },
 
     async uploadMission() {
+        if (this.isMissionEditable === false) return;
         return this.uploadMissionToAircraft(this.selectedAircraft);
     },
     async uploadMissionToAircraft(aircraft) {
@@ -693,6 +694,7 @@ var csharp = {
     },
 
     async selectWaypoint(index) {
+        if (this.isMissionEditable === false) return;
         try {
             if (index < 0 || index >= this.mission.waypoints.length)
                 throw "Invalid index";
@@ -706,6 +708,7 @@ var csharp = {
     },
 
     async deselectWaypoint(index) {
+        if (this.isMissionEditable === false) return;
         try {
             if (index < 0 || index >= this.mission.waypoints.length)
                 throw "Invalid index";
@@ -720,11 +723,13 @@ var csharp = {
     },
 
     async deleteSelectedWaypoints() {
+        if (this.isMissionEditable === false) return;
         this.selectedWaypointIndices.forEach((i) => this.deleteWaypoint(i));
         this.clearSelection();
     },
 
     async clearWaypoints(missionUpdateOrigin) {
+        if (this.isMissionEditable === false) return;
         this.selectedWaypointIndices = [];
         this.mission.waypoints = [];
         window.dispatchEvent(new CustomEvent('WaypointsCleared', {detail: missionUpdateOrigin}));
@@ -736,6 +741,7 @@ var csharp = {
     },
 
     async addWaypoint(index, command, latitude, longitude, altitude, parameter) {
+        if (this.isMissionEditable === false) return;
         console.log(altitude)
         let AddWaypoint = (index, command, latitude, longitude, altitude, parameter) => {
             try {
@@ -863,6 +869,7 @@ var csharp = {
     },
 
     async setWaypoint(index, command, latitude, longitude, altitude, parameter) {
+        if (this.isMissionEditable === false) return;
         try {
             if (index < 0 || index >= this.mission.waypoints.length)
                 throw "Invalid index";
@@ -878,6 +885,7 @@ var csharp = {
         }
     },
     async updateWaypoint(waypoint) {
+        if (this.isMissionEditable === false) return;
         try {
             if (waypoint.index < 0 || waypoint.index >= this.mission.waypoints.length)
                 throw "Invalid index";
@@ -889,6 +897,7 @@ var csharp = {
     },
 
     async changeWaypoint(index, latitude, longitude, altitude, parameter) {
+        if (this.isMissionEditable === false) return;
         try {
             var wp = this.mission.waypoints[index];
             wp.latitude = latitude;
@@ -902,11 +911,13 @@ var csharp = {
     },
 
     async editWaypoint(index) {
+        if (this.isMissionEditable === false) return;
         console.log("csharp.editWaypoint: Not implemented");
         window.dispatchEvent(new CustomEvent('editWaypoint', {detail: this.mission.waypoints[index]}));
     },
 
     async deleteWaypoint(index) {
+        if (this.isMissionEditable === false) return;
         try {
 
             if (index < 0 || index >= this.mission.waypoints.length)
@@ -925,6 +936,7 @@ var csharp = {
     },
 
     async jumpToWaypoint(index) {
+        if (this.isMissionEditable === false) return;
         let req = {
             aircraftId: this.selectedAircraft.aircraftId,
             aircraftName: this.selectedAircraft.aircraftName,
@@ -958,6 +970,7 @@ var csharp = {
         return this.telemetrySummaries[this.selectedAircraft.aircraftId];
     },
     clearGeoFence() {
+        if (this.isMissionEditable === false) return;
         if (this.mission.geoFence == null) {
             return;
         }
@@ -969,6 +982,7 @@ var csharp = {
         }
     },
     geoFenceActive(isActivated) {
+        if (this.isMissionEditable === false) return;
         let req = {
             aircraftId: this.selectedAircraft.aircraftId,
             aircraftName: this.selectedAircraft.aircraftName,

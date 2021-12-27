@@ -23,10 +23,8 @@ const getUserCode = (pathName: string) => {
 export const defaultUserCode: string = getUserCode(window.location.pathname);
 export default class MQTTManager {
     constructor(maps: any) {
-        
         this.mapsWindow = maps;
         this.gaugesWindow = null;
-        debugger;
         this.flightData = new FlightData(defaultUserCode);
         this.isActive = false;
     };

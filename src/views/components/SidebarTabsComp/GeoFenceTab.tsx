@@ -8,6 +8,7 @@ type GeoFenceTabProps = {
     setGeoFenceActive: (val: any) => void;
     setGeoFenceVisible: (val: boolean) => void;
     isDraft: boolean;
+    isMissionEditable: boolean;
     csharp: any;
 }
 
@@ -38,10 +39,15 @@ function GeoFenceTab(props: GeoFenceTabProps) {
                     <th>MinAlt</th>
                     <th>MaxAlt</th>
                     <th>
-                        <Button style={{fontSize: "10px"}} size="sm" variant="secondary"
-                                onClick={() => clearGeoFenceClick()}>Clear</Button>
+                        <Button
+                            disabled={props.isMissionEditable === false}
+                            style={{fontSize: "10px"}}
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => clearGeoFenceClick()}>Clear
+                        </Button>
                         <Switch
-                            disabled={props.isDraft}
+                            disabled={props.isDraft || props.isMissionEditable === false}
                             checked={(geoFenceData?.isActive as any)}
                             height={15}
                             width={40}
@@ -60,6 +66,7 @@ function GeoFenceTab(props: GeoFenceTabProps) {
                     <td>
 
                         <Form.Check
+                            disabled={props.isMissionEditable === false}
                             label="Visible"
                             inline
                             name="command"
