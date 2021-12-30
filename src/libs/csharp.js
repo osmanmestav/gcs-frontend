@@ -1,5 +1,5 @@
 var csharp = {
-    isMissionEditable: false,
+    isMissionEditable: true,
     aircrafts: {},
     selectedAircraft: {},
     mission: {
