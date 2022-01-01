@@ -1,4 +1,5 @@
-import { AircraftIdentifier, TelemetrySummaryModel } from "../models/telemetryModels/telemetryModels";
+import { AircraftIdentifier } from "../models/aircraftModels/aircraft";
+import { TelemetrySummaryModel } from "../models/telemetryModels/telemetryModels";
 import AircraftFleet from "./aircraftFleet";
 
 export default class FlightData {

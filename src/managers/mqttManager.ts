@@ -6,9 +6,9 @@ import {publishEvent, PubSubEvent, removeEvent, subscribeEvent} from "../utils/P
 import {Auth} from "aws-amplify";
 import {processingFunctions} from "../models/managerModels/aircraftModel";
 import FlightData from "./flightData";
-import {AircraftPilotageStatus, PilotageState} from "../views/components/AircraftsManagement/AircraftsListModal";
 import { UserStatusTopicMessage } from "../models/brokerModels/userStatusTopicMessage";
 import { AircraftStatusTopicMessage } from "../models/brokerModels/aircraftStatusTopicMessage";
+import { AircraftPilotageStatus, PilotageState } from "../models/aircraftModels/aircraft";
 // import { getEnumKeyByEnumValue, getEnumKeys, getEnumKeyValuePairs, getEnumValueByEnumKey, getEnumValues } from "../utils/enumHelpers";
 // import { UnitsHelperNew, UnitSystemEnum, UnitTypeEnum } from "../utils/unitsHelperNew";
 
@@ -46,22 +46,24 @@ export default class MQTTManager {
     subscribeAircrafts = (pilotage: AircraftPilotageStatus[]) => {
         pilotage.forEach(x => {
             console.log("state:", x.state)
-            var anyAircraft = this.flightData.aircraftFleet.any(x.name);
-            console.log("status:", anyAircraft)
-            if (anyAircraft === false) {
+            var aircraft = this.flightData.aircraftFleet.getAircraftByCertificateName(x.aircraftIdentifier.aircraftCertificateName);
+            console.log("status:", aircraft)
+            if (aircraft === null) {
                 if (x.state !== PilotageState.None) {
-                    this.flightData.aircraftFleet.insert(x.name);
-                    this.registerAircraft(x.name, x.state === PilotageState.Controlling);
+                    this.flightData.aircraftFleet.insert(x.aircraftIdentifier);
+                    this.registerAircraft(x.aircraftIdentifier.aircraftCertificateName, x.state === PilotageState.Controlling);
                 }
             } else {
-                // var observingList = this.flightData.aircraftFleet.getListOfObservingAircraftCertificateNames();
                 if (x.state === PilotageState.None) {
-                    this.unregisterAircraft(x.name);
-                    this.flightData.aircraftFleet.remove(x.name);
+                    this.unregisterAircraft(x.aircraftIdentifier.aircraftCertificateName);
+                    this.flightData.aircraftFleet.remove(x.aircraftIdentifier.aircraftCertificateName);
                     const csharp = this.getcsharp();
                     if (csharp) {
-                        csharp.removeAircraftByCertificateName(x.name);
+                        csharp.removeAircraftByCertificateName(x.aircraftIdentifier.aircraftCertificateName);
                     }
+                }
+                else if(x.state === PilotageState.Controlling && aircraft.isObservingButNotControlling()) {
+                    aircraft.requestClaim();
                 }
             }
         });
@@ -82,7 +84,7 @@ export default class MQTTManager {
             this.publishUserStatus();
         });
 
-        subscribeEvent(PubSubEvent.ManageAircrafts, this.subscribeAircrafts);
+        subscribeEvent(PubSubEvent.ManageAircraftsEvent, this.subscribeAircrafts);
         this.isActive = true;
 
 
@@ -96,7 +98,7 @@ export default class MQTTManager {
 
     finalizeMQTT = () => {
         console.log("finalize mqTT");
-        removeEvent(PubSubEvent.ManageAircrafts, this.subscribeAircrafts);
+        removeEvent(PubSubEvent.ManageAircraftsEvent, this.subscribeAircrafts);
         this.isActive = false;
     }
 
@@ -165,8 +167,8 @@ export default class MQTTManager {
         // console.log('attributes:', user.attributes);
         let req = {
             userCode: defaultUserCode,
-            listOfControllingAircrafts: this.flightData.aircraftFleet.getListOfControllingAircraftCertificateNames(),
-            listOfObservingAircrafts: this.flightData.aircraftFleet.getListOfObservingAircraftCertificateNames(),
+            listOfControllingAircrafts: this.flightData.aircraftFleet.getListOfControllingAircrafts().map(x=> x.aircraftCertificateName),
+            listOfObservingAircrafts: this.flightData.aircraftFleet.getListOfObservingAircrafts().map(x=> x.aircraftCertificateName),
         };
         PubSub.publish('UL/G/' + defaultUserCode + '/S', req).then(() => {
             setTimeout(this.publishUserStatus, 1000);

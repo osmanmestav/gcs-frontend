@@ -1,4 +1,5 @@
 import { PubSub } from "aws-amplify";
+import { AircraftIdentifier, PilotageState } from "../aircraftModels/aircraft";
 
 export type processingFunctions = {
     processTelemetry: (data: any) => void;
@@ -7,21 +8,14 @@ export type processingFunctions = {
     processParameters: (data: any) => void;
 };
 
-enum AircraftPilotageStatus {
-    None,
-    Initiated, 
-    ProcessingTelemetry,
-    Controlling
-} 
-
 export class AircraftModel {
-    constructor(name: string, userCode: string){
+    constructor(identifier: AircraftIdentifier, userCode: string){
         this.userCode = userCode;
-        this.aircraftCertificateName = name;
-        this.pilotageStatus = AircraftPilotageStatus.None;
+        this.aircraftIdentifier = identifier;
+        this.pilotageStatus = PilotageState.None;
     }
     userCode: string;
-    aircraftCertificateName: string;
+    aircraftIdentifier: AircraftIdentifier;
     private telemetrySubscription: any;
     private missionSubscription: any;
     private parametersSubscription: any;
@@ -29,49 +23,66 @@ export class AircraftModel {
     aircraftMission: any;
     aircraftParameters: any;
 
-    pilotageStatus: AircraftPilotageStatus;
+    pilotageStatus: PilotageState;
 
     receivedMission = ( mission: any) => {
-        if(this.pilotageStatus === AircraftPilotageStatus.None){
+        if(this.pilotageStatus === PilotageState.None){
             if(!this.aircraftMission && this.aircraftParameters){
-                this.pilotageStatus = AircraftPilotageStatus.ProcessingTelemetry;
+                this.pilotageStatus = PilotageState.Observing;
             }
         }
         this.aircraftMission = mission;
     }
 
     receivedParameters = ( parameters: any) => {
-        if(this.pilotageStatus === AircraftPilotageStatus.None){
+        if(this.pilotageStatus === PilotageState.None){
             if(!this.aircraftParameters && this.aircraftMission){
-                this.pilotageStatus = AircraftPilotageStatus.ProcessingTelemetry;
+                this.pilotageStatus = PilotageState.Observing;
             }
         }
         this.aircraftParameters = parameters;
     }
 
     isObserving = () => {
-        return this.pilotageStatus === AircraftPilotageStatus.ProcessingTelemetry || this.pilotageStatus === AircraftPilotageStatus.Controlling;
+        return this.pilotageStatus === PilotageState.Observing || this.pilotageStatus === PilotageState.Controlling;
     }
 
     isObservingButNotControlling = () => {
-        return this.pilotageStatus === AircraftPilotageStatus.ProcessingTelemetry;
+        return this.pilotageStatus === PilotageState.Observing;
     }
 
     isControlling = () => {
-        return this.pilotageStatus === AircraftPilotageStatus.Controlling;
+        return this.pilotageStatus === PilotageState.Controlling;
     }
 
     commandPublisher = (e: any) => {
         let requestId = 0;
-        if (this.aircraftCertificateName === e.detail.aircraftCertificateName) {
+        if (this.aircraftIdentifier.aircraftCertificateName === e.detail.aircraftCertificateName) {
             requestId++;
             e.detail.requestId = requestId;
-            PubSub.publish('UL/G/' + this.userCode + '/' + this.aircraftCertificateName + '/C', e.detail);
+            PubSub.publish('UL/G/' + this.userCode + '/' + this.aircraftIdentifier.aircraftCertificateName + '/C', e.detail);
         }
     }
 
+    requestClaim = () => {
+        this.commandPublisher(
+            {
+                detail: { 
+                    requestId: 1,
+                    userCode: this.userCode,
+                    aircraftCertificateName: this.aircraftIdentifier.aircraftCertificateName,
+                    aircraftName: this.aircraftIdentifier.aircraftCertificateName,
+                    aircraftId: this.aircraftIdentifier.aircraftId,
+                    command: 'Claim',
+                    data: {}
+                }
+            }
+        );
+        this.pilotageStatus = PilotageState.Controlling;
+    }
+
     startObserving = (next: processingFunctions, requestClaim: boolean) => {
-        this.telemetrySubscription = PubSub.subscribe('UL/U/' + this.aircraftCertificateName + '/T').subscribe({
+        this.telemetrySubscription = PubSub.subscribe('UL/U/' + this.aircraftIdentifier.aircraftCertificateName + '/T').subscribe({
             next: data => {
                 if(this.isObserving())
                     next.processTelemetry(data);
@@ -79,7 +90,7 @@ export class AircraftModel {
             error: error => console.error(error),
             complete: () => console.log('Done'),
         });
-        this.missionSubscription = PubSub.subscribe('UL/U/' + this.aircraftCertificateName + '/M').subscribe({
+        this.missionSubscription = PubSub.subscribe('UL/U/' + this.aircraftIdentifier.aircraftCertificateName + '/M').subscribe({
             next: data => {
                 console.log('Mission received', data.value);
                 this.receivedMission(data.value);
@@ -91,7 +102,7 @@ export class AircraftModel {
             error: error => console.error(error),
             complete: () => console.log('Done'),
         });
-        this.parametersSubscription = PubSub.subscribe('UL/U/' + this.aircraftCertificateName + '/P').subscribe({
+        this.parametersSubscription = PubSub.subscribe('UL/U/' + this.aircraftIdentifier.aircraftCertificateName + '/P').subscribe({
             next: data => {
                 console.log('Parameters received', data.value);
                 this.receivedParameters(data.value);
@@ -102,22 +113,8 @@ export class AircraftModel {
         });
 
         if(requestClaim){
-            this.commandPublisher(
-                {
-                    detail: { 
-                        requestId: 1,
-                        userCode: this.userCode,
-                        aircraftCertificateName: this.aircraftCertificateName,
-                        aircraftName: this.aircraftCertificateName,
-                        aircraftId: 11,
-                        command: 'Claim',
-                        data: {}
-                    }
-                }
-            );
+            this.requestClaim();
         }
-        // temporary set for full control.
-        // this.pilotageStatus = AircraftPilotageStatus.Controlling;
     }
 
     unregister(){

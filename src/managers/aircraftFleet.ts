@@ -1,3 +1,4 @@
+import { AircraftIdentifier } from "../models/aircraftModels/aircraft";
 import { AircraftModel } from "../models/managerModels/aircraftModel";
 
 export default class AircraftFleet {
@@ -10,22 +11,25 @@ export default class AircraftFleet {
     private aircrafts: AircraftModel[];
 
     any = (certificateName: string) => {
-        const list = this.aircrafts.filter(x => x.aircraftCertificateName === certificateName);
+        const list = this.aircrafts.filter(x => x.aircraftIdentifier.aircraftCertificateName === certificateName);
         return list.length > 0;
     }
-    getListOfObservingAircraftCertificateNames = () => {
-        return this.aircrafts.filter(x=> x.isObservingButNotControlling()).map(x=> x.aircraftCertificateName);
+
+
+
+    getListOfObservingAircrafts = () => {
+        return this.aircrafts.filter(x=> x.isObservingButNotControlling()).map(x=> x.aircraftIdentifier);
     }
 
-    getListOfControllingAircraftCertificateNames = () => {
-        return this.aircrafts.filter(x=> x.isControlling()).map(x=> x.aircraftCertificateName);
+    getListOfControllingAircrafts = () => {
+        return this.aircrafts.filter(x=> x.isControlling()).map(x=> x.aircraftIdentifier);
     }
 
-    insert = (certificateName: string) => {
-        if(this.any(certificateName))
+    insert = (identfier: AircraftIdentifier) => {
+        if(this.any(identfier.aircraftCertificateName))
             return false;
         
-        const aircraft = new AircraftModel(certificateName, this.userCode);
+        const aircraft = new AircraftModel(identfier, this.userCode);
         this.aircrafts.push(aircraft);
 
         return true;
@@ -35,12 +39,12 @@ export default class AircraftFleet {
         if(!this.any(certificateName))
             return false;
         
-        this.aircrafts = this.aircrafts.filter(y=> y.aircraftCertificateName !== certificateName);
+        this.aircrafts = this.aircrafts.filter(y=> y.aircraftIdentifier.aircraftCertificateName !== certificateName);
         return true;
     }
 
     getAircraftByCertificateName = (certificateName: string) => {
-        const aircraft = this.aircrafts.filter(x => x.aircraftCertificateName === certificateName)[0];
+        const aircraft = this.aircrafts.filter(x => x.aircraftIdentifier.aircraftCertificateName === certificateName)[0];
         if(aircraft === undefined)
             return null;
 

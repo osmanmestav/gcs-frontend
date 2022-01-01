@@ -1,5 +1,6 @@
 import {useEffect, useState} from "react";
 import {Button, Modal, Table, Form} from "react-bootstrap";
+import { AircraftIdentifier, AircraftPilotageStatus, PilotageState } from "../../../models/aircraftModels/aircraft";
 import { AircraftStatusTopicMessage } from "../../../models/brokerModels/aircraftStatusTopicMessage";
 import { UserStatusTopicMessage } from "../../../models/brokerModels/userStatusTopicMessage";
 import {PubSubEvent, removeEvent, subscribeEvent} from "../../../utils/PubSubService";
@@ -11,29 +12,7 @@ type AircraftsListModalProps = {
     onCloseModal: (isCancelled: boolean, aircraftNames: AircraftPilotageStatus[]) => void;
 };
 
-export enum PilotageState {
-    None,
-    Observing,
-    Controlling
-};
 
-export class AircraftPilotageStatus {
-    constructor(name: string, state: PilotageState) {
-        this.name = name;
-        this.state = state;
-    };
-
-    name: string;
-    state: PilotageState;
-
-    isObserving = () => {
-        return (this.state === PilotageState.Observing || this.state === PilotageState.Controlling);
-    };
-
-    isControlling = () => {
-        return this.state === PilotageState.Controlling;
-    };
-};
 
 class AircraftControlListViewModel {
     constructor(pilotage: AircraftPilotageStatus[]){
@@ -43,7 +22,7 @@ class AircraftControlListViewModel {
     pilotage: AircraftPilotageStatus[];
 
     isControlling = (aircraftCertificateName: string) => {
-        const status = this.pilotage.find(x=> x.name === aircraftCertificateName);
+        const status = this.pilotage.find(x=> x.aircraftIdentifier.aircraftCertificateName === aircraftCertificateName);
         if(status){
             return status.isControlling();
         }
@@ -51,15 +30,15 @@ class AircraftControlListViewModel {
     }
 
     isObserving = (aircraftCertificateName: string) => {
-        const status = this.pilotage.find(x=> x.name === aircraftCertificateName);
+        const status = this.pilotage.find(x=> x.aircraftIdentifier.aircraftCertificateName === aircraftCertificateName);
         if(status){
             return status.isObserving();
         }
         return false;
     }
 
-    control = (aircraftCertificateName: string) => {
-        const status = this.pilotage.find(x=> x.name === aircraftCertificateName);
+    control = (identifier: AircraftIdentifier) => {
+        const status = this.pilotage.find(x=> x.aircraftIdentifier.aircraftCertificateName === identifier.aircraftCertificateName);
         if(status){
             if(status.isControlling()){
                 status.state = PilotageState.None;
@@ -71,12 +50,12 @@ class AircraftControlListViewModel {
                 status.state = PilotageState.Controlling;
         }
         else {
-            this.pilotage.push(new AircraftPilotageStatus(aircraftCertificateName, PilotageState.Controlling));
+            this.pilotage.push(new AircraftPilotageStatus(identifier, PilotageState.Controlling));
         }
     }
 
-    observe = (aircraftCertificateName: string) => {
-        const status = this.pilotage.find(x=> x.name === aircraftCertificateName);
+    observe = (identifier: AircraftIdentifier) => {
+        const status = this.pilotage.find(x=> x.aircraftIdentifier.aircraftCertificateName === identifier.aircraftCertificateName);
         if(status){
             if(status.isControlling()){
                 return;
@@ -88,7 +67,7 @@ class AircraftControlListViewModel {
                 status.state = PilotageState.Observing;
         }
         else {
-            this.pilotage.push(new AircraftPilotageStatus(aircraftCertificateName, PilotageState.Observing));
+            this.pilotage.push(new AircraftPilotageStatus(identifier, PilotageState.Observing));
         }
     }
 }
@@ -101,15 +80,13 @@ const noControllerMessage = 'Not In Control';
  * string Array observers: pilot observers list / Observing By
  */
 class AircraftsListItemViewModel {
-    constructor(name: string, aircraftName: string, controller: string) {
-        this.name = name;
-        this.aircraftName = aircraftName;
+    constructor(identfier: AircraftIdentifier, controller: string) {
+        this.aircraftIdentifier = identfier;
         this.controller = controller;
         this.observers = [];
     }
 
-    name: string;
-    aircraftName: string;
+    aircraftIdentifier: AircraftIdentifier;
     private controller: string;
     private observers: string[];
 
@@ -167,7 +144,7 @@ class AircraftsListViewModel {
     };
 
     getAircraftByName = (aircraftCertificateName: string) => {
-        return this.aircraftItems.find(x => x.name === aircraftCertificateName);
+        return this.aircraftItems.find(x => x.aircraftIdentifier.aircraftCertificateName === aircraftCertificateName);
     }
 
     setAircraftController = (statusMsg: AircraftStatusTopicMessage) => {
@@ -177,7 +154,12 @@ class AircraftsListViewModel {
             aircraft.setController(controller);
         }
         else {
-            const newAircraft = new AircraftsListItemViewModel(statusMsg.aircraftCertificateName, statusMsg.aircraftName, controller);
+            const identifier : AircraftIdentifier = {
+                aircraftId: statusMsg.aircraftId,
+                aircraftName: statusMsg.aircraftName,
+                aircraftCertificateName: statusMsg.aircraftCertificateName 
+            };
+            const newAircraft = new AircraftsListItemViewModel(identifier, controller);
             this.aircraftItems.push(newAircraft);
         }
     }
@@ -191,7 +173,7 @@ class AircraftsListViewModel {
         });
         this.aircraftItems.forEach(aircraft => {
             if(aircraft.isObservedBy(observer)){
-                if(!listOfAircrafts.some(x=> x === aircraft.name)){
+                if(!listOfAircrafts.some(x=> x === aircraft.aircraftIdentifier.aircraftCertificateName)){
                     aircraft.removeObserver(observer);
                 }
             }
@@ -216,8 +198,13 @@ const AircraftsListModal = (props: AircraftsListModalProps) => {
         statusMessages.forEach((statusMsg) => {
             aircraftListItems.setAircraftController(statusMsg);
             if(props.userCode === statusMsg.gcsController.userCode){
+                const identifier : AircraftIdentifier = {
+                    aircraftId: statusMsg.aircraftId,
+                    aircraftName: statusMsg.aircraftName,
+                    aircraftCertificateName: statusMsg.aircraftCertificateName 
+                };
                 if(!aircraftControlList.isControlling(statusMsg.aircraftCertificateName)){
-                    aircraftControlList.control(statusMsg.aircraftCertificateName);
+                    aircraftControlList.control(identifier);
                     setAircraftControlList({...aircraftControlList});
                 }
             }
@@ -276,35 +263,35 @@ const AircraftsListModal = (props: AircraftsListModalProps) => {
                             // @ts-ignore
                             <tr key={index}>
                                 <td>{(index + 1)}</td>
-                                <td>{data.aircraftName + ' / ' + data.name}</td>
+                                <td>{data.aircraftIdentifier.aircraftName + ' / ' + data.aircraftIdentifier.aircraftCertificateName}</td>
                                 <td>{data.displayController() }</td>
                                 <td>{ data.displayObservers() }
                                 </td>
                                 <td>
                                     <Form.Check
                                         inline
-                                        label={!aircraftControlList.isControlling(data.name) ? 'Take Control' : 'Already controlling'}
-                                        name={data.name}
+                                        label={!aircraftControlList.isControlling(data.aircraftIdentifier.aircraftCertificateName) ? 'Take Control' : 'Already controlling'}
+                                        name={data.aircraftIdentifier.aircraftCertificateName}
                                         type="checkbox"
-                                        disabled={aircraftListItems.hasController(data.name)}
-                                        id={data.aircraftName + "inline" + index}
-                                        checked={aircraftControlList.isControlling(data.name)}
+                                        disabled={aircraftListItems.hasController(data.aircraftIdentifier.aircraftCertificateName)}
+                                        id={data.aircraftIdentifier.aircraftName + "inline" + index}
+                                        checked={aircraftControlList.isControlling(data.aircraftIdentifier.aircraftCertificateName)}
                                         onChange={(e) => {
-                                            aircraftControlList.control(data.name);
+                                            aircraftControlList.control(data.aircraftIdentifier);
                                             setAircraftControlList({...aircraftControlList});
                                         }}
                                     />
                                 </td>
                                 <td>
                                     <Form.Check
-                                        label={!aircraftControlList.isObserving(data.name) ? 'Observe' : 'Give up observing'}
-                                        name={data.aircraftName}
-                                        disabled={aircraftControlList.isControlling(data.name)}
+                                        label={!aircraftControlList.isObserving(data.aircraftIdentifier.aircraftCertificateName) ? 'Observe' : 'Give up observing'}
+                                        name={data.aircraftIdentifier.aircraftName}
+                                        disabled={aircraftControlList.isControlling(data.aircraftIdentifier.aircraftCertificateName)}
                                         type="checkbox"
-                                        id={data.aircraftName + "inline" + index}
-                                        checked={aircraftControlList.isObserving(data.name)}
+                                        id={data.aircraftIdentifier.aircraftName + "inline" + index}
+                                        checked={aircraftControlList.isObserving(data.aircraftIdentifier.aircraftCertificateName)}
                                         onChange={(e) => {
-                                            aircraftControlList.observe(data.name);
+                                            aircraftControlList.observe(data.aircraftIdentifier);
                                             setAircraftControlList({...aircraftControlList});
                                         }}
                                     />

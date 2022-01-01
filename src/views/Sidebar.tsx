@@ -2,12 +2,10 @@ import React, {useEffect, useState} from 'react';
 import SidebarTabs from "./components/SidebarTabs";
 import Console from "./components/Console"
 import Control from "./components/Control"
-import AircraftsListModal, {
-    AircraftPilotageStatus,
-    PilotageState
-} from './components/AircraftsManagement/AircraftsListModal';
+import AircraftsListModal from './components/AircraftsManagement/AircraftsListModal';
 import {publishEvent, PubSubEvent} from '../utils/PubSubService';
 import FlightData from '../managers/flightData';
+import { AircraftPilotageStatus, PilotageState } from '../models/aircraftModels/aircraft';
 
 
 type SidebarProps = {
@@ -36,7 +34,7 @@ function Sidebar(props: SidebarProps) {
         props.subscribeToAircraftStatuses(false);
         props.subscribeToUserStatuses(false);
         if (!isCancelled && aircraftNames.length > 0) {
-            publishEvent(PubSubEvent.ManageAircrafts, ...aircraftNames)
+            publishEvent(PubSubEvent.ManageAircraftsEvent, ...aircraftNames)
         }
     }
 
@@ -50,8 +48,8 @@ function Sidebar(props: SidebarProps) {
 
 
     const getAircraftStates = () => {
-        const controllingList = props.flightData.aircraftFleet.getListOfControllingAircraftCertificateNames().map(x => new AircraftPilotageStatus(x, PilotageState.Controlling));
-        const observingList = props.flightData.aircraftFleet.getListOfObservingAircraftCertificateNames().map(x => new AircraftPilotageStatus(x, PilotageState.Observing));
+        const controllingList = props.flightData.aircraftFleet.getListOfControllingAircrafts().map(x => new AircraftPilotageStatus(x, PilotageState.Controlling));
+        const observingList = props.flightData.aircraftFleet.getListOfObservingAircrafts().map(x => new AircraftPilotageStatus(x, PilotageState.Observing));
         return controllingList.concat(...observingList);
     }
 

@@ -4,7 +4,7 @@ import { EventEmitter } from 'events';
 export enum PubSubEvent {
     AnyAircraftStatusMessageReceived = 'any-aircraft-status-message-received',
     AnyUserStatusMessageReceived = 'any-user-status-message-received',
-    ManageAircrafts = 'manage-aircrafts',
+    ManageAircraftsEvent = 'manage-aircrafts',
   }
 
 const eventEmitter = new EventEmitter();

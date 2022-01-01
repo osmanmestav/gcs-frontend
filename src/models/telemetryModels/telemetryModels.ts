@@ -6,8 +6,3 @@ export type TelemetrySummaryModel = {
     isSittingOnGround: boolean,
 };
 
-export type AircraftIdentifier = {
-    aircraftId: number,
-    aircraftName: string, 
-    aircraftCertificateName: string
-};
