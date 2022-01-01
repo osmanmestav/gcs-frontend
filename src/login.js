@@ -1,4 +1,5 @@
 import Amplify, { Auth } from 'aws-amplify';
+import axios from 'axios';
 import awsconfig from './aws-exports';
 
 // Amplify get it's configuration from the js file in 
@@ -51,15 +52,48 @@ async function signIn(username,password) {
 		console.log(user)
 		document.getElementById('user').innerHTML = JSON.stringify(user,null,2);
 		// If this is the first time we a signing in we need to change the password
-    		if (user.challengeName === 'NEW_PASSWORD_REQUIRED') {
+    	if (user.challengeName === 'NEW_PASSWORD_REQUIRED') {
 			// these are the required attributes, supplying them again is optional
         		const { requiredAttributes } = user.challengeParam; 
 			// we will cheat and just set it to the one we used :)
 			// the object would contain the req attributes	
         		Auth.completeNewPassword(user,password, {}); 
+		} 
+
+		let token = "";
+		for(var i = 0; i<localStorage.length; i++){
+			const ithKey = localStorage.key(i);
+			if(ithKey.endsWith('accessToken')){
+				token = localStorage.getItem(ithKey);
+				break;
+			}
 		}
+
+		let instance = axios.create({
+			baseURL: 'https://flask-service.8e8rajss1pgl4.eu-west-1.cs.amazonlightsail.com',
+			headers: {
+				Accept: "application/json",
+    			"Content-Type": "application/json;charset=UTF-8",
+    			"Cache-Control": "no-store",
+				Authorization: `Basic ${token}`
+			}
+		});
+
+		Auth.currentCredentials().then(user => {
+			instance.post('/api/user/attachpolicy', {Principal: user.identityId})
+			.then((res) => {
+				console.log('attach policy success: ', res);
+				// eslint-disable-next-line no-restricted-globals
+				location.href = "/";
+			})
+			.catch(err => { 
+				console.log('attach policy failure: ', err);
+				// eslint-disable-next-line no-restricted-globals
+				location.href = "/";
+			});
+		});
 		// eslint-disable-next-line no-restricted-globals
-		location.href = "/";
+		// location.href = "/";
 	} catch (E) {
 		console.log(E);	
 	}
