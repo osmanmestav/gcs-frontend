@@ -145,6 +145,7 @@ var csharp = {
         try {
             this.selectedAircraft = this.aircrafts[aircraftId];
             window.dispatchEvent(new CustomEvent('AircraftSelectionChanged', {detail: aircraftId}));
+            window.dispatchEvent(new CustomEvent('AircraftSelectionChanged_FlightData', {detail: aircraftId}));
         } catch (err) {
             console.log(err);
         }
@@ -154,6 +155,7 @@ var csharp = {
     aircraftSelectionChanged(aircraftId) {
         this.selectedAircraft = this.aircrafts[aircraftId];
         this.downloadMission();
+        window.dispatchEvent(new CustomEvent('AircraftSelectionChanged_FlightData', {detail: aircraftId}));
     },
 
     async downloadMission() {

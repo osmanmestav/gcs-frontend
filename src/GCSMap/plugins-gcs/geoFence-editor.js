@@ -9,6 +9,7 @@ contextMenus.geoFenceMarker.addItem("Delete geofence point", (e)=> csharp.delete
 
 mouse.registerDragDropHandler("geoFenceMarker",{
 	start: function() {
+		if (csharp.isMissionEditable === false) return;
 		var i = mouse.targetIndex;
 		var g = geoFence[i];
 		var b = geoFence[(i-1+geoFence.length)%geoFence.length];
@@ -40,17 +41,20 @@ mouse.registerDragDropHandler("geoFenceMarker",{
 		}, false);
 	},
 	drag: function(coordinates) {
+		if (csharp.isMissionEditable === false) return;
 		var i = mouse.targetIndex;
 		geoFence[i].latitude = coordinates.latitude;
 		geoFence[i].longitude = coordinates.longitude;
 	},
 	drop: function(coordinates) {
+		if (csharp.isMissionEditable === false) return;
 		csharp.changeGeoFencePoint(mouse.targetIndex, coordinates.latitude, coordinates.longitude);
 	}
 });
 
 mouse.registerDragDropHandler("geoFenceReturn",{
 	start: function() {
+		if (csharp.isMissionEditable === false) return;
 		geoFenceReturn.position = new Cesium.CallbackProperty(function() {
 			return Cesium.Cartesian3.fromDegrees(geoFenceReturn.longitude, geoFenceReturn.latitude, geoFenceReturn.altitude);
 		}, false);
@@ -62,11 +66,13 @@ mouse.registerDragDropHandler("geoFenceReturn",{
 		}, false);
 	},
 	drag: function(coordinates) {
+		if (csharp.isMissionEditable === false) return;
 		geoFenceReturn.latitude = coordinates.latitude;
 		geoFenceReturn.longitude = coordinates.longitude;
 		geoFenceReturn.altitude = coordinates.altitude;
 	},
 	drop: function(coordinates) {
+		if (window.csharp.isMissionEditable === false) return;
 		csharp.changeGeoFenceReturn(coordinates.latitude,coordinates.longitude);
 	}
 });

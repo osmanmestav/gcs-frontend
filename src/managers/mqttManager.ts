@@ -25,7 +25,7 @@ export default class MQTTManager {
     constructor(maps: any) {
         this.mapsWindow = maps;
         this.gaugesWindow = null;
-        this.flightData = new FlightData(defaultUserCode);
+        this.flightData = new FlightData(defaultUserCode, maps);
         this.isActive = false;
     };
 
@@ -67,6 +67,7 @@ export default class MQTTManager {
                 }
             }
         });
+        this.flightData.refreshAircraftPilotageState();
     };
 
     initializeMQTT = () => {

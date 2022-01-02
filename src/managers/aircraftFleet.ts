@@ -50,4 +50,12 @@ export default class AircraftFleet {
 
         return aircraft;
     }
+
+    getAircraftById = (id: number) => {
+        const aircraft = this.aircrafts.filter(x => x.aircraftIdentifier.aircraftId === id)[0];
+        if(aircraft === undefined)
+            return null;
+
+        return aircraft;
+    }
 }

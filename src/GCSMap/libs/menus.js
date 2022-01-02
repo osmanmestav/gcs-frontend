@@ -1,7 +1,6 @@
 var contextMenus = {};
 
 function ContextMenu(items) {
-    if (window.csharp.isMissionEditable === false) return;
     var ulElement = $("<ul></ul>").addClass("ui-menu ui-widget").prop("role", "menu");
     this.container = $("<div></div>").addClass("cesium-box context-menu").hide().append(ulElement);
     $('.cesium-viewer-cesiumWidgetContainer').prepend(this.container);
@@ -52,12 +51,14 @@ function ContextMenu(items) {
 
 contextMenus.default = new ContextMenu();
 eventHandler.setInputAction(function (movement) {
+    if (window.csharp.isMissionEditable === false) return;
     if (!window.enableMouseEvents || !window.mouse) return;
     (contextMenus[mouse.targetType] || contextMenus.default).show(mouse.position.x - 10, mouse.position.y - 10);
 }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
 
 var instantContextMenu = new ContextMenu();
 eventHandler.setInputAction(function (movement) {
+    if (window.csharp.isMissionEditable === false) return;
     if (!window.enableMouseEvents || !window.mouse) return;
     instantContextMenu.show(mouse.position.x - 10, mouse.position.y - 10);
 }, Cesium.ScreenSpaceEventType.MIDDLE_CLICK);

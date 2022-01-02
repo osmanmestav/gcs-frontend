@@ -1,23 +1,62 @@
-import { AircraftIdentifier } from "../models/aircraftModels/aircraft";
+import { AircraftIdentifier, AircraftState } from "../models/aircraftModels/aircraft";
 import { TelemetrySummaryModel } from "../models/telemetryModels/telemetryModels";
+import { publishEvent, PubSubEvent } from "../utils/PubSubService";
 import AircraftFleet from "./aircraftFleet";
 
 export default class FlightData {
-    constructor(userCode: string){
+    constructor(userCode: string, maps: any){
         this.userCode = userCode;
         this.aircraftFleet = new AircraftFleet(userCode);
         this.telemetryMessages = {};
         this.telemetrySummaries = [];
         this.activeAircraft = null;
+        this.mapsWindow = maps;
+        this.registerWindowCSharpEvents();
     }
+
+    mapsWindow: any;
     userCode: string;
     aircraftFleet: AircraftFleet;
+    activeAircraft: AircraftState | null;
+
+    getcsharp = () => {
+        return this.mapsWindow && this.mapsWindow.csharp;
+    }
+
+    refreshAircraftPilotageState = () => {
+        debugger;
+        this.getcsharp().isMissionEditable = this.activeAircraft?.isControlling ?? false;
+        publishEvent(PubSubEvent.ActiveAircraftPilotageStateChanged);
+    }
+
+    activeAircraftChanged = (input: any) => {
+        const aircraftId : number = input.detail;
+        const aircraft = this.aircraftFleet.getAircraftById(aircraftId);
+        if(aircraft !== null){
+            const isControlling = aircraft.isControlling();
+            this.activeAircraft = new AircraftState(aircraft.aircraftIdentifier, isControlling);
+            this.refreshAircraftPilotageState();
+        }
+    };
+
+    isActiveAircraftBeingControlled = () => {
+        return this.activeAircraft?.isControlling ?? false;
+    }
+
+    registerWindowCSharpEvents = () => {
+        this.mapsWindow.addEventListener("AircraftSelectionChanged_FlightData", this.activeAircraftChanged);
+    }
+
+
+    // -----------------------------------------------------------------
+    // the below will be used for later
+
     /**
      * an object with keys as aircraftId.
      */
     telemetryMessages: { [key: number]: any };
     telemetrySummaries: TelemetrySummaryModel[];
-    activeAircraft: AircraftIdentifier | null;
+    
 
     prepareTelemetrySummary = (telMsg: any) => {
         return {
@@ -62,7 +101,10 @@ export default class FlightData {
     }
     // selectAircraft in csharp
     activateAircraft = (aircraftIdentifier: AircraftIdentifier) => {
-        this.activeAircraft = aircraftIdentifier;
-        window.dispatchEvent(new CustomEvent('AircraftSelectionChanged', {detail: aircraftIdentifier.aircraftId}));
+        const aircraft = this.aircraftFleet.getAircraftByCertificateName(aircraftIdentifier.aircraftCertificateName);
+        if(aircraft !== null){
+            this.activeAircraft = new AircraftState(aircraftIdentifier, aircraft.isControlling());
+            window.dispatchEvent(new CustomEvent('AircraftSelectionChanged', {detail: aircraftIdentifier.aircraftId}));
+        }
     }
 } 

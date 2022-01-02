@@ -3,7 +3,7 @@ import SidebarTabs from "./components/SidebarTabs";
 import Console from "./components/Console"
 import Control from "./components/Control"
 import AircraftsListModal from './components/AircraftsManagement/AircraftsListModal';
-import {publishEvent, PubSubEvent} from '../utils/PubSubService';
+import {publishEvent, PubSubEvent, removeEvent, subscribeEvent} from '../utils/PubSubService';
 import FlightData from '../managers/flightData';
 import { AircraftPilotageStatus, PilotageState } from '../models/aircraftModels/aircraft';
 
@@ -19,7 +19,7 @@ type SidebarProps = {
 
 function Sidebar(props: SidebarProps) {
     const [showAircraftsListModal, setShowAircraftsListModal] = useState<boolean>(false);
-    const [isMissionEditable, setIsMissionEditable] = useState<boolean>(props.mapsWindow.csharp.isMissionEditable);
+    const [isActiveAircraftBeingControlled, setIsActiveAircraftBeingControlled] = useState<boolean>(props.flightData.isActiveAircraftBeingControlled());
 
     const manageAircrafts = () => {
         if (showAircraftsListModal)
@@ -34,14 +34,21 @@ function Sidebar(props: SidebarProps) {
         props.subscribeToAircraftStatuses(false);
         props.subscribeToUserStatuses(false);
         if (!isCancelled && aircraftNames.length > 0) {
-            publishEvent(PubSubEvent.ManageAircraftsEvent, ...aircraftNames)
+            publishEvent(PubSubEvent.ManageAircraftsEvent, ...aircraftNames);
         }
+    }
+
+    const activeAircraftPilotageStateChanged = () => {
+        const isControlling = props.flightData.isActiveAircraftBeingControlled();
+        setIsActiveAircraftBeingControlled(isControlling);
     }
 
     useEffect(() => {
         props.mapsWindow.addEventListener("ManageAircrafts", manageAircrafts);
+        subscribeEvent(PubSubEvent.ActiveAircraftPilotageStateChanged, activeAircraftPilotageStateChanged);
         return () => {
             props.mapsWindow.removeEventListener("ManageAircrafts", manageAircrafts);
+            removeEvent(PubSubEvent.ActiveAircraftPilotageStateChanged, activeAircraftPilotageStateChanged);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.mapsWindow]);
@@ -56,12 +63,12 @@ function Sidebar(props: SidebarProps) {
     return (
         <div>
             <Control
-                isMissionEditable={isMissionEditable}
+                isMissionEditable={isActiveAircraftBeingControlled}
                 openGauges={props.openGauges}
                 startTelemetrySimulation={props.startTelemetrySimulation}
                 mapWindow={props.mapsWindow}>
             </Control>
-            <SidebarTabs isMissionEditable={isMissionEditable} mapWindow={props.mapsWindow}></SidebarTabs>
+            <SidebarTabs isMissionEditable={isActiveAircraftBeingControlled} mapWindow={props.mapsWindow}></SidebarTabs>
             <Console mapWindow={props.mapsWindow}></Console>
             {
                 showAircraftsListModal &&

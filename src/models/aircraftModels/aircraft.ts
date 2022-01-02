@@ -1,8 +1,21 @@
-export type AircraftIdentifier = {
+export type AircraftIdentifier  = {
     aircraftId: number,
     aircraftName: string, 
     aircraftCertificateName: string
 };
+
+export class AircraftState {
+    constructor(identifier: AircraftIdentifier, isControlling: boolean = false){
+        this.aircraftId = identifier.aircraftId;
+        this.aircraftName = identifier.aircraftName;
+        this.aircraftCertificateName = identifier.aircraftCertificateName;
+        this.isControlling = isControlling;
+    }
+    aircraftId: number;
+    aircraftName: string; 
+    aircraftCertificateName: string;
+    isControlling: boolean;
+}
 
 export enum PilotageState {
     None,
