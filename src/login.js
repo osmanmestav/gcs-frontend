@@ -61,7 +61,7 @@ async function signIn(username,password) {
 		} 
 
 		let token = "";
-		for(var i = 0; i<localStorage.length; i++){
+		for(let i = 0; i<localStorage.length; i++){
 			const ithKey = localStorage.key(i);
 			if(ithKey.endsWith('accessToken')){
 				token = localStorage.getItem(ithKey);

@@ -1,5 +1,6 @@
 import { PubSub } from "aws-amplify";
 import { AircraftIdentifier, PilotageState } from "../aircraftModels/aircraft";
+import { UserCredentials } from "../userModels/userCredentials";
 
 export type processingFunctions = {
     processTelemetry: (data: any) => void;
@@ -9,12 +10,12 @@ export type processingFunctions = {
 };
 
 export class AircraftModel {
-    constructor(identifier: AircraftIdentifier, userCode: string){
-        this.userCode = userCode;
+    constructor(identifier: AircraftIdentifier, user: UserCredentials){
+        this.userCredentials = user;
         this.aircraftIdentifier = identifier;
         this.pilotageStatus = PilotageState.None;
     }
-    userCode: string;
+    userCredentials: UserCredentials;
     aircraftIdentifier: AircraftIdentifier;
     private telemetrySubscription: any;
     private missionSubscription: any;
@@ -60,7 +61,7 @@ export class AircraftModel {
         if (this.aircraftIdentifier.aircraftCertificateName === e.detail.aircraftCertificateName) {
             requestId++;
             e.detail.requestId = requestId;
-            PubSub.publish('UL/G/' + this.userCode + '/' + this.aircraftIdentifier.aircraftCertificateName + '/C', e.detail);
+            PubSub.publish(this.userCredentials.getCommandPublisherTopicString(this.aircraftIdentifier.aircraftCertificateName), e.detail);
         }
     }
 
@@ -69,7 +70,7 @@ export class AircraftModel {
             {
                 detail: { 
                     requestId: 1,
-                    userCode: this.userCode,
+                    userCode: this.userCredentials.userCode,
                     aircraftCertificateName: this.aircraftIdentifier.aircraftCertificateName,
                     aircraftName: this.aircraftIdentifier.aircraftCertificateName,
                     aircraftId: this.aircraftIdentifier.aircraftId,
@@ -82,7 +83,7 @@ export class AircraftModel {
     }
 
     startObserving = (next: processingFunctions, requestClaim: boolean) => {
-        this.telemetrySubscription = PubSub.subscribe('UL/U/' + this.aircraftIdentifier.aircraftCertificateName + '/T').subscribe({
+        this.telemetrySubscription = PubSub.subscribe(this.userCredentials.getAircraftTelemetryTopicString(this.aircraftIdentifier.aircraftCertificateName)).subscribe({
             next: data => {
                 if(this.isObserving())
                     next.processTelemetry(data);
@@ -90,7 +91,7 @@ export class AircraftModel {
             error: error => console.error(error),
             complete: () => console.log('Done'),
         });
-        this.missionSubscription = PubSub.subscribe('UL/U/' + this.aircraftIdentifier.aircraftCertificateName + '/M').subscribe({
+        this.missionSubscription = PubSub.subscribe(this.userCredentials.getAircraftMissionTopicString(this.aircraftIdentifier.aircraftCertificateName)).subscribe({
             next: data => {
                 console.log('Mission received', data.value);
                 this.receivedMission(data.value);
@@ -102,7 +103,7 @@ export class AircraftModel {
             error: error => console.error(error),
             complete: () => console.log('Done'),
         });
-        this.parametersSubscription = PubSub.subscribe('UL/U/' + this.aircraftIdentifier.aircraftCertificateName + '/P').subscribe({
+        this.parametersSubscription = PubSub.subscribe(this.userCredentials.getAircraftParametersTopicString(this.aircraftIdentifier.aircraftCertificateName)).subscribe({
             next: data => {
                 console.log('Parameters received', data.value);
                 this.receivedParameters(data.value);

@@ -1,12 +1,13 @@
 import { AircraftIdentifier, AircraftState } from "../models/aircraftModels/aircraft";
 import { TelemetrySummaryModel } from "../models/telemetryModels/telemetryModels";
+import { UserCredentials } from "../models/userModels/userCredentials";
 import { publishEvent, PubSubEvent } from "../utils/PubSubService";
 import AircraftFleet from "./aircraftFleet";
 
 export default class FlightData {
-    constructor(userCode: string, maps: any){
-        this.userCode = userCode;
-        this.aircraftFleet = new AircraftFleet(userCode);
+    constructor(user: UserCredentials, maps: any){
+        this.userCredentials = user;
+        this.aircraftFleet = new AircraftFleet(user);
         this.telemetryMessages = {};
         this.telemetrySummaries = [];
         this.activeAircraft = null;
@@ -15,7 +16,7 @@ export default class FlightData {
     }
 
     mapsWindow: any;
-    userCode: string;
+    userCredentials: UserCredentials;
     aircraftFleet: AircraftFleet;
     activeAircraft: AircraftState | null;
 
@@ -24,7 +25,6 @@ export default class FlightData {
     }
 
     refreshAircraftPilotageState = () => {
-        debugger;
         this.getcsharp().isMissionEditable = this.activeAircraft?.isControlling ?? false;
         publishEvent(PubSubEvent.ActiveAircraftPilotageStateChanged);
     }

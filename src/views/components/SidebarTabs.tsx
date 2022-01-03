@@ -95,7 +95,6 @@ function SidebarTabs(props: any) {
 
     // @ts-ignore
     const setwayPoint = (e) => {
-        //debugger
         if (e.detail.waypoint) {
             setwayPointCurrent({
                 ...e.detail.waypoint,

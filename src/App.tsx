@@ -10,8 +10,18 @@ import {Auth} from 'aws-amplify';
 import MQTTManager from './managers/mqttManager';
 import simulateTelemetry from './managers/simulateTelemetry';
 import {MessageBoxProvider} from './hooks/messageBox';
+import { UserCredentials } from './models/userModels/userCredentials';
+import { getUserCredentials } from './utils/userHelper';
 
 const loginURL = "/login/signin.html";
+
+const getUserCode = (pathName: string) => {
+    const splitted = pathName.split('/')
+    if(splitted.length > 1 && splitted[1] !== '')  {
+        return splitted[1];
+    }
+    return 'pilot1';
+}
 
 function App() {
     const [mapsWindow, setMapsWindow] = useState<any>(null);
@@ -43,9 +53,16 @@ function App() {
             if (mqttManager != null) {
                 mqttManager.finalizeMQTT();
             }
-            const mqtt = new MQTTManager(gcsMap?.contentWindow);
-            mqtt.initializeMQTT();
-            setMQTTManager({...mqtt});
+            //const userCode = getUserCode(window.location.pathname);
+            const userCredentials = getUserCredentials();
+            if(userCredentials === null) {
+                alert("The user is not found or not elligible to use the Pilot Station.")
+            }
+            else {
+                const mqtt = new MQTTManager(gcsMap?.contentWindow, userCredentials);
+                mqtt.initializeMQTT();
+                setMQTTManager({...mqtt});
+            }
         } else {
             if (mqttManager != null) {
                 mqttManager.finalizeMQTT();

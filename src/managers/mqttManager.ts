@@ -9,32 +9,25 @@ import FlightData from "./flightData";
 import { UserStatusTopicMessage } from "../models/brokerModels/userStatusTopicMessage";
 import { AircraftStatusTopicMessage } from "../models/brokerModels/aircraftStatusTopicMessage";
 import { AircraftPilotageStatus, PilotageState } from "../models/aircraftModels/aircraft";
+import { UserCredentials } from "../models/userModels/userCredentials";
 // import { getEnumKeyByEnumValue, getEnumKeys, getEnumKeyValuePairs, getEnumValueByEnumKey, getEnumValues } from "../utils/enumHelpers";
 // import { UnitsHelperNew, UnitSystemEnum, UnitTypeEnum } from "../utils/unitsHelperNew";
 
-const getUserCode = (pathName: string) => {
-    const splitted = pathName.split('/')
-    if(splitted.length > 1 && splitted[1] !== '')  {
-        return splitted[1];
-    }
-    return 'pilot1';
-}
 
-export const defaultUserCode: string = getUserCode(window.location.pathname);
 export default class MQTTManager {
-    constructor(maps: any) {
+    constructor(maps: any, user: UserCredentials) {
         this.mapsWindow = maps;
+        this.userCredentials = user;
         this.gaugesWindow = null;
-        this.flightData = new FlightData(defaultUserCode, maps);
+        this.flightData = new FlightData(user, maps);
         this.isActive = false;
     };
-
 
     mapsWindow: any;
     gaugesWindow: any;
     flightData: FlightData;
     isActive: boolean;
-
+    userCredentials: UserCredentials;
     setGaugesWindow = (gauges: any) => {
         this.gaugesWindow = gauges;
     }
@@ -167,11 +160,11 @@ export default class MQTTManager {
         // const user = await Auth.currentAuthenticatedUser();
         // console.log('attributes:', user.attributes);
         let req = {
-            userCode: defaultUserCode,
+            userCode: this.userCredentials.userCode,
             listOfControllingAircrafts: this.flightData.aircraftFleet.getListOfControllingAircrafts().map(x=> x.aircraftCertificateName),
             listOfObservingAircrafts: this.flightData.aircraftFleet.getListOfObservingAircrafts().map(x=> x.aircraftCertificateName),
         };
-        PubSub.publish('UL/G/' + defaultUserCode + '/S', req).then(() => {
+        PubSub.publish(this.userCredentials.getUserStatusTopicString(), req).then(() => {
             setTimeout(this.publishUserStatus, 1000);
         }).catch(err => {
             console.log(err);
@@ -180,7 +173,7 @@ export default class MQTTManager {
     };
 
     simulateTelemetryPublish = (certificateNameForTelemetrySimulation: string, sampleTelemetryMessage: any) => {
-        PubSub.publish('UL/U/' + certificateNameForTelemetrySimulation + '/T', sampleTelemetryMessage).then(() => {
+        PubSub.publish(this.userCredentials.getSimulateTelemetryTopicString(certificateNameForTelemetrySimulation), sampleTelemetryMessage).then(() => {
         }).catch(err => {
             console.log(err);
         });
@@ -194,7 +187,7 @@ export default class MQTTManager {
         }
         if (initiate) {
             console.log('started listening to the aircraft status messages\n');
-            this.aircraftStatusSubscription = PubSub.subscribe('UL/U/+/S').subscribe({
+            this.aircraftStatusSubscription = PubSub.subscribe(this.userCredentials.getAircraftStatusesTopicString()).subscribe({
                 next: data => {
                     // console.log('aircraft status message: ', data.value);
                     const aircraftStatusMsg = new AircraftStatusTopicMessage();
@@ -221,7 +214,7 @@ export default class MQTTManager {
         }
         if (initiate) {
             console.log('started listening to the user status messages\n');
-            this.stationStatusSubscription = PubSub.subscribe('UL/G/+/S').subscribe({
+            this.stationStatusSubscription = PubSub.subscribe(this.userCredentials.getControlStationStatusesTopicString()).subscribe({
                 next: data => {
                     // console.log('user status message: ', data.value);
                     const userStatusMsg = new UserStatusTopicMessage(data.value.userCode);

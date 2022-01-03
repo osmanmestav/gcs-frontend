@@ -1,13 +1,14 @@
 import { AircraftIdentifier } from "../models/aircraftModels/aircraft";
 import { AircraftModel } from "../models/managerModels/aircraftModel";
+import { UserCredentials } from "../models/userModels/userCredentials";
 
 export default class AircraftFleet {
-    constructor(userCode: string){
-        this.userCode = userCode;
+    constructor(user: UserCredentials){
+        this.userCredentials = user;
         this.aircrafts = [];
     }
 
-    userCode: string;
+    userCredentials: UserCredentials;
     private aircrafts: AircraftModel[];
 
     any = (certificateName: string) => {
@@ -29,7 +30,7 @@ export default class AircraftFleet {
         if(this.any(identfier.aircraftCertificateName))
             return false;
         
-        const aircraft = new AircraftModel(identfier, this.userCode);
+        const aircraft = new AircraftModel(identfier, this.userCredentials);
         this.aircrafts.push(aircraft);
 
         return true;

@@ -74,7 +74,7 @@ function Sidebar(props: SidebarProps) {
                 showAircraftsListModal &&
                 <AircraftsListModal
                     show={showAircraftsListModal}
-                    userCode={props.flightData.userCode}
+                    userCode={props.flightData.userCredentials.userCode}
                     aircraftStates={getAircraftStates()}
                     onCloseModal={onAircraftsManagementModalClosed}/>
             }
