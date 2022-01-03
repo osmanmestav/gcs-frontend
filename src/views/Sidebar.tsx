@@ -69,7 +69,7 @@ function Sidebar(props: SidebarProps) {
                 mapWindow={props.mapsWindow}>
             </Control>
             <SidebarTabs isMissionEditable={isActiveAircraftBeingControlled} mapWindow={props.mapsWindow}></SidebarTabs>
-            <Console mapWindow={props.mapsWindow}></Console>
+            <Console/>
             {
                 showAircraftsListModal &&
                 <AircraftsListModal

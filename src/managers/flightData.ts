@@ -1,6 +1,8 @@
 import { AircraftIdentifier, AircraftState } from "../models/aircraftModels/aircraft";
+import { publishSummaryLog, SummaryLogType } from "../models/helperModels/summaryLog";
 import { TelemetrySummaryModel } from "../models/telemetryModels/telemetryModels";
 import { UserCredentials } from "../models/userModels/userCredentials";
+import { getEnumValueByEnumKey } from "../utils/enumHelpers";
 import { publishEvent, PubSubEvent } from "../utils/PubSubService";
 import AircraftFleet from "./aircraftFleet";
 
@@ -43,8 +45,13 @@ export default class FlightData {
         return this.activeAircraft?.isControlling ?? false;
     }
 
+    insertSummaryLog = (input: any) => {
+        publishSummaryLog(input.detail.msg, getEnumValueByEnumKey(SummaryLogType, input.detail.category) as SummaryLogType);
+    }
+
     registerWindowCSharpEvents = () => {
         this.mapsWindow.addEventListener("AircraftSelectionChanged_FlightData", this.activeAircraftChanged);
+        this.mapsWindow.addEventListener("FlightSummaryAdd", this.insertSummaryLog);
     }
 
 

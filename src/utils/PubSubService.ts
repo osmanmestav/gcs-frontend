@@ -6,6 +6,7 @@ export enum PubSubEvent {
     AnyUserStatusMessageReceived = 'any-user-status-message-received',
     ManageAircraftsEvent = 'manage-aircrafts',
     ActiveAircraftPilotageStateChanged = 'active-aircraft-pilotage-state-changed',
+    InsertSummaryLog = 'insert-summary-log',
   }
 
 const eventEmitter = new EventEmitter();

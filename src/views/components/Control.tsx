@@ -2,6 +2,7 @@ import React, {useRef} from 'react';
 import {Row, Col, Button} from 'react-bootstrap'
 import {useMessageBox} from '../../hooks/messageBox';
 import MissionManager from '../../managers/missionManager';
+import { publishSummaryLog, SummaryLogType } from '../../models/helperModels/summaryLog';
 
 function SidebarControlButtons(props: any) {
     const {askConfirmation} = useMessageBox();
@@ -21,7 +22,7 @@ function SidebarControlButtons(props: any) {
         }
         if (uploadPossible === true) {
             if (sanityCheckResults === "") sanityCheckResults = "No problems were found.";
-            props.mapWindow.FlightSummary.addToSummary("Message", "Sanity check results: \r\n" + sanityCheckResults);
+            publishSummaryLog("Sanity check results: \r\n" + sanityCheckResults, SummaryLogType.Warning);
             props.mapWindow.csharp.uploadMission();
         }
     }
@@ -31,7 +32,7 @@ function SidebarControlButtons(props: any) {
         if (telemetrySummary.isSittingOnGround) {
             props.mapWindow.csharp.startMission();
         } else {
-            props.mapWindow.FlightSummary.addToSummary("Warning", "Aircraft is already flying! \r\n");
+            publishSummaryLog("Aircraft is already flying! \r\n", SummaryLogType.Warning);
         }
     }
     const stopAllMissions = () => {
