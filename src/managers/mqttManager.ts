@@ -10,6 +10,7 @@ import { UserStatusTopicMessage } from "../models/brokerModels/userStatusTopicMe
 import { AircraftStatusTopicMessage } from "../models/brokerModels/aircraftStatusTopicMessage";
 import { AircraftPilotageStatus, PilotageState } from "../models/aircraftModels/aircraft";
 import { UserCredentials } from "../models/userModels/userCredentials";
+import { publishSummaryLog, SummaryLogType } from "../models/helperModels/summaryLog";
 // import { getEnumKeyByEnumValue, getEnumKeys, getEnumKeyValuePairs, getEnumValueByEnumKey, getEnumValues } from "../utils/enumHelpers";
 // import { UnitsHelperNew, UnitSystemEnum, UnitTypeEnum } from "../utils/unitsHelperNew";
 
@@ -44,7 +45,10 @@ export default class MQTTManager {
             if (aircraft === null) {
                 if (x.state !== PilotageState.None) {
                     this.flightData.aircraftFleet.insert(x.aircraftIdentifier);
-                    this.registerAircraft(x.aircraftIdentifier.aircraftCertificateName, x.state === PilotageState.Controlling);
+                    const isControlling = x.state === PilotageState.Controlling;
+                    this.registerAircraft(x.aircraftIdentifier.aircraftCertificateName, isControlling);
+                    const msg = "Started " + (isControlling ? "controlling " : "observing ") + x.aircraftIdentifier.aircraftName;
+                    publishSummaryLog(msg, SummaryLogType.Message);
                 }
             } else {
                 if (x.state === PilotageState.None) {
@@ -54,9 +58,13 @@ export default class MQTTManager {
                     if (csharp) {
                         csharp.removeAircraftByCertificateName(x.aircraftIdentifier.aircraftCertificateName);
                     }
+                    this.flightData.checkActiveAircraftPilotageState(x.aircraftIdentifier, x.state);
+                    publishSummaryLog("Disconnected from " + x.aircraftIdentifier.aircraftName, SummaryLogType.Warning);
                 }
                 else if(x.state === PilotageState.Controlling && aircraft.isObservingButNotControlling()) {
                     aircraft.requestClaim();
+                    this.flightData.checkActiveAircraftPilotageState(x.aircraftIdentifier, x.state);
+                    publishSummaryLog("Requesting control of " + x.aircraftIdentifier.aircraftName, SummaryLogType.Message);
                 }
             }
         });

@@ -1,4 +1,4 @@
-import { AircraftIdentifier, AircraftState } from "../models/aircraftModels/aircraft";
+import { AircraftIdentifier, AircraftState, PilotageState } from "../models/aircraftModels/aircraft";
 import { publishSummaryLog, SummaryLogType } from "../models/helperModels/summaryLog";
 import { TelemetrySummaryModel } from "../models/telemetryModels/telemetryModels";
 import { UserCredentials } from "../models/userModels/userCredentials";
@@ -40,6 +40,13 @@ export default class FlightData {
             this.refreshAircraftPilotageState();
         }
     };
+
+    checkActiveAircraftPilotageState = (aircraft: AircraftIdentifier, state: PilotageState) => {
+        if(this.activeAircraft != null && this.activeAircraft.aircraftId === aircraft.aircraftId) {
+            this.activeAircraft.isControlling = (state === PilotageState.Controlling);
+            this.refreshAircraftPilotageState();
+        }
+    }
 
     isActiveAircraftBeingControlled = () => {
         return this.activeAircraft?.isControlling ?? false;

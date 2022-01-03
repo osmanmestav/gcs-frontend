@@ -6,7 +6,6 @@ import { PubSubEvent, removeEvent, subscribeEvent } from '../../utils/PubSubServ
 function SidebarConsole() {
     const [ConsoleLog, setConsoleLog] = useState<SummaryLog[]>([]);
     const insertSummaryLog = (input: SummaryLog[]) => {
-        debugger;
         setConsoleLog(prevState => {
             return input.concat(prevState);
         });
@@ -25,7 +24,7 @@ function SidebarConsole() {
             <ListGroup>
                 {ConsoleLog.map((log, index) =>
                     <ListGroup.Item key={index} style={{backgroundColor: '#000'}} as="li" action>
-                        <b style={{color: '#fff'}}>{log.time}:</b>
+                        <b style={{color: '#fff'}}>{log.time}: </b>
                         <span
                             style={{color: (log.category === SummaryLogType.Error ? 'rgb(219 0 0)' : (log.category === SummaryLogType.Warning ? '#ffc107' : '#fff'))}}> 
                             {log.msg}
