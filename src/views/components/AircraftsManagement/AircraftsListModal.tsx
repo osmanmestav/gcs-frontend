@@ -3,10 +3,11 @@ import {Button, Modal, Table, Form} from "react-bootstrap";
 import { AircraftIdentifier, AircraftPilotageStatus, PilotageState } from "../../../models/aircraftModels/aircraft";
 import { AircraftStatusTopicMessage } from "../../../models/brokerModels/aircraftStatusTopicMessage";
 import { UserStatusTopicMessage } from "../../../models/brokerModels/userStatusTopicMessage";
+import { UserCredentials } from "../../../models/userModels/userCredentials";
 import {PubSubEvent, removeEvent, subscribeEvent} from "../../../utils/PubSubService";
 
 type AircraftsListModalProps = {
-    userCode: string;
+    user: UserCredentials;
     show: boolean;
     aircraftStates: AircraftPilotageStatus[];
     onCloseModal: (isCancelled: boolean, aircraftNames: AircraftPilotageStatus[]) => void;
@@ -197,7 +198,7 @@ const AircraftsListModal = (props: AircraftsListModalProps) => {
     const onAircraftStatusReceived = (statusMessages: AircraftStatusTopicMessage[]) => {
         statusMessages.forEach((statusMsg) => {
             aircraftListItems.setAircraftController(statusMsg);
-            if(props.userCode === statusMsg.gcsController.userCode){
+            if(props.user.userCode === statusMsg.gcsController.userCode){
                 const identifier : AircraftIdentifier = {
                     aircraftId: statusMsg.aircraftId,
                     aircraftName: statusMsg.aircraftName,
@@ -273,7 +274,7 @@ const AircraftsListModal = (props: AircraftsListModalProps) => {
                                         label={!aircraftControlList.isControlling(data.aircraftIdentifier.aircraftCertificateName) ? 'Take Control' : 'Already controlling'}
                                         name={data.aircraftIdentifier.aircraftCertificateName}
                                         type="checkbox"
-                                        disabled={aircraftListItems.hasController(data.aircraftIdentifier.aircraftCertificateName)}
+                                        disabled={aircraftListItems.hasController(data.aircraftIdentifier.aircraftCertificateName) || !props.user.isPilot}
                                         id={data.aircraftIdentifier.aircraftName + "inline" + index}
                                         checked={aircraftControlList.isControlling(data.aircraftIdentifier.aircraftCertificateName)}
                                         onChange={(e) => {

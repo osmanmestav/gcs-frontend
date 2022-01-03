@@ -57,6 +57,8 @@ export class AircraftModel {
     }
 
     commandPublisher = (e: any) => {
+        if(!this.userCredentials.isPilot)
+            return;
         let requestId = 0;
         if (this.aircraftIdentifier.aircraftCertificateName === e.detail.aircraftCertificateName) {
             requestId++;
