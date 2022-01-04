@@ -62,6 +62,7 @@ function Sidebar(props: SidebarProps) {
 
     return (
         <div>
+            (Tenant Code: {props.flightData.userCredentials.tenantCode}; User Code: {props.flightData.userCredentials.userCode}; Role: {props.flightData.userCredentials.isPilot ? "Pilot" : "Observer"})
             <Control
                 isMissionEditable={isActiveAircraftBeingControlled}
                 openGauges={props.openGauges}

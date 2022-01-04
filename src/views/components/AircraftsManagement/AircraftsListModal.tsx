@@ -241,7 +241,7 @@ const AircraftsListModal = (props: AircraftsListModalProps) => {
         >
             <Modal.Header>
                 <Modal.Title id="contained-modal-title-vcenter">
-                    Manage Aircrafts (It can be buggy - but pretty much okey)
+                    Manage Aircrafts (Tenant Code: {props.user.tenantCode}; User Code: {props.user.userCode}; Role: {props.user.isPilot ? "Pilot" : "Observer"})
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
