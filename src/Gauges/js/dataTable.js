@@ -45,7 +45,7 @@ loadSvg("dataTableContainer", "svg/dataTable.svg", function () {
             dataNames.forEach(function (name, i) {
                 switch (name) {
                     case 'currentCommand':
-                        elements[i].innerHTML = values['commandSource'] + '-' + values[name];
+                        elements[i].innerHTML = values['index'] + ' - ' + values[name];
                         break;
                     case 'commandSource':
                         elements[i].innerHTML = CommandSourceType[values[name]];
