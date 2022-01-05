@@ -205,12 +205,34 @@ function SidebarTabs(props: any) {
 
     const onCloseModal = (saveChanges: boolean, editedWaypoints: waypointDataType[] | null) => {
         if (saveChanges && editedWaypoints != null) {
-            editedWaypoints.forEach(w => {
-                props.mapWindow.csharp.updateWaypoint(w);
-                missionData!.waypoints[w.index].agl = w.agl;
-            })
-            setMissionData(missionData);
+            if (isDraft || !useDraftLogic) {
+                editedWaypoints.forEach((w, index) => {
+                    w.index = index;
+                    props.mapWindow.csharp.updateWaypoint(w);
+                    missionDraft!.waypoints[w.index].agl = w.agl;
+                })
+                setMissionDraft(missionDraft);
+            } else {
+                editedWaypoints.forEach((w, index) => {
+                    w.index = index;
+                    props.mapWindow.csharp.updateWaypoint(w);
+                    missionData!.waypoints[w.index].agl = w.agl;
+                })
+                setMissionData(missionData);
+            }
         }
+        let mission = clone(missionDraft);
+        props.mapWindow.csharp.receivedMission({
+            mission: {
+                waypoints: mission?.waypoints,
+                home: mission?.home,
+            },
+            geoFence: mission?.geoFence,
+            failsafe: mission?.failsafe,
+        }, 'draft-toggle');
+
+        if (!isDraft && useDraftLogic)
+            setIsDraft(true);
         setModalIndex(-1);
     }
 

@@ -27,7 +27,6 @@ function WaypointsTab(props: WaypointsTabProps) {
     }, [props.missionWaypoints])
 
     const handleDragEnd = (e: any) => {
-        console.log(e)
         props.setIndexWaypoints(e);
     }
     // @ts-ignore

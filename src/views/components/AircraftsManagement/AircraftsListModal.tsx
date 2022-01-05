@@ -47,7 +47,7 @@ class AircraftControlListViewModel {
             else if (status.isObserving()){
                 status.state = PilotageState.Controlling;
             }
-            else 
+            else
                 status.state = PilotageState.Controlling;
         }
         else {
@@ -64,7 +64,7 @@ class AircraftControlListViewModel {
             else if (status.isObserving()){
                 status.state = PilotageState.None;
             }
-            else 
+            else
                 status.state = PilotageState.Observing;
         }
         else {
@@ -124,7 +124,7 @@ class AircraftsListItemViewModel {
     displayObservers = () => {
         if(this.observers.length > 0)
             return this.observers.reduce((prev, cur) => prev + cur + '; ', '');
-        
+
         return 'No Observers';
     }
 }
@@ -158,7 +158,7 @@ class AircraftsListViewModel {
             const identifier : AircraftIdentifier = {
                 aircraftId: statusMsg.aircraftId,
                 aircraftName: statusMsg.aircraftName,
-                aircraftCertificateName: statusMsg.aircraftCertificateName 
+                aircraftCertificateName: statusMsg.aircraftCertificateName
             };
             const newAircraft = new AircraftsListItemViewModel(identifier, controller);
             this.aircraftItems.push(newAircraft);
@@ -202,7 +202,7 @@ const AircraftsListModal = (props: AircraftsListModalProps) => {
                 const identifier : AircraftIdentifier = {
                     aircraftId: statusMsg.aircraftId,
                     aircraftName: statusMsg.aircraftName,
-                    aircraftCertificateName: statusMsg.aircraftCertificateName 
+                    aircraftCertificateName: statusMsg.aircraftCertificateName
                 };
                 if(!aircraftControlList.isControlling(statusMsg.aircraftCertificateName)){
                     aircraftControlList.control(identifier);
@@ -249,12 +249,12 @@ const AircraftsListModal = (props: AircraftsListModalProps) => {
                 <Table striped bordered hover>
                     <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Aircraft Name</th>
-                        <th>Controlling By</th>
-                        <th>Observing By</th>
-                        <th>Claim/Control</th>
-                        <th>Observe</th>
+                        <th style={{width:'60px'}}>#</th>
+                        <th style={{width:'200px'}}>Aircraft Name</th>
+                        <th style={{width:'150px'}}>Controlling By</th>
+                        <th style={{width:'300px'}}>Observing By</th>
+                        <th style={{width:'200px'}}>Claim/Control</th>
+                        <th style={{width:'200px'}}>Observe</th>
                     </tr>
                     </thead>
                     <tbody>

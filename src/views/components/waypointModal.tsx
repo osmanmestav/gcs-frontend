@@ -2,6 +2,7 @@ import clone from 'clone';
 import React, {useState} from 'react';
 import {Row, Col, Form, Table, Button, ButtonGroup, Modal} from 'react-bootstrap'
 import {waypointDataType} from "../viewModels/missionTypes";
+import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
 
 type waypointModalType = {
     show: boolean;
@@ -14,6 +15,24 @@ const ModalsWaypoint = (props: waypointModalType) => {
 
     const [waypointsData, setWaypointsData] = useState<waypointDataType[]>(clone(props.missionWaypoints));
     const [editingIndex, setEditingIndex] = useState<number>(props.editIndex);
+
+
+    const handleDragEnd = (e: any) => {
+        if (!e.destination) return;
+        try {
+            let tempData = Array.from(waypointsData);
+            let [source_data] = tempData.splice(e.source.index, 1);
+            tempData.splice(e.destination.index, 0, source_data);
+            tempData.forEach((w, index) => {
+                w.index = index;
+            })
+            var newWaypointsData = waypointsData;
+            newWaypointsData = tempData;
+            setWaypointsData(newWaypointsData);
+        } catch (e) {
+            console.log(e)
+        }
+    }
 
     return (
         <Modal
@@ -30,48 +49,69 @@ const ModalsWaypoint = (props: waypointModalType) => {
             <Modal.Body>
                 <Row>
                     <Col lg={8}>
-                        <Table striped bordered hover>
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Command</th>
-                                <th>Latitude</th>
-                                <th>Longitude</th>
-                                <th>MSL</th>
-                                <th>AGL</th>
-                                <th>Parameter</th>
-                                <th></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {waypointsData &&
-                            // @ts-ignore
-                            waypointsData.map((data, indexs) => {
-                                return (
-                                    <tr key={indexs}
-                                        className={(indexs === editingIndex ? 'select-red' : '' ? 'select-red' : '')}>
-                                        <td>{(indexs + 1)}</td>
-                                        <td>{data.command}</td>
-                                        <td>{data.latitude?.toFixed(7)}</td>
-                                        <td>{data.longitude?.toFixed(7)}</td>
-                                        <td style={{width: "100px"}}>{data.altitude?.toFixed(0)} m</td>
-                                        <td>{data.agl} m</td>
-                                        <td>{data.parameter?.toString()}</td>
-                                        <td>
-                                            <ButtonGroup aria-label="Basic example" size="sm">
-                                                <Button style={{fontSize: "10px"}} variant="dark" onClick={() => {
-                                                    setEditingIndex(indexs);
-                                                }}>
-                                                    <i className="fa fa-pencil-alt"></i>
-                                                </Button>
-                                            </ButtonGroup>
-                                        </td>
-                                    </tr>
-                                );
-                            })
-                            }
-                            </tbody>
-                        </Table>
+                        <DragDropContext onDragEnd={handleDragEnd}>
+                            <Table striped bordered hover>
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>#</th>
+                                    <th>Command</th>
+                                    <th>Latitude</th>
+                                    <th>Longitude</th>
+                                    <th>MSL</th>
+                                    <th>AGL</th>
+                                    <th>Parameter</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <Droppable droppableId="droppable-1">
+                                    {(provider) => (
+                                        <tbody
+                                            ref={provider.innerRef}
+                                            {...provider.droppableProps}
+                                        >
+                                        {waypointsData &&
+                                        // @ts-ignore
+                                        waypointsData.map((data, indexs) => {
+                                            return (
+                                                <Draggable
+                                                    key={indexs}
+                                                    draggableId={(data.command + '-' + indexs)}
+                                                    index={indexs}
+                                                >
+                                                    {(provider) => (
+                                                        <tr
+                                                            {...provider.draggableProps} ref={provider.innerRef}
+                                                            key={indexs}
+                                                            className={(indexs === editingIndex ? 'select-red' : '' ? 'select-red' : '')}>
+                                                            <td {...provider.dragHandleProps}> =</td>
+                                                            <td>{(indexs + 1)}</td>
+                                                            <td>{data.command}</td>
+                                                            <td>{data.latitude?.toFixed(7)}</td>
+                                                            <td>{data.longitude?.toFixed(7)}</td>
+                                                            <td style={{width: "100px"}}>{data.altitude?.toFixed(0)} m</td>
+                                                            <td>{data.agl} m</td>
+                                                            <td>{data.parameter?.toString()}</td>
+                                                            <td>
+                                                                <ButtonGroup aria-label="Basic example" size="sm">
+                                                                    <Button style={{fontSize: "10px"}} variant="dark"
+                                                                            onClick={() => {
+                                                                                setEditingIndex(indexs);
+                                                                            }}>
+                                                                        <i className="fa fa-pencil-alt"></i>
+                                                                    </Button>
+                                                                </ButtonGroup>
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </Draggable>
+                                            );
+                                        })}
+                                        </tbody>
+                                    )}
+                                </Droppable>
+                            </Table>
+                        </DragDropContext>
                     </Col>
                     <Col>
                         <Form.Group as={Row} className="mb-3">
