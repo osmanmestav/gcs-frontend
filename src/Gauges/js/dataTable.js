@@ -42,10 +42,11 @@ loadSvg("dataTableContainer", "svg/dataTable.svg", function () {
         update: function () {
             if (!dataTable.isVisible()) return;
             progressBar.setAttribute("width", maxWidth * (values.percentCompleted / 100.0));
+            document.getElementById("aircraftName").innerHTML = values.aircraftName;
             dataNames.forEach(function (name, i) {
                 switch (name) {
                     case 'currentCommand':
-                        elements[i].innerHTML = values['commandSource'] + '-' + values[name];
+                        elements[i].innerHTML = values['index'] + ' - ' + values[name];
                         break;
                     case 'commandSource':
                         elements[i].innerHTML = CommandSourceType[values[name]];
