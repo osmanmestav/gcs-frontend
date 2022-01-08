@@ -33,7 +33,7 @@ export class AircraftPilotageStatus {
     state: PilotageState;
 
     isObserving = () => {
-        return (this.state === PilotageState.Observing || this.state === PilotageState.Controlling);
+        return (this.state === PilotageState.Observing);
     };
 
     isControlling = () => {
