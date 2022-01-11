@@ -27,6 +27,10 @@ export class UserCredentials {
         return this.tenantCode + '/G/' + this.userCode + '/' + certificateName + '/C';
     }
 
+    getAircraftResponseTopicString = (certificateName: string) => {
+        return this.tenantCode + '/U/' + certificateName + '/' + this.userCode + '/R';
+    }
+
     getAircraftTelemetryTopicString = (certificateName: string) => {
         return this.tenantCode + '/U/' + certificateName + '/T';
     }

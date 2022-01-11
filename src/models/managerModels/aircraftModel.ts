@@ -1,5 +1,6 @@
 import { PubSub } from "aws-amplify";
 import { AircraftIdentifier, PilotageState } from "../aircraftModels/aircraft";
+import { publishSummaryLog, SummaryLogType } from "../helperModels/summaryLog";
 import { UserCredentials } from "../userModels/userCredentials";
 
 export type processingFunctions = {
@@ -14,17 +15,21 @@ export class AircraftModel {
         this.userCredentials = user;
         this.aircraftIdentifier = identifier;
         this.pilotageStatus = PilotageState.None;
+        this.requestId = 0;
     }
     userCredentials: UserCredentials;
     aircraftIdentifier: AircraftIdentifier;
     private telemetrySubscription: any;
     private missionSubscription: any;
     private parametersSubscription: any;
+    private responseSubscription: any;
 
     aircraftMission: any;
     aircraftParameters: any;
 
     pilotageStatus: PilotageState;
+
+    requestId: number;
 
     receivedMission = ( mission: any) => {
         if(this.pilotageStatus === PilotageState.None){
@@ -59,19 +64,31 @@ export class AircraftModel {
     commandPublisher = (e: any) => {
         if(!this.userCredentials.isPilot)
             return;
-        let requestId = 0;
+        
         if (this.aircraftIdentifier.aircraftCertificateName === e.detail.aircraftCertificateName) {
-            requestId++;
-            e.detail.requestId = requestId;
+            this.requestId++;
+            e.detail.requestId = this.requestId;
             PubSub.publish(this.userCredentials.getCommandPublisherTopicString(this.aircraftIdentifier.aircraftCertificateName), e.detail);
         }
     }
 
     requestClaim = () => {
+        if(!this.userCredentials.isPilot)
+            return;
+
+        this.responseSubscription = PubSub.subscribe(this.userCredentials.getAircraftResponseTopicString(this.aircraftIdentifier.aircraftCertificateName)).subscribe({
+            next: data => {
+                if(this.isControlling() && data.value.aircraftCertificateName === this.aircraftIdentifier.aircraftCertificateName) {
+                    publishSummaryLog("Command response received for request id #" + data.value.requestID + ", command: " + data.value.command, SummaryLogType.Message);
+                }
+            },
+            error: error => console.error(error),
+            complete: () => console.log('Done'),
+        });    
+        this.requestId = 0;
         this.commandPublisher(
             {
                 detail: { 
-                    requestId: 1,
                     userCode: this.userCredentials.userCode,
                     aircraftCertificateName: this.aircraftIdentifier.aircraftCertificateName,
                     aircraftName: this.aircraftIdentifier.aircraftCertificateName,
@@ -124,5 +141,6 @@ export class AircraftModel {
         this.telemetrySubscription?.unsubscribe();
         this.missionSubscription?.unsubscribe();
         this.parametersSubscription?.unsubscribe();
+        this.responseSubscription?.unsubscribe();
     };
 }
