@@ -17,6 +17,10 @@ window.addEventListener("GeoFenceChanged", (e) => {
     refreshGeoFence(e.detail);
 });
 
+window.addEventListener("GeoFenceVisible", (e) => {
+    refreshGeoFence(e.detail);
+});
+
 function refreshGeoFence(pGeoFence) {
     while (pGeoFence.points.length < geoFence.length && geoFence.length) {
         var item = geoFence.pop();
