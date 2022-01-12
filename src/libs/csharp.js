@@ -237,6 +237,7 @@ var csharp = {
 
         this.mission.home = mission.mission.home;
         this.mission.home.missionUpdateOrigin = missionUpdateOrigin;
+        mission.geoFence.isVisible = true
         this.mission.geoFence = mission.geoFence;
         this.mission.geoFence.missionUpdateOrigin = missionUpdateOrigin;
         this.mission.failsafe = mission.failSafe;
@@ -995,7 +996,25 @@ var csharp = {
         }
         window.dispatchEvent(new CustomEvent('CommandRequest', {detail: req}));
     },
-
+    isGeoFenceVisible(isActivated) {
+        if (this.isMissionEditable === false) return;
+        this.mission.geoFence.isVisible = isActivated;
+        if (isActivated === false) {
+            var req = {
+                maxAltitude: this.mission.geoFence.maxAltitude,
+                minAltitude: this.mission.geoFence.minAltitude,
+                points: [],
+                returnPoint: {
+                    latitude: this.mission.geoFence.returnPoint.latitude,
+                    longitude: this.mission.geoFence.returnPoint.longitude,
+                },
+            }
+        }
+        if (isActivated === true) {
+            var req = this.mission.geoFence;
+        }
+        window.dispatchEvent(new CustomEvent('GeoFenceVisible', {detail: req}));
+    },
     setAltitudeOverHome(number) {
         ConfigInfo.AltitudeOverHome = number;
     },

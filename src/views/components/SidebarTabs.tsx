@@ -261,6 +261,8 @@ function SidebarTabs(props: any) {
             newGeofence.geoFence.isVisible = e;
             setMissionData(newGeofence);
         }
+        console.log(e)
+        props.mapWindow.csharp.isGeoFenceVisible(e);
     }
 
     const indexWaypointEdit = (e: any) => {

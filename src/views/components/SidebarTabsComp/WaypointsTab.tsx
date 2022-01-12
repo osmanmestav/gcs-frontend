@@ -118,7 +118,7 @@ function WaypointsTab(props: WaypointsTabProps) {
                                                         <td>{data.agl} m</td>
                                                         <td>{data.parameter?.toString()}</td>
                                                         <td>
-                                                            <ButtonGroup aria-label="Basic example" size="sm">
+                                                            <ButtonGroup size="sm">
                                                                 <Button style={{fontSize: "10px"}}
                                                                         disabled={props.isMissionEditable === false}
                                                                         variant="dark"
@@ -130,7 +130,7 @@ function WaypointsTab(props: WaypointsTabProps) {
                                                                 </Button>
                                                                 <Button style={{fontSize: "10px"}}
                                                                         variant="warning"
-                                                                        disabled={props.isDraft && props.isMissionEditable === false}
+                                                                        disabled={props.isDraft === false && props.isMissionEditable === false}
                                                                         onClick={(e) => {
                                                                             e.preventDefault();
                                                                             props.jumpToWaypoint(indexs)

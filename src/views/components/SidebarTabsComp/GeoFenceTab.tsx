@@ -14,18 +14,31 @@ type GeoFenceTabProps = {
 
 function GeoFenceTab(props: GeoFenceTabProps) {
     const [geoFenceData, setGeoFenceData] = useState<geoFenceType>();
+    const [visibleStatus, setVisibleStatus] = useState<boolean>(true);
 
     useEffect(() => {
         setGeoFenceData(props.missionGeofence);
+        setVisible()
     }, [props.missionGeofence])
 
     const clearGeoFenceClick = () => {
+
         // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         props.csharp.clearGeoFence();
         var geofence = geoFenceData;
         geofence!.points = [];
         setGeoFenceData(geofence)
+        setVisible()
     }
+
+    const setVisible = () => {
+        if (geoFenceData && geoFenceData?.points?.length <= 0 && visibleStatus == true) {
+            setVisibleStatus(false);
+        } else if (geoFenceData && geoFenceData?.points?.length <= 0 && visibleStatus == false) {
+            setVisibleStatus(true);
+        }
+    }
+
 
     // @ts-ignore
     return (
@@ -40,14 +53,14 @@ function GeoFenceTab(props: GeoFenceTabProps) {
                     <th>MaxAlt</th>
                     <th>
                         <Button
-                            disabled={props.isMissionEditable === false}
+                            disabled={props.isDraft || props.isMissionEditable === false || visibleStatus === false}
                             style={{fontSize: "10px"}}
                             size="sm"
                             variant="secondary"
                             onClick={() => clearGeoFenceClick()}>Clear
                         </Button>
                         <Switch
-                            disabled={props.isDraft || props.isMissionEditable === false}
+                            disabled={props.isDraft || props.isMissionEditable === false || visibleStatus === false}
                             checked={(geoFenceData?.isActive as any)}
                             height={15}
                             width={40}
@@ -66,7 +79,7 @@ function GeoFenceTab(props: GeoFenceTabProps) {
                     <td>
 
                         <Form.Check
-                            disabled={props.isMissionEditable === false}
+                            disabled={props.isDraft || props.isMissionEditable === false || visibleStatus === false}
                             label="Visible"
                             inline
                             name="command"

@@ -2,7 +2,7 @@ import React, {useRef} from 'react';
 import {Row, Col, Button} from 'react-bootstrap'
 import {useMessageBox} from '../../hooks/messageBox';
 import MissionManager from '../../managers/missionManager';
-import { publishSummaryLog, SummaryLogType } from '../../models/helperModels/summaryLog';
+import {publishSummaryLog, SummaryLogType} from '../../models/helperModels/summaryLog';
 
 function SidebarControlButtons(props: any) {
     const {askConfirmation} = useMessageBox();
@@ -88,6 +88,11 @@ function SidebarControlButtons(props: any) {
         };
     };
 
+    const logout = () => {
+        localStorage.clear();
+        window.location.reload();
+    }
+
     // @ts-ignore
     return (
         <div style={{height: '100%', minHeight: '40px', marginTop: '20px'}}>
@@ -97,10 +102,15 @@ function SidebarControlButtons(props: any) {
                             onClick={props.openGauges}>Open Gauges</Button>
                 </Col>
                 <Col>
-                    <Button style={{marginRight: '5px', display: "none"}} variant="dark" size="sm"
+                    <Button style={{marginRight: '5px', float: 'right', display: "none"}} variant="dark" size="sm"
                             id="simulateTelemetry"
                             disabled={true}
                             onClick={props.startTelemetrySimulation}>Simulate Telemetry</Button>
+                </Col>
+                <Col>
+                    <Button style={{marginRight: '5px', float: 'right', display: "block"}} variant="dark" size="sm"
+                            id="simulateTelemetry"
+                            onClick={logout}><i className="fas fa-sign-out-alt"></i> Logout</Button>
                 </Col>
                 <Button
                     className="mb-2"
