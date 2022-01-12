@@ -32,18 +32,16 @@ function GeoFenceTab(props: GeoFenceTabProps) {
     }
 
     const setVisible = () => {
-        if (geoFenceData && geoFenceData?.points?.length <= 0 && visibleStatus == true) {
+        if (geoFenceData && geoFenceData?.points?.length <= 0 && visibleStatus === true) {
             setVisibleStatus(false);
-        } else if (geoFenceData && geoFenceData?.points?.length <= 0 && visibleStatus == false) {
+        } else if (geoFenceData && geoFenceData?.points?.length <= 0 && visibleStatus === false) {
             setVisibleStatus(true);
         }
     }
 
-
     // @ts-ignore
     return (
         <div>
-
             <Table striped bordered hover>
                 <thead>
                 <tr>
@@ -79,7 +77,6 @@ function GeoFenceTab(props: GeoFenceTabProps) {
                     <td>
 
                         <Form.Check
-                            disabled={props.isDraft || props.isMissionEditable === false || visibleStatus === false}
                             label="Visible"
                             inline
                             name="command"

@@ -69,7 +69,9 @@ function Sidebar(props: SidebarProps) {
                 startTelemetrySimulation={props.startTelemetrySimulation}
                 mapWindow={props.mapsWindow}>
             </Control>
-            <SidebarTabs isMissionEditable={isActiveAircraftBeingControlled} mapWindow={props.mapsWindow}></SidebarTabs>
+            <SidebarTabs 
+                style={{height: '350px', minHeight: '350px', backgroundColor: '#000', padding: '10px', overflow: 'scroll'}}
+                isMissionEditable={isActiveAircraftBeingControlled} mapWindow={props.mapsWindow}></SidebarTabs>
             <Console/>
             {
                 showAircraftsListModal &&

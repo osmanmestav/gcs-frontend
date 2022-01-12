@@ -19,19 +19,7 @@ function SidebarConsole() {
     }, []);
 
     return (
-        <div
-            style={{
-                height: '350px',
-                minHeight: '350px',
-                backgroundColor: '#000',
-                padding: '10px',
-                overflow: 'scroll',
-                position: 'absolute',
-                bottom: '2px',
-                right: '0px',
-                width: '100%',
-                maxWidth: '650px'
-            }}>
+        <div style={{height: '350px', minHeight: '350px', backgroundColor: '#000', padding: '10px', overflow: 'scroll'}}>
             <ListGroup>
                 {ConsoleLog.map((log, index) =>
                     <ListGroup.Item key={index} style={{backgroundColor: '#000'}} as="li" action>

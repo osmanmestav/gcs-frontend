@@ -996,8 +996,7 @@ var csharp = {
         }
         window.dispatchEvent(new CustomEvent('CommandRequest', {detail: req}));
     },
-    isGeoFenceVisible(isActivated) {
-        if (this.isMissionEditable === false) return;
+    setGeoFenceVisibility(isActivated) {
         this.mission.geoFence.isVisible = isActivated;
         if (isActivated === false) {
             var req = {
