@@ -93,9 +93,11 @@ var csharp = {
                 this.selectedAircraft = null;
                 this.clearWaypoints("aircraftRemoval");
                 this.clearGeoFence();
+                this.setHome(0, 0, 0);
             }
 
             window.dispatchEvent(new CustomEvent('AircraftRemoved', {detail: aircraftId}));
+            window.dispatchEvent(new CustomEvent('airplaneRemoved', {detail: aircraftId}));
         } catch (err) {
             console.log(err);
         }
@@ -116,6 +118,8 @@ var csharp = {
                 this.addAircraft(aircraftState);
                 aircraft = this.aircrafts[aircraftState.aircraftId];
             }
+            if (!this.selectedAircraft || !this.selectedAircraft.aircraftId)
+                this.selectAircraft(aircraftState);
             this.telemetrySummaries[aircraftState.aircraftId] = Object.assign({}, this.prepareTelemetrySummary(aircraftState));
             Object.assign(aircraft, aircraftState);
             window.dispatchEvent(new CustomEvent('AircraftChanged', {detail: aircraft}));
@@ -154,7 +158,6 @@ var csharp = {
     // invoked by plane.js on dropdown box selection changed - no need to invoke AircraftSelectionChanged.
     aircraftSelectionChanged(aircraftId) {
         this.selectedAircraft = this.aircrafts[aircraftId];
-        this.downloadMission();
         window.dispatchEvent(new CustomEvent('AircraftSelectionChanged_FlightData', {detail: aircraftId}));
     },
 
@@ -731,7 +734,6 @@ var csharp = {
     },
 
     async clearWaypoints(missionUpdateOrigin) {
-        if (this.isMissionEditable === false) return;
         this.selectedWaypointIndices = [];
         this.mission.waypoints = [];
         window.dispatchEvent(new CustomEvent('WaypointsCleared', {detail: missionUpdateOrigin}));
@@ -972,7 +974,6 @@ var csharp = {
         return this.telemetrySummaries[this.selectedAircraft.aircraftId];
     },
     clearGeoFence() {
-        if (this.isMissionEditable === false) return;
         if (this.mission.geoFence == null) {
             return;
         }

@@ -26,11 +26,11 @@ export default class AircraftFleet {
         return this.aircrafts.filter(x=> x.isControlling()).map(x=> x.aircraftIdentifier);
     }
 
-    insert = (identfier: AircraftIdentifier) => {
-        if(this.any(identfier.aircraftCertificateName))
+    insert = (identifier: AircraftIdentifier) => {
+        if(this.any(identifier.aircraftCertificateName))
             return false;
         
-        const aircraft = new AircraftModel(identfier, this.userCredentials);
+        const aircraft = new AircraftModel(identifier, this.userCredentials);
         this.aircrafts.push(aircraft);
 
         return true;

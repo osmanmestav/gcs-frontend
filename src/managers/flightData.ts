@@ -38,6 +38,12 @@ export default class FlightData {
             const isControlling = aircraft.isControlling();
             this.activeAircraft = new AircraftState(aircraft.aircraftIdentifier, isControlling);
             this.refreshAircraftPilotageState();
+            let csharp = this.getcsharp();
+            setTimeout(() => {
+                if (csharp && csharp.selectedAircraft && aircraft.aircraftMission.aircraftName === csharp.selectedAircraft.aircraftName) {
+                    csharp.receivedMission(aircraft.aircraftMission, 'mission-download');
+                }
+            }, 500);
         }
     };
 

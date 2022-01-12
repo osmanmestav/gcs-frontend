@@ -114,15 +114,12 @@ export default class MQTTManager {
                 let csharp = this.getcsharp();
 
                 this.mapsWindow.window.dispatchEvent(new CustomEvent("planeChanged", {"detail": data.value}));
-                setTimeout(() => {
-                    this.mapsWindow.window.dispatchEvent(new CustomEvent("planeChanged", {"detail": data.value}));
-                }, 2000);
                 // console.log('Message received', data.value);
                 let values = preprocessTelemetry(data.value);
                 if (csharp) {
                     // this.flightData.insertTelemetryMessage(data.value);
                     csharp.updateAircraft(values);
-                    if (data.value.aircraftName === csharp.selectedAircraft.aircraftName) {
+                    if (csharp.selectedAircraft !== null && data.value.aircraftName === csharp.selectedAircraft.aircraftName) {
                         let setGaugeValues = this.gaugesWindow && (this.gaugesWindow as any).setValues;
                         if (setGaugeValues) {
                             setGaugeValues(values);

@@ -1,5 +1,23 @@
 new PulldownMenu("Mission",[
-	{ title: "Clear", handler: function() { csharp.clearWaypoints("map-clear"); } },
-	{ title: "Upload", handler: function() { csharp.uploadMission(); } },
-	{ title: "Download", handler: function() { csharp.downloadMission(); } }
+	{ 
+		title: "Clear", 
+		handler: function() { 
+			if(csharp.isMissionEditable) 
+				csharp.clearWaypoints("map-clear"); 
+		} 
+	},
+	{ 
+		title: "Upload", 
+		handler: function() { 
+			if(csharp.isMissionEditable) 
+				csharp.uploadMission(); 
+		} 
+	},
+	{ 
+		title: "Download", 
+		handler: function() { 
+			if(csharp.isMissionEditable) 
+				csharp.downloadMission(); 
+		} 
+	},
 ]);
