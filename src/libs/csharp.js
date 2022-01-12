@@ -462,7 +462,7 @@ var csharp = {
 
     async addGeoFence(latitude, longitude, altitude) {
         try {
-            this.mission.geoFence = {isActive: false, isVisible: true};
+            this.mission.geoFence = { isActive: false, isVisible: true };
             this.mission.geoFence.returnPoint = {latitude, longitude};
             this.mission.geoFence.minAltitude = altitude + 50;
             this.mission.geoFence.maxAltitude = altitude + 500;
@@ -986,7 +986,7 @@ var csharp = {
         }
     },
     geoFenceActive(isActivated) {
-        if (this.isMissionEditable === false) return;
+        this.mission.geoFence.isActive = isActivated;
         let req = {
             aircraftId: this.selectedAircraft.aircraftId,
             aircraftName: this.selectedAircraft.aircraftName,
