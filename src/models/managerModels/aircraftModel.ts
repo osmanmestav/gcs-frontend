@@ -79,7 +79,7 @@ export class AircraftModel {
         this.responseSubscription = PubSub.subscribe(this.userCredentials.getAircraftResponseTopicString(this.aircraftIdentifier.aircraftCertificateName)).subscribe({
             next: data => {
                 if(this.isControlling() && data.value.aircraftCertificateName === this.aircraftIdentifier.aircraftCertificateName) {
-                    publishSummaryLog("Command response received for request id #" + data.value.requestID + ", command: " + data.value.command, SummaryLogType.Message);
+                    publishSummaryLog("Command response received for request id #" + data.value.requestID + ", command: " + data.value.command, SummaryLogType.Message, this.aircraftIdentifier.aircraftName);
                 }
             },
             error: error => console.error(error),
@@ -112,7 +112,8 @@ export class AircraftModel {
         });
         this.missionSubscription = PubSub.subscribe(this.userCredentials.getAircraftMissionTopicString(this.aircraftIdentifier.aircraftCertificateName)).subscribe({
             next: data => {
-                console.log('Mission received', data.value);
+                // console.log('Mission received', data.value);
+                publishSummaryLog("Mission received", SummaryLogType.Message, this.aircraftIdentifier.aircraftName);
                 this.receivedMission(data.value);
                 setTimeout(() => {
                     next.processMission(data);
@@ -124,7 +125,8 @@ export class AircraftModel {
         });
         this.parametersSubscription = PubSub.subscribe(this.userCredentials.getAircraftParametersTopicString(this.aircraftIdentifier.aircraftCertificateName)).subscribe({
             next: data => {
-                console.log('Parameters received', data.value);
+                // console.log('Parameters received', data.value);
+                publishSummaryLog("Parameters received", SummaryLogType.Message, this.aircraftIdentifier.aircraftName);
                 this.receivedParameters(data.value);
                 next.processParameters(data);
             },

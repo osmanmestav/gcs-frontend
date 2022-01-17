@@ -59,7 +59,8 @@ export default class FlightData {
     }
 
     insertSummaryLog = (input: any) => {
-        publishSummaryLog(input.detail.msg, getEnumValueByEnumKey(SummaryLogType, input.detail.category) as SummaryLogType);
+        console.log(input);
+        publishSummaryLog(input.detail.msg, getEnumValueByEnumKey(SummaryLogType, input.detail.category) as SummaryLogType, input.detail.name);
     }
 
     registerWindowCSharpEvents = () => {

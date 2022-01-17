@@ -22,7 +22,7 @@ function SidebarControlButtons(props: any) {
         }
         if (uploadPossible === true) {
             if (sanityCheckResults === "") sanityCheckResults = "No problems were found.";
-            publishSummaryLog("Sanity check results: \r\n" + sanityCheckResults, SummaryLogType.Warning);
+            publishSummaryLog("Sanity check results: \r\n" + sanityCheckResults, SummaryLogType.Warning, props.mapWindow.csharp.selectedAircraft.aircraftName);
             props.mapWindow.csharp.uploadMission();
         }
     }
@@ -32,7 +32,7 @@ function SidebarControlButtons(props: any) {
         if (telemetrySummary.isSittingOnGround) {
             props.mapWindow.csharp.startMission();
         } else {
-            publishSummaryLog("Aircraft is already flying! \r\n", SummaryLogType.Warning);
+            publishSummaryLog("Aircraft is already flying! \r\n", SummaryLogType.Warning, props.mapWindow.csharp.selectedAircraft.aircraftName);
         }
     }
     const stopAllMissions = () => {

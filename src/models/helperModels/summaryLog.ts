@@ -7,12 +7,13 @@ export enum SummaryLogType {
 };
 
 export type SummaryLog = {
+    aircraftName: string;
     time: string;
     msg: string;
     category: SummaryLogType;
 }
 
-export const createSummaryLog = (msg: string, category: SummaryLogType) => {
+export const createSummaryLog = (msg: string, category: SummaryLogType, name: string) => {
     var date = new Date();
     var hours = date.getHours();
     var minutes: string | number = date.getMinutes();
@@ -23,13 +24,16 @@ export const createSummaryLog = (msg: string, category: SummaryLogType) => {
     var strTime = hours + ':' + minutes + ' ' + ampm;
 
     return {
+        aircraftName: name,
         time: strTime,
         msg: msg,
         category: category
     } as SummaryLog;
 }
 
-export const publishSummaryLog = (msg: string, category: SummaryLogType) => {
-    const log = createSummaryLog(msg, category);
+export const publishSummaryLog = (msg: string, category: SummaryLogType, aircraftName: string = "unknown") => {
+    if(aircraftName === null)
+        aircraftName = "unknown";
+    const log = createSummaryLog(msg, category, aircraftName);
     publishEvent(PubSubEvent.InsertSummaryLog, log);
 }

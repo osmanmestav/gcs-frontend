@@ -47,17 +47,17 @@ var csharp = {
         alert(msg);
     },
     playAlarm(message) {
-        FlightSummary.addToSummary(SummaryEntryType.Message, "Alarm: " + message);
+        FlightSummary.addToSummary(SummaryEntryType.Message, "Alarm: " + message, this.selectedAircraft.aircraftName);
     },
     pauseAlarm() {
-        FlightSummary.addToSummary(SummaryEntryType.Message, "Alarm stopped");
+        FlightSummary.addToSummary(SummaryEntryType.Message, "Alarm stopped", this.selectedAircraft.aircraftName);
     },
     indicatorStatusChanged(name, value) {
         let category = SummaryEntryType.Message;
         if (value == "Failed" || value == 1) category = SummaryEntryType.Error;
         if (value == "Disabled" || value == 0) category = SummaryEntryType.Warning;
         if (value == "Unhealthy" || value == 2) category = SummaryEntryType.Warning;
-        FlightSummary.addToSummary(category, "Status changed: " + name + "=" + value);
+        FlightSummary.addToSummary(category, "Status changed: " + name + "=" + value, this.selectAircraft.aircraftName);
     },
     getCommands() {
         return ["Waypoint", "Loiter", "Hover", "Taxi", "Takeoff-Runway", "Takeoff-Launch", "Takeoff-Vtol", "Land-Runway", "Land-Vtol", "Land-Chute"];
@@ -94,6 +94,7 @@ var csharp = {
                 this.clearWaypoints("aircraftRemoval");
                 this.clearGeoFence();
                 this.setHome(0, 0, 0);
+                this.setCurrentWaypoint(null, null);
             }
 
             window.dispatchEvent(new CustomEvent('AircraftRemoved', {detail: aircraftId}));
@@ -167,9 +168,8 @@ var csharp = {
     },
 
     async downloadMissionFromAircraft(aircraft) {
-        var aircraftName = aircraft.aircraftName + " (" + aircraft.aircraftId + ")";
         if (aircraft.upLinkStatus != ConnectionStatus.Healthy) {
-            FlightSummary.addToSummary(SummaryEntryType.Error, "Aircraft is not connected, cannot download mission: " + aircraftName);
+            FlightSummary.addToSummary(SummaryEntryType.Error, "Aircraft is not connected, cannot download mission: ", aircraft.aircraftName);
             return false;
         } else {
             let req = {
@@ -179,7 +179,7 @@ var csharp = {
                 command: "DownloadMission"
             };
             window.dispatchEvent(new CustomEvent('CommandRequest', {detail: req}));
-            FlightSummary.addToSummary(SummaryEntryType.Message, "Mission download requested: " + aircraftName);
+            FlightSummary.addToSummary(SummaryEntryType.Message, "Mission download requested: ", aircraft.aircraftName);
             return true;
         }
     },
@@ -189,9 +189,8 @@ var csharp = {
         return this.uploadMissionToAircraft(this.selectedAircraft);
     },
     async uploadMissionToAircraft(aircraft) {
-        var aircraftName = aircraft.aircraftName + " (" + aircraft.aircraftId + ")";
         if (aircraft.upLinkStatus != ConnectionStatus.Healthy) {
-            FlightSummary.addToSummary(SummaryEntryType.Error, "Aircraft is not connected, cannot upload mission: " + aircraftName);
+            FlightSummary.addToSummary(SummaryEntryType.Error, "Aircraft is not connected, cannot upload mission: ", aircraft.aircraftName);
             return false;
         } else {
             let req = {
@@ -214,7 +213,7 @@ var csharp = {
 
             };
             window.dispatchEvent(new CustomEvent('CommandRequest', {detail: req}));
-            FlightSummary.addToSummary(SummaryEntryType.Message, "Mission upload requested: " + aircraftName);
+            FlightSummary.addToSummary(SummaryEntryType.Message, "Mission upload requested: ", aircraft.aircraftName);
             return true;
         }
     },

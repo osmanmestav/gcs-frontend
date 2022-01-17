@@ -218,17 +218,23 @@ var currentWaypoint = {};
 window.addEventListener("CurrentWaypointChanged", (e) => refreshCurrentWayPoint(e.detail.waypoint, e.detail.commandSource));
 
 function refreshCurrentWayPoint(waypoint, commandSource) {
-    waypoint = CommandExpanded.fromWaypoint(waypoint);
-    copyWaypoint(currentWaypoint, waypoint);
-    currentWaypoint.commandSource = commandSource;
-    if (!currentWaypoint.marker) {
-        createMarker(currentWaypoint);
-        currentWaypoint.marker.name = "currentWaypoint:" + currentWaypoint.index;
-        currentWaypoint.marker.allowPicking = false;
-        currentWaypoint.marker.billboard.image = new Cesium.ConstantProperty(pinBuilder.fromText("C", Cesium.Color.DARKRED, 58));
-    } else
-        currentWaypoint.marker.name = "currentWaypoint:" + currentWaypoint.index;
-    refreshLoiter(currentWaypoint, Cesium.Color.RED.withAlpha(0.3));
+    if(waypoint == null){
+        viewer.entities.remove(currentWaypoint.marker);
+        currentWaypoint = {};
+    }
+    else {
+        waypoint = CommandExpanded.fromWaypoint(waypoint);
+        copyWaypoint(currentWaypoint, waypoint);
+        currentWaypoint.commandSource = commandSource;
+        if (!currentWaypoint.marker) {
+            createMarker(currentWaypoint);
+            currentWaypoint.marker.name = "currentWaypoint:" + currentWaypoint.index;
+            currentWaypoint.marker.allowPicking = false;
+            currentWaypoint.marker.billboard.image = new Cesium.ConstantProperty(pinBuilder.fromText("C", Cesium.Color.DARKRED, 58));
+        } else
+            currentWaypoint.marker.name = "currentWaypoint:" + currentWaypoint.index;
+        refreshLoiter(currentWaypoint, Cesium.Color.RED.withAlpha(0.3));
+    }
 }
 
 function clearWaypoints() {

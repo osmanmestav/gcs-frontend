@@ -5,8 +5,8 @@ const SummaryEntryType = {
 };
 
 var FlightSummary = {
-    addToSummary(/*SummaryEntryType*/category, msg) {
+    addToSummary(/*SummaryEntryType*/category, msg, name) {
         console.log(category + ": " + msg);
-        window.dispatchEvent(new CustomEvent("FlightSummaryAdd", {"detail": {"category": category, "msg": msg}}));
+        window.dispatchEvent(new CustomEvent("FlightSummaryAdd", {"detail": {"category": category, "msg": msg, "name": name}}));
     }
 };

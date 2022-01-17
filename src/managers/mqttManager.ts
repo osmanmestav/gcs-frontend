@@ -48,7 +48,7 @@ export default class MQTTManager {
                     const isControlling = x.state === PilotageState.Controlling;
                     this.registerAircraft(x.aircraftIdentifier.aircraftCertificateName, isControlling);
                     const msg = "Started " + (isControlling ? "controlling " : "observing ") + x.aircraftIdentifier.aircraftName;
-                    publishSummaryLog(msg, SummaryLogType.Message);
+                    publishSummaryLog(msg, SummaryLogType.Message, x.aircraftIdentifier.aircraftName);
                 }
             } else {
                 if (x.state === PilotageState.None) {
@@ -59,12 +59,12 @@ export default class MQTTManager {
                         csharp.removeAircraftByCertificateName(x.aircraftIdentifier.aircraftCertificateName);
                     }
                     this.flightData.checkActiveAircraftPilotageState(x.aircraftIdentifier, x.state);
-                    publishSummaryLog("Disconnected from " + x.aircraftIdentifier.aircraftName, SummaryLogType.Warning);
+                    publishSummaryLog("Disconnected from " + x.aircraftIdentifier.aircraftName, SummaryLogType.Warning, x.aircraftIdentifier.aircraftName);
                 }
                 else if(x.state === PilotageState.Controlling && aircraft.isObservingButNotControlling()) {
                     aircraft.requestClaim();
                     this.flightData.checkActiveAircraftPilotageState(x.aircraftIdentifier, x.state);
-                    publishSummaryLog("Requesting control of " + x.aircraftIdentifier.aircraftName, SummaryLogType.Message);
+                    publishSummaryLog("Requesting control of " + x.aircraftIdentifier.aircraftName, SummaryLogType.Message, x.aircraftIdentifier.aircraftName);
                 }
             }
         });
