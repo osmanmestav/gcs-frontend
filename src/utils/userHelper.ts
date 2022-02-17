@@ -22,7 +22,7 @@ export const getUserCredentials : () => UserCredentials | null = () => {
     }
 
     let tenantCode : string = userData.UserAttributes.find((x: { Name: string; Value: string }) => x.Name === 'custom:organization')?.Value ?? 'unknown';
-    let isPilot : boolean = userData.UserAttributes.find((x: { Name: string; Value: string }) => x.Name === 'custom:Role')?.Value === 'Pilot' ?? 'false';
+    let isPilot : boolean = userData.UserAttributes.find((x: { Name: string; Value: string }) => x.Name === 'custom:clientSpecificRole')?.Value === 'Pilot' ?? 'true';
     
     if(tenantCode === 'unknown')
         return null;
